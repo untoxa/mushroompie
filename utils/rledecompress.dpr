@@ -10,8 +10,10 @@ var src, dest     : tMemoryStream;
     p, e          : pansichar;
     b, c          : byte;
     i             : longint;
+    verbose       : boolean;
 begin
   fn:= paramstr(1);
+  verbose:= (AnsiCompareText(paramstr(2), '-debug') = 0);
   if fileexists(fn) then begin
     src    := tMemoryStream.create;
     dest   := tMemoryStream.create;
@@ -22,17 +24,19 @@ begin
       e:= p + src.Size;
       while (p < e) do try
         b:= byte(p^);
-        if (b and mask_flags <> 0) then begin
+        if (b and mask_flags = mask_flags) then begin
           if (b and mask_counter <> 0) then begin
             inc(p); c:= byte(p^);
-            for i:= 0 to (b and mask_counter) - 1 do dest.Write(c, 1);
-          end else dest.Write(b, 1);
-        end else dest.Write(b, 1);
+            if verbose then write(inttohex(b, 2), ' ', inttohex(c, 2), ' --> ');
+            for i:= 0 to (b and mask_counter) - 1 do begin dest.Write(c, 1); if verbose then write(inttohex(c, 2), ' '); end;
+            if verbose then writeln;
+          end else begin dest.Write(b, 1); if verbose then writeln(inttohex(b, 2)); end;
+        end else begin dest.Write(b, 1); if verbose then writeln(inttohex(b, 2)); end;
       finally inc(p); end;
       dest.SaveToFile(changefileext(fn, '.decompressed'));
     finally
       freeandnil(src);
       freeandnil(dest);
     end;
-  end else writeln('rlecompress.exe <file_to_compress>');
+  end else writeln('rlecompress.exe <file_to_decompress> [-debug]');
 end.

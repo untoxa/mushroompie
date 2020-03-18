@@ -6,3 +6,5 @@
 *.gb
 *.cfg
 /gfx/rooms/tilemapstudio.exe
+/unused.py
+/gfx/tiles/tilemapstudio.exe

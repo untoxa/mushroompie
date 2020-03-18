@@ -1,4 +1,47 @@
-void rle_decompress_tiles(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles) __naked
+void unshrink_tiles(UBYTE from, UBYTE count, unsigned char * shrinked_tiles)
+{
+    unsigned char __temp_tile_data[16];
+    unsigned char * dest; 
+    UBYTE mode;
+    for (UBYTE i = 0; i < count; i++) {
+        mode = *shrinked_tiles; shrinked_tiles++;
+        dest = __temp_tile_data;
+        if (mode == 1) {
+            for (UBYTE j = 0; j < 8; j ++) {
+                *dest = *shrinked_tiles; dest++;
+                *dest = 0x00; dest++;
+                shrinked_tiles++;
+            }
+            set_bkg_data(from, 1, __temp_tile_data);
+        } else if (mode == 2) {
+            for (UBYTE j = 0; j < 8; j ++) {
+                *dest = 0x00; dest++;
+                *dest = *shrinked_tiles; dest++; 
+                shrinked_tiles++;
+            }
+            set_bkg_data(from, 1, __temp_tile_data);
+        } else if (mode == 3) {
+            for (UBYTE j = 0; j < 8; j ++) {
+                *dest = *shrinked_tiles; dest++; 
+                *dest = *shrinked_tiles; dest++; 
+                shrinked_tiles++;
+            }
+            set_bkg_data(from, 1, __temp_tile_data);
+        } else if (mode == 4) {
+            set_bkg_data(from, 1, shrinked_tiles);
+            shrinked_tiles += 16;
+        } else {
+            for (UBYTE j = 0; j < 8; j ++) {
+                *dest = 0x00; dest++;
+                *dest = 0x00; dest++;
+            }            
+            set_bkg_data(from, 1, __temp_tile_data);
+        }
+        from++;        
+    }
+}
+
+void rle_decompress_tilemap(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles) __naked
 {
     bkg; x; y; w; h; tiles;
 __asm

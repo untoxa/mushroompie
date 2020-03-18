@@ -136,7 +136,12 @@ void get_v_coll(WORD x, WORD y) {
     tile_pos_x = x >> 3; 
     if (tile_pos_x < room_width) {
         tile_pos_y = y >> 3;
-        if (tile_pos_y < room_height) collision_buf[0] = current_coll_idx[tile_pos_y][tile_pos_x]; else collision_buf[0] = 0x00;
+        if (tile_pos_y < room_height) { 
+            collision_buf[0] = current_coll_idx[tile_pos_y][tile_pos_x]; 
+        } else { 
+            collision_buf[0] = 0x00; 
+            tile_pos_y = 0; 
+        }
         if (tile_pos_y < room_height - 1) collision_buf[1] = current_coll_idx[tile_pos_y + 1][tile_pos_x]; else collision_buf[1] = 0x00;
     } else { collision_buf[0] = 0x00; collision_buf[1] = 0x00;}
 }
@@ -186,7 +191,7 @@ void check_dizzy_collisions() {
     }
 }
 
-UBYTE current_room_x = 1, current_room_y = 0, __temp_j; 
+UBYTE current_room_x = 1, current_room_y = 1, __temp_j; 
 const room_t * target_room;
 unsigned char * __data_ptr;
 void set_room(UBYTE row, UBYTE col) {
@@ -195,17 +200,37 @@ void set_room(UBYTE row, UBYTE col) {
     target_room = dizzy_world[row]->rooms[col];
     __data_ptr = target_room->room_tiles->data;
     for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++) {
-        set_bkg_tiles(0, __temp_j, 16, 1, __data_ptr);
-        set_bkg_tiles(16, __temp_j, 16, 1, __data_ptr);
+        set_bkg_tiles(0, __temp_j, 16, 1, dizzy_anim_tiles);
+        set_bkg_tiles(16, __temp_j, 16, 1, dizzy_anim_tiles);
     }
 
-    set_bkg_data(0x00, target_room->room_tiles->count, __data_ptr);  
-    rle_decompress_tiles(rle_decompress_to_bkg, 0, 3, room_width, room_height, target_room->room_map->rle_data);
-    if (target_room->room_coll_map) rle_decompress_data(target_room->room_coll_map->rle_data, (UWORD)target_room->room_coll_map->size, coll_buf);
+    unshrink_tiles(0x00, target_room->room_tiles->count, __data_ptr);  
+
+    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, target_room->room_map->rle_data);
+    rle_decompress_data(target_room->room_coll_map->rle_data, (UWORD)target_room->room_coll_map->size, coll_buf);
 
     SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
     enable_interrupts();
+}
+void check_change_room() {
+    dizzy_tmp_xy = dizzy_x + delta_x;
+    if (dizzy_tmp_xy < MIN_DIZZY_X) {
+        if (current_room_x) { current_room_x--; dizzy_x = MAX_DIZZY_X; set_room(current_room_y, current_room_x); }
+        delta_x = 0;
+    } else if (dizzy_tmp_xy > MAX_DIZZY_X) { 
+        current_room_x++; 
+        if (current_room_x < WORLD_WIDTH) { dizzy_x = MIN_DIZZY_X; set_room(current_room_y, current_room_x); } else current_room_x = WORLD_WIDTH - 1;
+        delta_x = 0;
+    }
+    
+    dizzy_tmp_xy = dizzy_y + delta_y;
+    if (dizzy_tmp_xy < MIN_DIZZY_Y) {
+        if (current_room_y) { current_room_y--; dizzy_y = MAX_DIZZY_Y; set_room(current_room_y, current_room_x); }
+    } else if (dizzy_tmp_xy > MAX_DIZZY_Y) {
+        current_room_y++; 
+        if (current_room_y < WORLD_HEIGHT) { dizzy_y = MIN_DIZZY_Y; set_room(current_room_y, current_room_x); } else current_room_y = WORLD_HEIGHT - 1;
+    }    
 }
 
 UBYTE tim_div = 0;    
@@ -316,14 +341,16 @@ void main()
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
-    set_win_data(0x80, (sizeof(title_tiles) >> 4), title_tiles);
+    unshrink_tiles(0x80, 18, title_shrinked_tiles);
     set_win_tiles(0, 0, 20, 3, title_map);
-    set_win_data(0x92, (sizeof(misc_tiles) >> 4), misc_tiles);
+    unshrink_tiles(0x92, 12, misc_shrinked_tiles);
     set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);
-    rle_decompress_tiles(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
+    rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
     
     enable_interrupts();
     DISPLAY_ON;
+
+//    current_room_x = 5, current_room_y = 0, dizzy_x = 80;  // set any for debugging
 
     set_room(current_room_y, current_room_x);
     SHOW_BKG;
@@ -364,27 +391,13 @@ void main()
                 
         if (walk_update) {
             delta_x = move_x_data[ani_type];
-            dizzy_tmp_xy = dizzy_x + delta_x;
-            if (dizzy_tmp_xy < MIN_DIZZY_X) {
-                if (current_room_x) {
-                    current_room_x--; 
-                    dizzy_x = MAX_DIZZY_X;
-                    set_room(current_room_y, current_room_x);
-                }
-                delta_x = 0;
-            } else if (dizzy_tmp_xy > MAX_DIZZY_X) {
-                current_room_x++; 
-                if (current_room_x < WORLD_WIDTH) {
-                    dizzy_x = MIN_DIZZY_X;
-                    set_room(current_room_y, current_room_x);
-                } else current_room_x = WORLD_WIDTH - 1;
-                delta_x = 0;
-            }
-            
+
             if ((bal_update) && (current_dyn)) {
                 delta_y += current_dyn->steps[current_dyn_phase];
                 current_dyn_phase++; if (current_dyn_phase >= current_dyn->count) current_dyn = 0;
             } else delta_y = 0;
+
+            check_change_room();
 
             check_dizzy_collisions();
             dizzy_x += delta_x; dizzy_y += delta_y;
