@@ -1,0 +1,1 @@
+@cutter dizzy2.2bpp dizzy2.meta 8x16 >dizzy_animation_2.txt

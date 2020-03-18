@@ -1,0 +1,8 @@
+/build
+*.bak
+*.dof
+*.dsk
+*.out
+*.gb
+*.cfg
+/gfx/rooms/tilemapstudio.exe

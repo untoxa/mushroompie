@@ -1,0 +1,1 @@
+@cutter font.2bpp font.meta >font.txt
