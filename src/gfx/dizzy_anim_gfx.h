@@ -236,3 +236,76 @@ const unsigned char const dizzy_anim_tiles[] = {
 0x3F,0x03,0x03,0x01,0x01,0x00,0x03,0x01,0x03,0x01,0x01,0x00,0x00,0x00,0x00,0x00,
 0xFE,0xE0,0xE0,0x40,0xC0,0x80,0xE0,0xC0,0xE0,0xC0,0xC0,0x80,0x80,0x00,0x00,0x00,
 };
+
+void clear_8x16_sprites_and_set_prop(UBYTE start, UBYTE count, UBYTE prop) __naked
+{
+    start; count; prop;
+__asm
+            lda     HL, 2(SP)
+            ld      E, (HL)     ; E = start
+            inc     HL
+            ld      D, (HL)     ; D = count
+            sla     D           ; 8x16 sprites: count * 2
+                
+            ld      H, #0x00    ; HL = nb_tiles
+            ld      L, E
+            add     HL, HL      ; HL *= 16
+            add     HL, HL
+            add     HL, HL
+            add     HL, HL
+                
+            push    BC
+            ld      BC, #0x8000
+            add     HL, BC
+            pop     BC
+ 
+            push    HL
+            ld      L, D
+            ld      H, #0
+            add     HL, HL      ; HL *= 16
+            add     HL, HL
+            add     HL, HL
+            add     HL, HL
+            ld      D, H
+            ld      E, L        ; DE = D * 16
+            pop     HL
+ 
+$clrspt01:  ldh     A, (#_STAT_REG)
+            and     #0x02
+            jr      NZ, $clrspt01
+
+            xor     A
+            ld      (HL+), A
+            dec     DE
+            ld      A, D
+            or      E
+            jr      NZ, $clrspt01
+
+            push    BC
+            
+            lda     HL, 4(SP)
+            ld      C, (HL)     ; C = start
+            inc     HL
+            ld      E, (HL)     ; E = count
+            inc     HL
+            ld      D, (HL)     ; D = prop
+            
+            ld      B, #0x00
+            sla     C           ; Multiply C by 4
+            sla     C
+
+            ld      HL, #0xC000 + 3
+            add     HL, BC
+            ld      C, #0x04
+
+            ld      A, D        ; Set sprite properties
+$clrspt02:  ld      (HL), A
+            add     HL, BC
+            dec     E
+            jr      NZ, $clrspt02
+            
+            pop     BC
+            
+            ret     
+__endasm;
+}

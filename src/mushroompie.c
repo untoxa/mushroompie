@@ -90,19 +90,15 @@ WORD get_y_scroll_value(WORD y) {
 UBYTE __temp_i, __temp_j, __temp_k; 
 void init_dizzy()
 {
-    for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++) {
+    for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + (__temp_i << 1));
-    }            
 }
-
 void set_dizzy_animdata(const s_data * sprite)
 {
     __temp_k = (sprite->rev)?S_FLIPX:0;
     if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
-        for (__temp_i = 0; __temp_i < dizzy_sprite_tile_count; __temp_i++)
-            set_sprite_data(dizzy_sprites_tileoffset + __temp_i, 1, dizzy_anim_tiles);
-        for (__temp_i = 0; __temp_i <= dizzy_sprite_count; __temp_i++) 
-            set_sprite_prop(__temp_i, __temp_k);
+        clear_8x16_sprites_and_set_prop(0, dizzy_sprite_count, __temp_k);
+        wait_vbl_done();
     }
     for (__temp_i = 0; __temp_i < dizzy_sprite_tile_count; __temp_i++)
         set_sprite_data(dizzy_sprites_tileoffset + __temp_i, 1, &dizzy_anim_tiles[sprite->data[__temp_i] << 4]);
@@ -206,11 +202,12 @@ void set_room(UBYTE row, UBYTE col) {
 
     unshrink_tiles(0x00, target_room->room_tiles->count, __data_ptr);  
 
+    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
+    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
+
     rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, target_room->room_map->rle_data);
     rle_decompress_data(target_room->room_coll_map->rle_data, (UWORD)target_room->room_coll_map->size, coll_buf);
 
-    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
-    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
     enable_interrupts();
 }
 void check_change_room() {
@@ -277,7 +274,6 @@ __asm
             ret
 __endasm;
 }    
-
 void vbl_interrupt() __naked
 {
 __asm
@@ -301,9 +297,19 @@ $vblint02:  ld      A, #1
             ret
 __endasm;
 } 
+void wait_inventory() __naked
+{
+__asm
+$my_vbl01:  ld      A, (#___lcd_int_state)
+            and     #1
+            jr      NZ, $my_vbl01
+            ret
+__endasm;
+}
 
 UBYTE joy = 0;        
 void show_inventory() {
+    wait_inventory();          // prevent inventory flicking
     inventory = 1;
     while(inventory) {
         wait_vbl_done();
