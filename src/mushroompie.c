@@ -87,7 +87,7 @@ WORD get_y_scroll_value(WORD y) {
 }
 
 #define dizzy_sprites_tileoffset 0x00U
-UBYTE __temp_i, __temp_k; 
+UBYTE __temp_i, __temp_j, __temp_k; 
 void init_dizzy()
 {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++) {
@@ -149,7 +149,7 @@ void get_v_coll(WORD x, WORD y) {
 void check_dizzy_collisions() {
     if (delta_y >= 0) {
         get_h_coll(dizzy_x, dizzy_y + 21);
-//        set_win_tiles(1, 1, 3, 1, collision_buf);
+//set_win_tiles(1, 1, 3, 1, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
             if (tile_pos_oy <= 4) delta_y = -1;
         } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
@@ -159,7 +159,7 @@ void check_dizzy_collisions() {
         }
         if (delta_y > 0) {            
             get_h_coll(dizzy_x, dizzy_y + 21 + delta_y);
-//            set_win_tiles(1, 2, 3, 1, collision_buf);
+//set_win_tiles(1, 2, 3, 1, collision_buf);
             if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
                 delta_y = 0;
             } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
@@ -176,7 +176,7 @@ void check_dizzy_collisions() {
         } else dizzy_falling = 0;
     } else {
         get_h_coll(dizzy_x, dizzy_y + 4);
-//        set_win_tiles(1, 1, 3, 1, collision_buf);
+//set_win_tiles(1, 1, 3, 1, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
             delta_y = 0;
         }
@@ -184,14 +184,14 @@ void check_dizzy_collisions() {
     
     if (delta_x) {
         if (delta_x < 0) get_v_coll(dizzy_x + delta_x, dizzy_y); else get_v_coll(dizzy_x + delta_x + 16, dizzy_y);
-//        set_win_tiles(0, 0, 1, 2, collision_buf);
+//set_win_tiles(0, 0, 1, 2, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[0] == 2) || (collision_buf[1] == 1)) {
             delta_x = 0;
         }
     }
 }
 
-UBYTE current_room_x = 1, current_room_y = 1, __temp_j; 
+UBYTE current_room_x = 1, current_room_y = 1; 
 const room_t * target_room;
 unsigned char * __data_ptr;
 void set_room(UBYTE row, UBYTE col) {
@@ -332,8 +332,8 @@ void main()
     set_interrupts(VBL_IFLAG | LCD_IFLAG);
     
     // load palettes
-    BGP_REG = 0x63U; OBP0_REG = OBP1_REG = 0x2CU;
-            
+    BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU;
+    
     SPRITES_8x16;
     init_dizzy();
     set_dizzy_animdata(&m_stand_0);            

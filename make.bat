@@ -3,11 +3,8 @@ set PROJ=mushroompie
 set BIN=..\..\gbdk-n\bin
 set OBJ=build
 
-if "%1"=="clean" (
-	if exist %OBJ% rd /s/q %OBJ%
-	if exist %PROJ%.gb del %PROJ%.gb
-	goto end
-)
+if exist %OBJ% rd /s/q %OBJ%
+if exist %PROJ%.gb del %PROJ%.gb
 
 if not exist %OBJ% mkdir %OBJ%
 
