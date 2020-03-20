@@ -1,10 +1,13 @@
 #include <gb/gb.h>
 
 #include "include/rle_utils.h"
+#include "include/sprite_utils.h"
 
 #include "gfx/rooms_gfx.h"
 #include "gfx/dizzy_anim_gfx.h"
 #include "gfx/title_gfx.h"
+
+#include "include/inventory.h"
 
 #define room_width 30
 #define room_height 17
@@ -19,6 +22,7 @@
 
 const fixed const dizzy_offsets[] = {{.w={0x0426}}, {.w={0x0C26}}, {.w={0x1426}}, {.w={0x0436}}, {.w={0x0C36}}, {.w={0x1436}}};
 
+#define dizzy_sprites_tileoffset 0x00U
 #define dizzy_sprite_count 6
 #define dizzy_sprite_tile_count 12
       
@@ -35,7 +39,7 @@ const ani_data const jump_r_ani = {16, 0,   0, ANI_WALK_R, ANI_ROLL_R, {&m_walk_
                                                                         &m_walk_r_0, &m_roll_r_0, &m_roll_r_1, &m_roll_r_2, &m_roll_r_3, &m_roll_r_4, &m_roll_r_5, &m_roll_r_6}};
 const ani_data const jump_l_ani = {16, 0,   0, ANI_WALK_L, ANI_ROLL_L, {&m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6,
                                                                         &m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6}};
-const ani_data const stun_ani   = { 5, 0, 254, ANI_STAND,  ANI_STAND,  {&m_stun_0, &m_stun_1, &m_stun_2, &m_stun_3, &m_stun_4}};
+const ani_data const stun_ani   = { 7, 0, 254, ANI_STAND,  ANI_STAND,  {&m_stun_0, &m_stun_1, &m_stun_2, &m_stun_3, &m_stun_2, &m_stun_3, &m_stun_4}};
 const ani_data const dead_ani   = { 4, 3, 254, ANI_DEAD,   ANI_DEAD,   {&m_dead_0, &m_dead_1, &m_dead_2, &m_dead_1}};
         
 const ani_data * const animation[] = {&stand_ani, &up_ani, &walk_r_ani, &walk_l_ani, &roll_r_ani, &roll_l_ani, &stun_ani, &dead_ani, &jump_r_ani, &jump_l_ani};
@@ -86,18 +90,24 @@ WORD get_y_scroll_value(WORD y) {
     return __temp_scroll_value;
 }
 
-#define dizzy_sprites_tileoffset 0x00U
 UBYTE __temp_i, __temp_j, __temp_k; 
-void init_dizzy()
-{
+void init_enemies() {
+    set_sprite_data(dizzy_sprites_tileoffset + dizzy_sprite_tile_count, 2, enemies_tiles);
+    for (__temp_i = dizzy_sprites_tileoffset + dizzy_sprite_tile_count; __temp_i < (dizzy_sprites_tileoffset + dizzy_sprite_tile_count + 4); __temp_i++) 
+        set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + dizzy_sprite_tile_count);
+}
+void set_enemies_position() {
+    // TODO: set position of visible enemies within a room
+}
+void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + (__temp_i << 1));
 }
-void set_dizzy_animdata(const s_data * sprite)
-{
+void set_dizzy_animdata(const s_data * sprite) {
     __temp_k = (sprite->rev)?S_FLIPX:0;
     if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
-        clear_8x16_sprites_and_set_prop(0, dizzy_sprite_count, __temp_k);
+        multiple_clear_sprite_tiles(0, dizzy_sprite_tile_count);
+        multiple_set_sprite_prop(0, dizzy_sprite_count, __temp_k);
         wait_vbl_done();
     }
     for (__temp_i = 0; __temp_i < dizzy_sprite_tile_count; __temp_i++)
@@ -307,18 +317,60 @@ $my_vbl01:  ld      A, (#___lcd_int_state)
 __endasm;
 }
 
-UBYTE joy = 0;        
+UBYTE joy = 0;
 void show_inventory() {
+    unsigned char temp_tiles[4];        
+    game_item * current_itm = inventory_items[0];
+    const tile_data_t * tiledata;
+
+    rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
+
+    __temp_i = 0; __temp_j = 3; __temp_k = 0x9E;
+    while (__temp_i < 3) {
+        if (current_itm) {
+            tiledata = current_itm->desc->data;
+            unshrink_tiles(__temp_k, tiledata->count, tiledata->data);
+            set_inc_tiles(__temp_k, tiledata->count, temp_tiles);
+            set_win_tiles(__temp_j, 5, 2, 2, temp_tiles);
+            __temp_j += 4; __temp_k += 4;
+        }
+        current_itm++;
+        __temp_i++;
+    }
+    unshrink_tiles(__temp_k, exit_tiles.count, exit_tiles.data);
+    set_inc_tiles(__temp_k, exit_tiles.count, temp_tiles);
+    set_win_tiles(15, 5, 2, 2, temp_tiles);
+
+    UBYTE selection, old_selection;
+    
+    selection = old_selection = 3;
+    for (__temp_i = 0; __temp_i < 4; __temp_i++)
+       set_win_tiles(2 + (selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[__temp_i]);
+      
     wait_inventory();          // prevent inventory flicking
     inventory = 1;
+    waitpadup();
     while(inventory) {
         wait_vbl_done();
+        old_selection = selection;
         joy = joypad();
-        if (joy & J_B) {
-            (inventory = 0);
+        if (joy & J_LEFT) {
+            if (selection) selection--; else selection = 3;
+            waitpadup();
+        } else if (joy & J_RIGHT) {
+            selection++; selection &= 3;
+            waitpadup();
+        } else if (joy & J_B) {
+            inventory = 0;
+            waitpadup();
+        } 
+        if (selection != old_selection) {
+            for (__temp_i = 0; __temp_i < 4; __temp_i++)
+               set_win_tiles(2 + (old_selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[4]);
+            for (__temp_i = 0; __temp_i < 4; __temp_i++)
+               set_win_tiles(2 + (selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[__temp_i]);
         }
     }
-    waitpadup();
 }
 
 unsigned char dizzy_lives_indicator[3] = {0x92, 0x92, 0x92};
@@ -344,6 +396,7 @@ void main()
     init_dizzy();
     set_dizzy_animdata(&m_stand_0);            
     set_dizzy_position();
+    init_enemies();
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
@@ -351,12 +404,14 @@ void main()
     set_win_tiles(0, 0, 20, 3, title_map);
     unshrink_tiles(0x92, 12, misc_shrinked_tiles);
     set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);
-    rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
     
     enable_interrupts();
     DISPLAY_ON;
 
-//    current_room_x = 5, current_room_y = 0, dizzy_x = 80;  // set any for debugging
+// --- debugging --------------
+//current_room_x = 5, current_room_y = 0, dizzy_x = 80;  // set any for debugging
+inventory_items[0] = &game_items[0]; // put coin to inventory
+// ----------------------------
 
     set_room(current_room_y, current_room_x);
     SHOW_BKG;
@@ -370,22 +425,22 @@ void main()
             if (!joy) {
                 ani_type = ANI_STAND;    
             } else if (joy & J_LEFT) {
-                if ((joy & J_UP) || (joy & J_B)) {
+                if ((joy & J_UP) || (joy & J_A)) {
                     ani_type = ANI_JUMP_L;
                 } else {
                     ani_type = ANI_WALK_L;
                 }
             } else if (joy & J_RIGHT) {
-                if ((joy & J_UP) || (joy & J_B)) {
+                if ((joy & J_UP) || (joy & J_A)) {
                     ani_type = ANI_JUMP_R;
                 } else {
                     ani_type = ANI_WALK_R; 
                 }
-            } else if ((joy == J_UP) || (joy == J_B)) {
+            } else if ((joy == J_UP) || (joy == J_A)) {
                 ani_type = ANI_UP;
             }
         }
-        if (joy == J_A) {
+        if (joy == J_B) {
             show_inventory();
         }
         
@@ -409,6 +464,9 @@ void main()
             dizzy_x += delta_x; dizzy_y += delta_y;
 
             set_dizzy_position();
+
+            set_enemies_position();
+
             walk_update = 0; bal_update = 0;
             delta_x = delta_y = 0;
         };

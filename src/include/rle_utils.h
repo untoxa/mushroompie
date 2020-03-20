@@ -1,7 +1,31 @@
+void set_inc_tiles(UBYTE from, UBYTE count, unsigned char * buf) __naked
+{
+    from; count; buf;
+__asm
+            lda     HL, 2(SP)   ; Skip return address and registers
+            ld      E, (HL)     ; E = from
+            inc     HL
+            ld      D, (HL)     ; D = count
+            inc     HL
+            ld      A, (HL+)    
+            ld      H, (HL)     
+            ld      L, A        ; HL = buf
+            
+            ld      A, E
+$tileset01: ld      (HL+), A           
+            inc     A
+            dec     D
+            jr      NZ, $tileset01 
+            
+            ret
+__endasm;           
+}
+
 void unshrink_tiles(UBYTE from, UBYTE count, unsigned char * shrinked_tiles)
 {
     from; count; shrinked_tiles;
 __asm
+; TODO: switching to copy_vram
 ;            ldh     A,(.LCDC)
 ;            bit     4,A
 ;            jp      NZ,_set_sprite_data

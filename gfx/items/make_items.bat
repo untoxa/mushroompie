@@ -1,0 +1,1 @@
+@cutter items.2bpp items.meta >items.txt
