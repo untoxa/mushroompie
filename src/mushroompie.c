@@ -39,7 +39,7 @@ const ani_data const jump_r_ani = {16, 0,   0, ANI_WALK_R, ANI_ROLL_R, {&m_walk_
                                                                         &m_walk_r_0, &m_roll_r_0, &m_roll_r_1, &m_roll_r_2, &m_roll_r_3, &m_roll_r_4, &m_roll_r_5, &m_roll_r_6}};
 const ani_data const jump_l_ani = {16, 0,   0, ANI_WALK_L, ANI_ROLL_L, {&m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6,
                                                                         &m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6}};
-const ani_data const stun_ani   = { 7, 0, 254, ANI_STAND,  ANI_STAND,  {&m_stun_0, &m_stun_1, &m_stun_2, &m_stun_3, &m_stun_2, &m_stun_3, &m_stun_4}};
+const ani_data const stun_ani   = { 8, 0, 254, ANI_STAND,  ANI_STAND,  {&m_stun_0, &m_stun_1, &m_stun_0, &m_stun_2, &m_stun_3, &m_stun_2, &m_stun_3, &m_stun_4}};
 const ani_data const dead_ani   = { 4, 3, 254, ANI_DEAD,   ANI_DEAD,   {&m_dead_0, &m_dead_1, &m_dead_2, &m_dead_1}};
         
 const ani_data * const animation[] = {&stand_ani, &up_ani, &walk_r_ani, &walk_l_ani, &roll_r_ani, &roll_l_ani, &stun_ani, &dead_ani, &jump_r_ani, &jump_l_ani};
@@ -320,13 +320,14 @@ __endasm;
 UBYTE joy = 0;
 void show_inventory() {
     unsigned char temp_tiles[4];        
-    game_item * current_itm = inventory_items[0];
+    game_item * current_itm;
     const tile_data_t * tiledata;
 
     rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
 
     __temp_i = 0; __temp_j = 3; __temp_k = 0x9E;
     while (__temp_i < 3) {
+        current_itm = inventory_items[__temp_i];
         if (current_itm) {
             tiledata = current_itm->desc->data;
             unshrink_tiles(__temp_k, tiledata->count, tiledata->data);
@@ -334,7 +335,6 @@ void show_inventory() {
             set_win_tiles(__temp_j, 5, 2, 2, temp_tiles);
             __temp_j += 4; __temp_k += 4;
         }
-        current_itm++;
         __temp_i++;
     }
     unshrink_tiles(__temp_k, exit_tiles.count, exit_tiles.data);
@@ -344,8 +344,8 @@ void show_inventory() {
     UBYTE selection, old_selection;
     
     selection = old_selection = 3;
-    for (__temp_i = 0; __temp_i < 4; __temp_i++)
-       set_win_tiles(2 + (selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[__temp_i]);
+    set_win_tiles(2 + (selection << 2), 4, 4, 1, selector_top);
+    set_win_tiles(2 + (selection << 2), 7, 4, 1, selector_bottom);
       
     wait_inventory();          // prevent inventory flicking
     inventory = 1;
@@ -365,10 +365,12 @@ void show_inventory() {
             waitpadup();
         } 
         if (selection != old_selection) {
-            for (__temp_i = 0; __temp_i < 4; __temp_i++)
-               set_win_tiles(2 + (old_selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[4]);
-            for (__temp_i = 0; __temp_i < 4; __temp_i++)
-               set_win_tiles(2 + (selection << 2) + selector_corners_ofs[__temp_i].b.l, 4 + selector_corners_ofs[__temp_i].b.h, 1, 1, &selector_map[__temp_i]);
+            // erase old cursor
+            rle_decompress_tilemap(rle_decompress_to_win, 2, 4, 16, 1, empty_compressed_map);
+            rle_decompress_tilemap(rle_decompress_to_win, 2, 7, 16, 1, empty_compressed_map);
+            // draw new cursor
+            set_win_tiles(2 + (selection << 2), 4, 4, 1, selector_top);
+            set_win_tiles(2 + (selection << 2), 7, 4, 1, selector_bottom);
         }
     }
 }
@@ -410,7 +412,7 @@ void main()
 
 // --- debugging --------------
 //current_room_x = 5, current_room_y = 0, dizzy_x = 80;  // set any for debugging
-inventory_items[0] = &game_items[0]; // put coin to inventory
+inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
     set_room(current_room_y, current_room_x);
