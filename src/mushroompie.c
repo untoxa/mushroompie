@@ -20,11 +20,13 @@
 #define MIN_DIZZY_Y 0
 #define MAX_DIZZY_Y ((room_height - 2) * 8)
 
-const fixed const dizzy_offsets[] = {{.w={0x0426}}, {.w={0x0C26}}, {.w={0x1426}}, {.w={0x0436}}, {.w={0x0C36}}, {.w={0x1436}}};
+const fixed const dizzy_offsets[] = {{.w={0x0426}}, {.w={0x042E}}, {.w={0x0C26}},
+                                     {.w={0x0C2E}}, {.w={0x1426}}, {.w={0x142E}},
+                                     {.w={0x0436}}, {.w={0x0C36}}, {.w={0x1436}}};
 
 #define dizzy_sprites_tileoffset 0x00U
-#define dizzy_sprite_count 6
-#define dizzy_sprite_tile_count 12
+#define dizzy_sprite_count 9
+#define dizzy_sprite_tile_count 9
       
 enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L};
       
@@ -101,7 +103,7 @@ void set_enemies_position() {
 }
 void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
-        set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + (__temp_i << 1));
+        set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
 void set_dizzy_animdata(const s_data * sprite) {
     __temp_k = (sprite->rev)?S_FLIPX:0;
@@ -119,8 +121,7 @@ void set_dizzy_position() {
     if ((dizzy_old_pos_x != dizzy_x) || (dizzy_old_pos_y != dizzy_y)) {
         bkg_scroll_x_target = scroll_dx = get_x_scroll_value(dizzy_x); 
         bkg_scroll_y_target = scroll_dy = get_y_scroll_value(dizzy_y);
-        for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++) 
-            move_sprite(__temp_i, dizzy_x + dizzy_offsets[__temp_i].b.h - scroll_dx, dizzy_y + dizzy_offsets[__temp_i].b.l - scroll_dy);
+        multiple_move_sprites(0, dizzy_sprite_count, dizzy_x - scroll_dx, dizzy_y - scroll_dy, (unsigned char *)dizzy_offsets);
         dizzy_old_pos_x = dizzy_x; dizzy_old_pos_y = dizzy_y;
     }
 }    
@@ -356,23 +357,24 @@ void show_inventory() {
         joy = joypad();
         if (joy & J_LEFT) {
             if (selection) selection--; else selection = 3;
-            waitpadup();
         } else if (joy & J_RIGHT) {
             selection++; selection &= 3;
-            waitpadup();
         } else if (joy & J_B) {
             inventory = 0;
-            waitpadup();
         } 
         if (selection != old_selection) {
             // erase old cursor
-            rle_decompress_tilemap(rle_decompress_to_win, 2, 4, 16, 1, empty_compressed_map);
-            rle_decompress_tilemap(rle_decompress_to_win, 2, 7, 16, 1, empty_compressed_map);
+            __temp_i = 2 + (old_selection << 2);
+            rle_decompress_tilemap(rle_decompress_to_win, __temp_i, 4, 4, 1, empty_compressed_map);
+            rle_decompress_tilemap(rle_decompress_to_win, __temp_i, 7, 4, 1, empty_compressed_map);
             // draw new cursor
-            set_win_tiles(2 + (selection << 2), 4, 4, 1, selector_top);
-            set_win_tiles(2 + (selection << 2), 7, 4, 1, selector_bottom);
+            __temp_i = 2 + (selection << 2);
+            set_win_tiles(__temp_i, 4, 4, 1, selector_top);
+            set_win_tiles(__temp_i, 7, 4, 1, selector_bottom);
+            waitpadup();
         }
     }
+    waitpadup();
 }
 
 unsigned char dizzy_lives_indicator[3] = {0x92, 0x92, 0x92};
@@ -394,7 +396,7 @@ void main()
     // load palettes
     BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU;
     
-    SPRITES_8x16;
+    SPRITES_8x8;
     init_dizzy();
     set_dizzy_animdata(&m_stand_0);            
     set_dizzy_position();
