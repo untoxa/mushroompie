@@ -127,3 +127,90 @@ $mmspr02:   push    AF
             ret     
 __endasm;
 }
+
+void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, unsigned char * offsets) __naked
+{
+    start; count; x; y; offsets;
+__asm
+            push    BC
+            
+            lda     HL, 4(SP)
+            ld      C, (HL)     ; C = start
+            inc     HL
+            ld      A, (HL)     ; A = count
+            
+            ld      B, #0x00
+            sla     C           ; Multiply C by 4
+            sla     C
+
+            ld      HL, #0xC000
+            add     HL, BC
+
+            push    HL
+            lda     HL, 11(SP)
+            ld      B, (HL)
+            dec     HL
+            ld      C, (HL)     ; BC = offsets
+            dec     HL
+            ld      D, (HL)     ; D = y
+            dec     HL
+            ld      E, (HL)     ; E = x
+            pop     HL
+
+$mmsprl02:  push    AF
+
+            ld      A, (BC)
+            add     D
+            
+            inc     BC
+            push    HL
+            ld      H, B
+            ld      L, C
+            cp      (HL)
+            jr      NC, $mmsprl03
+            inc     BC
+            xor     A
+            jr      $mmsprl04
+$mmsprl03:  inc     BC
+            inc     HL
+            cp      (HL)
+            jr      C, $mmsprl04
+            jr      Z, $mmsprl04
+            xor     A
+            
+$mmsprl04:  pop     HL
+            ld      (HL+), A
+            inc     BC
+            ld      A, (BC)
+            add     E
+            
+            inc     BC
+            push    HL
+            ld      H, B
+            ld      L, C
+            cp      (HL)
+            jr      NC, $mmsprl05
+            inc     BC
+            xor     A
+            jr      $mmsprl06
+$mmsprl05:  inc     BC
+            inc     HL
+            cp      (HL)
+            jr      C, $mmsprl06
+            jr      Z, $mmsprl06
+            xor     A
+            
+$mmsprl06:  pop     HL
+            ld      (HL+), A
+            inc     BC
+            inc     HL
+            inc     HL
+
+            pop     AF
+            dec     A
+            jr      NZ, $mmsprl02
+            
+            pop     BC
+            ret     
+__endasm;
+}

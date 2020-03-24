@@ -11,10 +11,14 @@ typedef struct {
     unsigned char data[];
 } tile_data_t;
 
+typedef void (*room_actions_t)();
+
+
 typedef struct {
     rle_data_t * room_map;
     rle_data_t * room_coll_map;
     tile_data_t * room_tiles;
+    room_actions_t room_actions;
 } room_t;
 
 typedef struct {
@@ -22,24 +26,26 @@ typedef struct {
     room_t * rooms[];
 } world_row;
 
+void move_float();
+
 const world_row * const dizzy_world[] = {&world_row_0, &world_row_1};
 
 const world_row const world_row_0 = {0, {&room_0_0, &room_1_0, &room_2_0, &room_3_0, &room_4_0, &room_5_0}};
 const world_row const world_row_1 = {1, {&room_0_1, &room_1_1, &room_2_1, &room_3_1, &room_4_1, &room_5_1}};
 
-const room_t const room_0_0 = {&room_0_0_map, &room_0_0_coll, &room_0_0_tiles};
-const room_t const room_1_0 = {&room_1_0_map, &room_1_0_coll, &room_1_0_tiles};
-const room_t const room_2_0 = {&room_2_0_map, &room_2_0_coll, &room_2_0_tiles};
-const room_t const room_3_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles};  // empty room
-const room_t const room_4_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles};  // empty room
-const room_t const room_5_0 = {&room_5_0_map, &room_5_0_coll, &room_5_0_tiles};
+const room_t const room_0_0 = {&room_0_0_map, &room_0_0_coll, &room_0_0_tiles, 0};
+const room_t const room_1_0 = {&room_1_0_map, &room_1_0_coll, &room_1_0_tiles, 0};
+const room_t const room_2_0 = {&room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0};
+const room_t const room_3_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0};  // empty room
+const room_t const room_4_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0};  // empty room
+const room_t const room_5_0 = {&room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0};
 
-const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles};
-const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles};
-const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles};
-const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles};
-const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles};
-const room_t const room_5_1 = {&room_5_1_map, &room_5_1_coll, &room_5_1_tiles};
+const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, 0};
+const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0};
+const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles, 0};
+const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &move_float};
+const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &move_float};
+const room_t const room_5_1 = {&room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0};
 
 const rle_data_t const room_0_0_map = {0, {
 0xE1,0x00,0x01,0x02,0x00,0x03,0x04,0x05,0xD8,0x00,0x06,0x07,0x08,0x09,0x08,0x09,

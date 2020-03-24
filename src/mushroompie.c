@@ -20,13 +20,32 @@
 #define MIN_DIZZY_Y 0
 #define MAX_DIZZY_Y ((room_height - 2) * 8)
 
-const fixed const dizzy_offsets[] = {{.w={0x0426}}, {.w={0x042E}}, {.w={0x0C26}},
-                                     {.w={0x0C2E}}, {.w={0x1426}}, {.w={0x142E}},
-                                     {.w={0x0436}}, {.w={0x0C36}}, {.w={0x1436}}};
+typedef struct {
+    UBYTE y, x;
+} spr_ofs_t;
 
+typedef struct {
+    UBYTE y, min_y, max_y, x, min_x, max_x;
+} spr_ofs_and_lim_t;
+
+const spr_ofs_t const dizzy_offsets[] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
+                                         {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
+                                         {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
 #define dizzy_sprites_tileoffset 0x00U
+#define dizzy_sprite_offset 0x00U
 #define dizzy_sprite_count 9
 #define dizzy_sprite_tile_count 9
+
+const spr_ofs_and_lim_t const float_offsets_r3[] = {{0x28, 0, 255, 0x08, 24, 248}, {0x28, 0, 255, 0x10, 24, 248}, {0x28, 0, 255, 0x18, 24, 248}, {0x28, 0, 255, 0x20, 24, 248}};
+const spr_ofs_and_lim_t const float_offsets_r4[] = {{0x28, 0, 255, 0x08, 0, 64}, {0x28, 0, 255, 0x10, 0, 64}, {0x28, 0, 255, 0x18, 0, 64}, {0x28, 0, 255, 0x20, 0, 64}};
+#define float_sprites_tileoffset dizzy_sprite_tile_count
+#define float_sprite_offset dizzy_sprite_count
+#define float_sprite_count 4
+#define float_sprite_tile_count 1
+
+const spr_ofs_t const evil_hide[] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+#define evil_sprite_offset float_sprite_offset
+#define evil_sprite_total_count float_sprite_count
       
 enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L};
       
@@ -72,6 +91,10 @@ UBYTE temp;
 const dyn_data * current_dyn = 0;       
 UBYTE      current_dyn_phase = 0;
 
+// current room coordinates and descriptor
+UBYTE current_room_x = 1, current_room_y = 1; 
+const room_t * current_room = 0;
+
 // dizzy position within a room
 WORD  dizzy_x = 112, dizzy_y = 72, dizzy_tmp_xy = 0;
 WORD  delta_x = 0, delta_y = 0;
@@ -98,8 +121,36 @@ void init_enemies() {
     for (__temp_i = dizzy_sprites_tileoffset + dizzy_sprite_tile_count; __temp_i < (dizzy_sprites_tileoffset + dizzy_sprite_tile_count + 4); __temp_i++) 
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + dizzy_sprite_tile_count);
 }
+#define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
+const UBYTE const float_pos_y = (15 * 8);
+UBYTE float_pos_x = 0, float_dir = 1;
+void move_float() {
+    if (float_dir) { 
+        float_pos_x++; if (float_pos_x >= float_track_len) float_dir = 0; 
+    } else {
+        float_pos_x--; if (!float_pos_x) float_dir = 1; 
+    }
+    if (current_room_x == 3) {
+        if (float_pos_x <= (17 * 8)) {
+            multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+                                         float_pos_x + (13 * 8) - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
+                                         (unsigned char *)float_offsets_r3);
+        } else {
+            multiple_move_sprites(float_sprite_offset, float_sprite_count, 0, 0, (unsigned char *)evil_hide);
+        }
+    } else {
+        if (float_pos_x >= ((17 * 8) - (4 * 8))) {
+            multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+                                         float_pos_x - (17 * 8) - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
+                                         (unsigned char *)float_offsets_r4);
+        } else {
+            multiple_move_sprites(float_sprite_offset, float_sprite_count, 0, 0, (unsigned char *)evil_hide);
+        }
+    }
+}
 void set_enemies_position() {
-    // TODO: set position of visible enemies within a room
+    if (current_room)
+        if (current_room->room_actions) current_room->room_actions();
 }
 void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
@@ -115,13 +166,12 @@ void set_dizzy_animdata(const s_data * sprite) {
     for (__temp_i = 0; __temp_i < dizzy_sprite_tile_count; __temp_i++)
         set_sprite_data(dizzy_sprites_tileoffset + __temp_i, 1, &dizzy_anim_tiles[sprite->data[__temp_i] << 4]);
 }
-WORD scroll_dx = 0, scroll_dy = 0;
 WORD dizzy_old_pos_x = -1, dizzy_old_pos_y = -1; 
 void set_dizzy_position() {
     if ((dizzy_old_pos_x != dizzy_x) || (dizzy_old_pos_y != dizzy_y)) {
-        bkg_scroll_x_target = scroll_dx = get_x_scroll_value(dizzy_x); 
-        bkg_scroll_y_target = scroll_dy = get_y_scroll_value(dizzy_y);
-        multiple_move_sprites(0, dizzy_sprite_count, dizzy_x - scroll_dx, dizzy_y - scroll_dy, (unsigned char *)dizzy_offsets);
+        bkg_scroll_x_target = get_x_scroll_value(dizzy_x); 
+        bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
+        multiple_move_sprites(0, dizzy_sprite_count, dizzy_x - bkg_scroll_x_target, dizzy_y - bkg_scroll_y_target, (unsigned char *)dizzy_offsets);
         dizzy_old_pos_x = dizzy_x; dizzy_old_pos_y = dizzy_y;
     }
 }    
@@ -198,26 +248,22 @@ void check_dizzy_collisions() {
     }
 }
 
-UBYTE current_room_x = 1, current_room_y = 1; 
-const room_t * target_room;
-unsigned char * __data_ptr;
 void set_room(UBYTE row, UBYTE col) {
     wait_vbl_done();
     disable_interrupts();
-    target_room = dizzy_world[row]->rooms[col];
-    __data_ptr = target_room->room_tiles->data;
-    for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++) {
-        set_bkg_tiles(0, __temp_j, 16, 1, dizzy_anim_tiles);
-        set_bkg_tiles(16, __temp_j, 16, 1, dizzy_anim_tiles);
-    }
+    current_room = dizzy_world[row]->rooms[col];
+    for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++)
+        rle_decompress_tilemap(rle_decompress_to_bkg, 0, __temp_j, 32, 1, empty_compressed_map);
 
-    unshrink_tiles(0x00, target_room->room_tiles->count, __data_ptr);  
+    unshrink_tiles(0x00, current_room->room_tiles->count, current_room->room_tiles->data);  
 
     SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
-    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, target_room->room_map->rle_data);
-    rle_decompress_data(target_room->room_coll_map->rle_data, (UWORD)target_room->room_coll_map->size, coll_buf);
+    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
+    rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
+
+    multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
     enable_interrupts();
 }
@@ -413,7 +459,7 @@ void main()
     DISPLAY_ON;
 
 // --- debugging --------------
-//current_room_x = 5, current_room_y = 0, dizzy_x = 80;  // set any for debugging
+current_room_x = 3, current_room_y = 1, dizzy_x = 80;  // set any for debugging
 inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
