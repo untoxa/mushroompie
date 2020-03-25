@@ -36,11 +36,12 @@ const spr_ofs_t const dizzy_offsets[] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C
 #define dizzy_sprite_count 9
 #define dizzy_sprite_tile_count 9
 
-const spr_ofs_t const evil_hide[] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+const spr_ofs_t const evil_hide[] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 
+                                     {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
 #define evil_sprites_tileoffset dizzy_sprite_tile_count
 #define evil_sprite_offset dizzy_sprite_count
       
-#define evil_sprite_total_count 8
+#define evil_sprite_total_count 16
       
 enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L};
       
@@ -112,13 +113,12 @@ WORD get_y_scroll_value(WORD y) {
 
 UBYTE __temp_i, __temp_j, __temp_k; 
 
-
 const spr_ofs_t const bat1_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 const spr_ofs_t const bat2_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 #define bat_sprite_count 2
 #define bat1_sprite_offset evil_sprite_offset
 #define bat2_sprite_offset (evil_sprite_offset + bat_sprite_count)
-void init_room1() {
+void init_room0() {
     set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
 }
 #define bat_length
@@ -131,7 +131,7 @@ void init_room1() {
 #define bat2_max_x (21 * 8)
 WORD bat1_pos_x = bat1_min_x, bat1_dir = 1;
 WORD bat2_pos_x = bat2_min_x, bat2_dir = 1;
-void move_bats1() {
+void move_bats0() {
     if (bat1_dir) {
         bat1_pos_x++; if (bat1_pos_x >= bat1_max_x) bat1_dir = 0;
     } else {
@@ -144,17 +144,17 @@ void move_bats1() {
     }
 }
 UBYTE bat_phase = 0;  
-void draw_bats1() {
+void draw_bats0() {
     if (bat_phase == 0) {
-        set_sprite_tile(evil_sprite_offset + 0, evil_sprites_tileoffset + 0);
-        set_sprite_tile(evil_sprite_offset + 1, evil_sprites_tileoffset + 1);
-        set_sprite_tile(evil_sprite_offset + 2, evil_sprites_tileoffset + 2);
-        set_sprite_tile(evil_sprite_offset + 3, evil_sprites_tileoffset + 3);
+        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 0);
+        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 1);
+        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 2);
+        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 3);
     } else if (bat_phase == 4) {
-        set_sprite_tile(evil_sprite_offset + 0, evil_sprites_tileoffset + 2);
-        set_sprite_tile(evil_sprite_offset + 1, evil_sprites_tileoffset + 3);
-        set_sprite_tile(evil_sprite_offset + 2, evil_sprites_tileoffset + 0);
-        set_sprite_tile(evil_sprite_offset + 3, evil_sprites_tileoffset + 1);
+        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 0);
+        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 1);
+        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 2);
+        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 3);
     }
     bat_phase++; bat_phase &= 7;
     multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
@@ -163,6 +163,39 @@ void draw_bats1() {
     multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
                           bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
                           (unsigned char *)bat2_offsets);    
+}
+
+const unsigned char const elevator_map[] = {0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
+const spr_ofs_t const elevator_offsets[] = {{0x00, 0x14}, {0x08, 0x14}, {0x10, 0x14}, {0x18, 0x14}, {0x20, 0x14},
+                                            {0x28, 0x08}, {0x28, 0x10}, {0x28, 0x18}, {0x28, 0x20},
+                                            {0x48, 0x08}, {0x48, 0x10}, {0x48, 0x18}, {0x48, 0x20}};
+#define elevator_sprite_count 13
+#define elevator_sprite_offset evil_sprite_offset
+void init_room2() {
+    set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+    for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
+        set_sprite_tile(elevator_sprite_offset + __temp_i, evil_sprites_tileoffset + elevator_map[__temp_i]);
+}
+#define elevator_pos_x (15 * 8)
+#define elevator_min_y (3 * 8)
+#define elevator_max_y (7 * 8)
+UBYTE elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0;
+void move_elevator() {
+    elevator_move++; elevator_move &= 1;
+    if (!elevator_move) {
+        if (elevator_dir) {
+            elevator_pos_y++; if (elevator_pos_y >= elevator_max_y) elevator_dir = 0;
+        } else {
+            elevator_pos_y--; if (elevator_pos_y <= elevator_min_y) elevator_dir = 1;
+        }
+    }
+}
+void draw_elevator() {
+    if (!elevator_move) {
+        multiple_move_sprites(elevator_sprite_offset, elevator_sprite_count, 
+                              elevator_pos_x - bkg_scroll_x_target, elevator_pos_y - bkg_scroll_y_target, 
+                              (unsigned char *)elevator_offsets);
+    }
 }
 
 const spr_ofs_and_lim_t const float_offsets_r3[] = {{0x28, 0, 255, 0x08, 24, 248}, {0x28, 0, 255, 0x10, 24, 248}, {0x28, 0, 255, 0x18, 24, 248}, {0x28, 0, 255, 0x20, 24, 248}};
@@ -326,6 +359,9 @@ void set_room(UBYTE row, UBYTE col) {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
+    // hide all possible evil sprites
+    multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
+
     // clear screen to avoid flickering
     for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++)
         rle_decompress_tilemap(rle_decompress_to_bkg, 0, __temp_j, 32, 1, empty_compressed_map);
@@ -342,9 +378,6 @@ void set_room(UBYTE row, UBYTE col) {
     // decompress background tiles and collision map
     rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
-
-    // hide all possible evil sprites
-    multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
     enable_interrupts();
 }
