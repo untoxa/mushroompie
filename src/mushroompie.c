@@ -117,40 +117,61 @@ WORD get_y_scroll_value(WORD y) {
 
 UBYTE __temp_i, __temp_j, __temp_k; 
 void init_enemies() {
-    set_sprite_data(dizzy_sprites_tileoffset + dizzy_sprite_tile_count, 2, enemies_tiles);
+    set_sprite_data(dizzy_sprites_tileoffset + dizzy_sprite_tile_count, 1, enemies_tiles);
     for (__temp_i = dizzy_sprites_tileoffset + dizzy_sprite_tile_count; __temp_i < (dizzy_sprites_tileoffset + dizzy_sprite_tile_count + 4); __temp_i++) 
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + dizzy_sprite_tile_count);
 }
 #define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
 const UBYTE const float_pos_y = (15 * 8);
 UBYTE float_pos_x = 0, float_dir = 1;
+
+UBYTE float3_move = 1, float4_move = 0;
+#define float_length (4 * 8)
+#define float3_min_x (13 * 8)
+#define float3_max_x (room_width * 8)
+WORD float3_pos_x = float3_min_x, float3_dir = 1;
+#define float4_min_x (0 - float_length)
+#define float4_max_x ((8 * 8) - float_length)
+WORD float4_pos_x = float4_min_x, float4_dir = 1;
+
 void move_float() {
-    if (float_dir) { 
-        float_pos_x++; if (float_pos_x >= float_track_len) float_dir = 0; 
-    } else {
-        float_pos_x--; if (!float_pos_x) float_dir = 1; 
-    }
-    if (current_room_x == 3) {
-        if (float_pos_x <= (17 * 8)) {
-            multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                         float_pos_x + (13 * 8) - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
-                                         (unsigned char *)float_offsets_r3);
+    // two floats in room 3 and 4 move in sync with each other
+    if (float3_move) {
+        if (float3_dir) {
+            float3_pos_x++;
+            if (float3_pos_x >= float3_max_x) { float3_dir = 0; float3_move = 0; }
+            if (float3_pos_x == float3_max_x - (float_length + 16)) float4_move = 1;
         } else {
-            multiple_move_sprites(float_sprite_offset, float_sprite_count, 0, 0, (unsigned char *)evil_hide);
+            float3_pos_x--;
+            if (float3_pos_x <= float3_min_x) float3_dir = 1;
         }
-    } else {
-        if (float_pos_x >= ((17 * 8) - (4 * 8))) {
-            multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                         float_pos_x - (17 * 8) - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
-                                         (unsigned char *)float_offsets_r4);
+    }    
+    if (float4_move) {
+        if (float4_dir) {
+            float4_pos_x++;
+            if (float4_pos_x >= float4_max_x) float4_dir = 0;
         } else {
-            multiple_move_sprites(float_sprite_offset, float_sprite_count, 0, 0, (unsigned char *)evil_hide);
+            float4_pos_x--;
+            if (float4_pos_x <= float4_min_x) { float4_dir = 1; float4_move = 0; }
+            if (float4_pos_x == float4_min_x + (float_length + 16)) float3_move = 1;
         }
     }
 }
+void draw_float3() {
+    multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+                                 float3_pos_x - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
+                                 (unsigned char *)float_offsets_r3);
+}
+void draw_float4() {
+    multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+                                 float4_pos_x - bkg_scroll_x_target, float_pos_y - bkg_scroll_y_target, 
+                                 (unsigned char *)float_offsets_r4);
+}
 void set_enemies_position() {
-    if (current_room)
+    if (current_room) {
         if (current_room->room_actions) current_room->room_actions();
+        if (current_room->room_animations) current_room->room_animations();
+    }
 }
 void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
@@ -252,17 +273,21 @@ void set_room(UBYTE row, UBYTE col) {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
+    // clear screen to avoid flickering
     for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++)
         rle_decompress_tilemap(rle_decompress_to_bkg, 0, __temp_j, 32, 1, empty_compressed_map);
 
+    // unshrink background tiles
     unshrink_tiles(0x00, current_room->room_tiles->count, current_room->room_tiles->data);  
 
     SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
+    // decompress background tiles and collision map
     rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
 
+    // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
     enable_interrupts();
