@@ -13,11 +13,12 @@ typedef struct {
 
 typedef void (*room_actions_t)();
 
-
 typedef struct {
     rle_data_t * room_map;
     rle_data_t * room_coll_map;
     tile_data_t * room_tiles;
+    tile_data_t * raw_enemies_tiles;
+    room_actions_t room_init;
     room_actions_t room_actions;
     room_actions_t room_animations;
 } room_t;
@@ -27,28 +28,30 @@ typedef struct {
     room_t * rooms[];
 } world_row;
 
-void move_float();
-void draw_float3();
-void draw_float4();
+// room 0_1 handlers
+void init_room1(); void move_bats1(); void draw_bats1();
+
+// rooms 3_1 and 4_1 handlers
+void init_room34(); void move_float(); void draw_float3(); void draw_float4();
 
 const world_row * const dizzy_world[] = {&world_row_0, &world_row_1};
 
 const world_row const world_row_0 = {0, {&room_0_0, &room_1_0, &room_2_0, &room_3_0, &room_4_0, &room_5_0}};
 const world_row const world_row_1 = {1, {&room_0_1, &room_1_1, &room_2_1, &room_3_1, &room_4_1, &room_5_1}};
 
-const room_t const room_0_0 = {&room_0_0_map, &room_0_0_coll, &room_0_0_tiles, 0, 0};
-const room_t const room_1_0 = {&room_1_0_map, &room_1_0_coll, &room_1_0_tiles, 0, 0};
-const room_t const room_2_0 = {&room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0, 0};
-const room_t const room_3_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0};  // empty room
-const room_t const room_4_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0};  // empty room
-const room_t const room_5_0 = {&room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0, 0};
+const room_t const room_0_0 = {&room_0_0_map, &room_0_0_coll, &room_0_0_tiles, 0, 0, 0, 0};
+const room_t const room_1_0 = {&room_1_0_map, &room_1_0_coll, &room_1_0_tiles, 0, 0, 0, 0};
+const room_t const room_2_0 = {&room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0, 0, 0, 0};
+const room_t const room_3_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0};  // empty room
+const room_t const room_4_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0};  // empty room
+const room_t const room_5_0 = {&room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0, 0, 0, 0};
 
-const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, 0, 0};
-const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0, 0};
-const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles, 0, 0};
-const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &move_float, &draw_float3};
-const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &move_float, &draw_float4};
-const room_t const room_5_1 = {&room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0, 0};
+const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles, &init_room1, &move_bats1, &draw_bats1};
+const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0, 0, 0, 0};
+const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles, 0, 0, 0, 0};
+const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float3};
+const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float4};
+const room_t const room_5_1 = {&room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0, 0, 0, 0};
 
 const rle_data_t const room_0_0_map = {0, {
 0xE1,0x00,0x01,0x02,0x00,0x03,0x04,0x05,0xD8,0x00,0x06,0x07,0x08,0x09,0x08,0x09,
@@ -768,6 +771,12 @@ const tile_data_t const room_0_1_tiles = {114, {
 0x03,0x00,0x81,0x87,0x8F,0x1F,0x3F,0x7D,0x7B,
 0x03,0x04,0x04,0x08,0x30,0xC0,0x00,0x00,0x00
 }};
+const tile_data_t const enemies_0_1_tiles = {4, {
+0x19,0x19,0x25,0x3D,0x42,0x7F,0x75,0x7D,0x49,0x49,0x00,0x00,0x00,0x00,0x00,0x00,
+0x4C,0x4C,0xD2,0xDE,0x21,0xFF,0x57,0xDF,0x49,0xC9,0x80,0x80,0x00,0x00,0x00,0x00,
+0x01,0x01,0x03,0x03,0x1E,0x1F,0x25,0x3D,0x29,0x39,0x4C,0x7C,0x50,0x70,0x30,0x30,
+0x40,0x40,0xE0,0xE0,0x3C,0xFC,0x52,0xDE,0x4A,0xCE,0x99,0x9F,0x05,0x07,0x06,0x06,
+}};
 
 const rle_data_t const room_1_1_map = {0, {
 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x00,0x0A,0x0B,0x0C,0x0D,0xD0,0x00,
@@ -1175,6 +1184,9 @@ const tile_data_t const room_3_1_tiles = {76, {
 0x03,0x00,0xEE,0x11,0x00,0x00,0x00,0x00,0x00,
 0x03,0x7C,0xFB,0xFF,0xFF,0xDD,0x69,0x28,0x00,
 0x03,0x36,0xF9,0xD5,0xBA,0xD4,0x4C,0x08,0x00,
+}};
+const tile_data_t const enemies_34_1_tiles = {1, {
+0xFF,0x38,0xD7,0x7C,0xAB,0xFE,0xD3,0xFE,0x83,0xFE,0xC6,0x7C,0x7C,0x38,0x38,0x00
 }};
 
 const rle_data_t const room_4_1_map = {0, {
