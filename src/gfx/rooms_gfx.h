@@ -12,7 +12,7 @@ typedef struct {
 } tile_data_t;
 
 typedef void (*room_actions_t)();
-typedef UBYTE (*room_checkcoll_t)(WORD x, WORD y, UBYTE oy, unsigned char * buf);
+typedef void (*room_checkcoll_t)(WORD x, WORD y);
 
 typedef struct {
     rle_data_t * room_map;
@@ -20,7 +20,7 @@ typedef struct {
     tile_data_t * room_tiles;
     tile_data_t * raw_enemies_tiles;
     room_actions_t room_init, room_actions, room_animations;
-    room_checkcoll_t room_hcoll, room_vcoll;
+    room_checkcoll_t room_h_coll, room_v_coll;
 } room_t;
 
 typedef struct {
@@ -32,12 +32,12 @@ typedef struct {
 void init_room0(); void move_bats0(); void draw_bats0();
 // room 2_1 handlers
 void init_room2(); void move_elevator(); void draw_elevator(); 
-UBYTE hcoll_elevator(WORD x, WORD y, UBYTE oy, unsigned char * buf);
+void hcoll_elevator(WORD x, WORD y);
 // rooms 3_1 and 4_1 handlers
 void init_room34(); void move_float(); void draw_float3(); void draw_float4();
-UBYTE hcoll_float3(WORD x, WORD y, UBYTE oy, unsigned char * buf);
-UBYTE hcoll_float4(WORD x, WORD y, UBYTE oy, unsigned char * buf);
-
+void hcoll_float3(WORD x, WORD y);
+void hcoll_float4(WORD x, WORD y);
+void vcoll_troll(WORD x, WORD y);
 const world_row * const dizzy_world[] = {&world_row_0, &world_row_1};
 
 const world_row const world_row_0 = {0, {&room_0_0, &room_1_0, &room_2_0, &room_3_0, &room_4_0, &room_5_0}};
@@ -54,7 +54,7 @@ const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &
 const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0, 0, 0, 0, 0, 0};
 const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles, &enemies_2_1_tiles, &init_room2, &move_elevator, &draw_elevator, &hcoll_elevator, 0};
 const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float3, &hcoll_float3, 0};
-const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float4, &hcoll_float4, 0};
+const room_t const room_4_1 = {&room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float4, &hcoll_float4, &vcoll_troll};
 const room_t const room_5_1 = {&room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0, 0, 0, 0, 0, 0};
 
 const rle_data_t const room_0_0_map = {0, {
