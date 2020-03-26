@@ -178,7 +178,7 @@ void init_room2() {
 }
 #define elevator_pos_x (15 * 8)
 #define elevator_min_y (3 * 8)
-#define elevator_max_y (7 * 8)
+#define elevator_max_y (9 * 8)
 UBYTE elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0;
 void move_elevator() {
     elevator_move++; elevator_move &= 1;
@@ -196,6 +196,18 @@ void draw_elevator() {
                               elevator_pos_x - bkg_scroll_x_target, elevator_pos_y - bkg_scroll_y_target, 
                               (unsigned char *)elevator_offsets);
     }
+}
+UBYTE hcoll_elevator(WORD x, WORD y, UBYTE oy, unsigned char * buf) {
+    if ((x >= elevator_pos_x - 8) && (x <= elevator_pos_x + (3 * 8))) {
+        if ((y >= elevator_pos_y + (4 * 8)) && (y <= elevator_pos_y + ((4 * 8) + 4))) {
+            buf[0] = 1; buf[1] = 1; buf[2] = 0;
+            if (!elevator_move) {
+                if (!elevator_dir) delta_y = -1; else delta_y = 0;
+            }
+            return (y - elevator_pos_y);
+        }
+    }
+    return oy;
 }
 
 const spr_ofs_and_lim_t const float_offsets_r3[] = {{0x28, 0, 255, 0x08, 24, 248}, {0x28, 0, 255, 0x10, 24, 248}, {0x28, 0, 255, 0x18, 24, 248}, {0x28, 0, 255, 0x20, 24, 248}};
@@ -249,6 +261,24 @@ void draw_float4() {
     multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
                                  float4_pos_x - bkg_scroll_x_target, float34_pos_y - bkg_scroll_y_target, 
                                  (unsigned char *)float_offsets_r4);
+}
+UBYTE hcoll_float3(WORD x, WORD y, UBYTE oy, unsigned char * buf) {
+    if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {
+        if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
+            buf[0] = 1; buf[1] = 1; buf[2] = 0;
+            delta_y = 0;
+        }
+    }
+    return oy;
+}
+UBYTE hcoll_float4(WORD x, WORD y, UBYTE oy, unsigned char * buf) {
+    if ((x >= float4_pos_x - 8) && (x <= float4_pos_x + (3 * 8))) {
+        if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
+            buf[0] = 1; buf[1] = 1; buf[2] = 0;
+            delta_y = 0;
+        }
+    }
+    return oy;
 }
 
 void set_enemies_position() {
@@ -313,6 +343,7 @@ void get_v_coll(WORD x, WORD y) {
 void check_dizzy_collisions() {
     if (delta_y >= 0) {
         get_h_coll(dizzy_x, dizzy_y + 21);
+        if (current_room->room_hcoll) tile_pos_oy = current_room->room_hcoll(dizzy_x, dizzy_y + 21, tile_pos_oy, collision_buf);
 //set_win_tiles(1, 1, 3, 1, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
             if (tile_pos_oy <= 4) delta_y = -1;
@@ -333,10 +364,10 @@ void check_dizzy_collisions() {
                     if (dizzy_falling < MAX_STUN_HEIGHT) dizzy_falling++;
                 }
             }
-            if (!delta_y) {
-                if (dizzy_falling == MAX_STUN_HEIGHT) dizzy_stun = 1;
-                dizzy_falling = 0;
-            }            
+//            if (!delta_y) {
+//                if (dizzy_falling == MAX_STUN_HEIGHT) dizzy_stun = 1;
+//                dizzy_falling = 0;
+//            }            
         } else dizzy_falling = 0;
     } else {
         get_h_coll(dizzy_x, dizzy_y + 4);
@@ -345,6 +376,11 @@ void check_dizzy_collisions() {
             delta_y = 0;
         }
     }
+
+    if (!delta_y) {
+        if (dizzy_falling == MAX_STUN_HEIGHT) dizzy_stun = 1;
+        dizzy_falling = 0;
+    }            
     
     if (delta_x) {
         if (delta_x < 0) get_v_coll(dizzy_x + delta_x, dizzy_y); else get_v_coll(dizzy_x + delta_x + 16, dizzy_y);
