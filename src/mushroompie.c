@@ -7,8 +7,6 @@
 #include "gfx/dizzy_anim_gfx.h"
 #include "gfx/title_gfx.h"
 
-#include "include/inventory.h"
-
 #define room_width 30
 #define room_height 17
 
@@ -95,6 +93,12 @@ const room_t * current_room = 0;
 WORD  dizzy_x = 112, dizzy_y = 72, dizzy_tmp_xy = 0;
 WORD  delta_x = 0, delta_y = 0;
 
+// some general purpose variables
+UBYTE __temp_i, __temp_j, __temp_k; 
+
+#include "include/energy.h"
+#include "include/inventory.h"
+
 #define MAX_STUN_HEIGHT 32
 UBYTE dizzy_falling = 0, dizzy_stun = 0;
 
@@ -110,8 +114,6 @@ WORD get_y_scroll_value(WORD y) {
     if (__temp_scroll_value < 0) return 0; else if (__temp_scroll_value > 16) return 16;
     return __temp_scroll_value;
 }
-
-UBYTE __temp_i, __temp_j, __temp_k; 
 
 UBYTE tile_pos_x, tile_pos_y, tile_pos_ox, tile_pos_oy;
 unsigned char collision_buf[3];                         // TODO: use bits instead of array: 0x01 if ground, 0x02 if small rock and so on
@@ -140,203 +142,10 @@ void get_v_coll(WORD x, WORD y) {
     } else { collision_buf[0] = 0x00; collision_buf[1] = 0x00;}
 }
 
-const spr_ofs_t const bat1_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
-const spr_ofs_t const bat2_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
-#define bat_sprite_count 2
-#define bat1_sprite_offset evil_sprite_offset
-#define bat2_sprite_offset (evil_sprite_offset + bat_sprite_count)
-void init_room0() {
-    set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
-}
-#define bat_length
-#define bat1_pos_y (7 * 8)
-#define bat1_min_x (2 * 8)
-#define bat1_max_x (25 * 8)
-
-#define bat2_pos_y (11 * 8)
-#define bat2_min_x (4 * 8)
-#define bat2_max_x (21 * 8)
-WORD bat1_pos_x = bat1_min_x, bat1_dir = 1;
-WORD bat2_pos_x = bat2_min_x, bat2_dir = 1;
-void move_bats0() {
-    if (bat1_dir) {
-        bat1_pos_x++; if (bat1_pos_x >= bat1_max_x) bat1_dir = 0;
-    } else {
-        bat1_pos_x--; if (bat1_pos_x <= bat1_min_x) bat1_dir = 1;
-    }
-    if (bat2_dir) {
-        bat2_pos_x++; if (bat2_pos_x >= bat2_max_x) bat2_dir = 0;
-    } else {
-        bat2_pos_x--; if (bat2_pos_x <= bat2_min_x) bat2_dir = 1;
-    }
-}
-UBYTE bat_phase = 0;  
-void draw_bats0() {
-    if (bat_phase == 0) {
-        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 0);
-        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 1);
-        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 2);
-        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 3);
-    } else if (bat_phase == 4) {
-        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 0);
-        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 1);
-        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 2);
-        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 3);
-    }
-    bat_phase++; bat_phase &= 7;
-    multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
-                          bat1_pos_x - bkg_scroll_x_target, bat1_pos_y - bkg_scroll_y_target, 
-                          (unsigned char *)bat1_offsets);    
-    multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
-                          bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
-                          (unsigned char *)bat2_offsets);    
-}
-
-const unsigned char const elevator_map[] = {0, 0, 0, 0, 0, 1, 2, 3, 4, 5, 6, 7, 8};
-const spr_ofs_t const elevator_offsets[] = {{0x00, 0x14}, {0x08, 0x14}, {0x10, 0x14}, {0x18, 0x14}, {0x20, 0x14},
-                                            {0x28, 0x08}, {0x28, 0x10}, {0x28, 0x18}, {0x28, 0x20},
-                                            {0x48, 0x08}, {0x48, 0x10}, {0x48, 0x18}, {0x48, 0x20}};
-#define elevator_sprite_count 13
-#define elevator_sprite_offset evil_sprite_offset
-void init_room2() {
-    set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
-    for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
-        set_sprite_tile(elevator_sprite_offset + __temp_i, evil_sprites_tileoffset + elevator_map[__temp_i]);
-}
-#define elevator_pos_x (15 * 8)
-#define elevator_min_y (3 * 8)
-#define elevator_max_y (9 * 8)
-UBYTE elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0;
-void move_elevator() {
-    if (elevator_enabled) {
-        elevator_move++; elevator_move &= 1;
-        if (!elevator_move) {
-            if (elevator_dir) {
-                elevator_pos_y++; if (elevator_pos_y >= elevator_max_y) elevator_dir = 0;
-            } else {
-                elevator_pos_y--; if (elevator_pos_y <= elevator_min_y) elevator_dir = 1;
-            }
-        }
-    }
-}
-void draw_elevator() {
-    if (!elevator_move) {
-        multiple_move_sprites(elevator_sprite_offset, elevator_sprite_count, 
-                              elevator_pos_x - bkg_scroll_x_target, elevator_pos_y - bkg_scroll_y_target, 
-                              (unsigned char *)elevator_offsets);
-    }
-}
-void hcoll_elevator(WORD x, WORD y) {
-    if ((elevator_enabled) && (delta_y >= 0)) {
-        if ((x >= elevator_pos_x - 8) && (x <= elevator_pos_x + (3 * 8))) {
-            if ((y >= elevator_pos_y + (4 * 8) - 1) && (y <= elevator_pos_y + ((4 * 8) + 7))) {
-                tile_pos_x = x >> 3; tile_pos_ox = x & 7;
-                tile_pos_y = y >> 3; tile_pos_oy = (y - elevator_pos_y) & 7;
-                collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
-                if (!elevator_move) {
-                    if (!elevator_dir) delta_y = -1; else delta_y = 0;
-                }
-                return;
-            }
-        }
-    }
-    get_h_coll(x, y);
-}
-
-const spr_ofs_and_lim_t const float_offsets_r3[] = {{0x28, 0, 255, 0x08, 24, 248}, {0x28, 0, 255, 0x10, 24, 248}, {0x28, 0, 255, 0x18, 24, 248}, {0x28, 0, 255, 0x20, 24, 248}};
-const spr_ofs_and_lim_t const float_offsets_r4[] = {{0x28, 0, 255, 0x08, 0, 64}, {0x28, 0, 255, 0x10, 0, 64}, {0x28, 0, 255, 0x18, 0, 64}, {0x28, 0, 255, 0x20, 0, 64}};
-#define float_sprites_tileoffset evil_sprites_tileoffset
-#define float_sprite_offset evil_sprite_offset
-#define float_sprite_count 4
-void init_room34(){
-    set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
-    for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
-        set_sprite_tile(__temp_i, evil_sprites_tileoffset);
-}
-#define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
-#define float34_pos_y (15 * 8)
-UBYTE float3_move = 1, float4_move = 0, troll_satisfied = 0;
-#define float_length (4 * 8)
-#define float3_min_x (13 * 8)
-#define float3_max_x (room_width * 8)
-WORD float3_pos_x = float3_min_x, float3_dir = 1;
-#define float4_min_x (0 - float_length)
-#define float4_max_x ((8 * 8) - float_length)
-WORD float4_pos_x = float4_min_x, float4_dir = 1;
-void move_float() {             // two floats in room 3 and 4 move in sync with each other
-    if (float3_move) {
-        if (float3_dir) {
-            float3_pos_x++;
-            if (float3_pos_x >= float3_max_x) { float3_dir = 0; float3_move = 0; }
-            if (float3_pos_x == float3_max_x - (float_length + 14)) float4_move = 1;
-        } else {
-            float3_pos_x--;
-            if (float3_pos_x <= float3_min_x) float3_dir = 1;
-        }
-    }    
-    if (float4_move) {
-        if (float4_dir) {
-            float4_pos_x++;
-            if (float4_pos_x >= float4_max_x) float4_dir = 0;
-        } else {
-            float4_pos_x--;
-            if (float4_pos_x <= float4_min_x) { float4_dir = 1; float4_move = 0; }
-            if (float4_pos_x == float4_min_x + (float_length + 15)) float3_move = 1;
-        }
-    }
-}
-void draw_float3() {
-    multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                 float3_pos_x - bkg_scroll_x_target, float34_pos_y - bkg_scroll_y_target, 
-                                 (unsigned char *)float_offsets_r3);
-}
-void draw_float4() {
-    multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                 float4_pos_x - bkg_scroll_x_target, float34_pos_y - bkg_scroll_y_target, 
-                                 (unsigned char *)float_offsets_r4);
-}
-void hcoll_float3(WORD x, WORD y) {
-    if (delta_y >= 0) {
-        if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {
-            if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
-                tile_pos_x = x >> 3; tile_pos_ox = (x - float3_pos_x) & 7;
-                tile_pos_y = y >> 3; tile_pos_oy = y & 7;
-                collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
-                delta_y = 0;
-                return;
-            }
-        }
-    }
-    get_h_coll(x, y);
-}
-void hcoll_float4(WORD x, WORD y) {
-    if (delta_y >= 0) {
-        if ((x >= float4_pos_x - 8) && (x <= float4_pos_x + (3 * 8))) {
-            if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
-                tile_pos_x = x >> 3; tile_pos_ox = (x - float4_pos_x) & 7;
-                tile_pos_y = y >> 3; tile_pos_oy = y & 7;
-                collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
-                delta_y = 0;
-                return;
-            }
-        }
-    }
-    get_h_coll(x, y);
-}
-void vcoll_troll(WORD x, WORD y) {
-    if ((!troll_satisfied) && (delta_x >= 0)) {
-        if (x >= (22 * 8)) {
-            tile_pos_x = x >> 3; 
-            collision_buf[0] = 1; collision_buf[1] = 1;
-            delta_x = -1;
-            
-            dizzy_stun = 1;
-            ani_type = ANI_JUMP_L; ani_phase = 0;
-            current_dyn = &move_y_dynamics; current_dyn_phase = 0;            
-        }
-    }
-    get_v_coll(x, y);
-}
+// room specific handlers
+#include "rooms/room_0_1.h"
+#include "rooms/room_2_1.h" 
+#include "rooms/room_34_1.h" 
 
 void set_enemies_position() {
     if (current_room) {
@@ -421,6 +230,7 @@ void check_dizzy_collisions() {
 }
 
 void check_dizzy_evil_collisions() {
+    if (current_room->room_evil_coll) current_room->room_evil_coll();
 }
 
 void set_room(UBYTE row, UBYTE col) {
@@ -554,7 +364,7 @@ void show_inventory() {
 
     rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
 
-    __temp_i = 0; __temp_j = 3; __temp_k = 0x9E;
+    __temp_i = 0; __temp_j = 3; __temp_k = inventoty_tiles_start;
     while (__temp_i < 3) {
         current_itm = inventory_items[__temp_i];
         if (current_itm) {
@@ -605,7 +415,6 @@ void show_inventory() {
     waitpadup();
 }
 
-unsigned char dizzy_lives_indicator[3] = {0x92, 0x92, 0x92};
 void main()
 {
     DISPLAY_OFF;
@@ -631,10 +440,23 @@ void main()
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
-    unshrink_tiles(0x80, 18, title_shrinked_tiles);
+    
+    unshrink_tiles(inventoty_tiles_start, title_shrinked_tiles.count, title_shrinked_tiles.data);
+    dizzy_live_symbol = inventoty_tiles_start += title_shrinked_tiles.count;
+   
+    unshrink_tiles(inventoty_tiles_start, lives_shrinked_tiles.count, lives_shrinked_tiles.data);
+    inventoty_tiles_start += lives_shrinked_tiles.count;
+    
+    unshrink_tiles(inventoty_tiles_start, inventory_frame_tiles.count, inventory_frame_tiles.data);
+    dizzy_energy_start = inventoty_tiles_start += inventory_frame_tiles.count;
+
+    unshrink_tiles(inventoty_tiles_start, energy_tiles.count, energy_tiles.data);
+    inventoty_tiles_start += energy_tiles.count;
+
     set_win_tiles(0, 0, 20, 3, title_map);
-    unshrink_tiles(0x92, 12, misc_shrinked_tiles);
-    set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);
+    
+    show_lives();
+    show_energy();
     
     enable_interrupts();
     DISPLAY_ON;
@@ -702,6 +524,8 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
 
             walk_update = 0; bal_update = 0;
             delta_x = delta_y = 0;
+            
+            update_energy();
         };
         
         if (ani_update) {
@@ -714,6 +538,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                     ani_type = ANI_STUN;
                     ani_phase = 0;
                     dizzy_stun = 0;
+                    dec_energy += 10;
                 } else if (dizzy_falling) { 
                     ani_type = current_animation->fall_state;
                     ani_phase = 0;

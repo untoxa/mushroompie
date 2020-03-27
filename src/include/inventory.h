@@ -12,9 +12,11 @@ typedef struct {
     const game_item_desc * desc;
 } game_item;
 
-game_item game_items[] = {{0, 1, 1, 10, 10, {0x9E, 0x9F, 0xA0, 0xA1}, &itmdesc_pickaxe}, 
-                          {0, 1, 1, 10, 10, {0xA2, 0xA3, 0xA4, 0xA5}, &itmdesc_key}, 
-                          {0, 1, 1, 10, 10, {0xA6, 0xA7, 0xA8, 0xA9}, &itmdesc_mushrooms}};
+UBYTE inventoty_tiles_start = 0x80;
+
+game_item game_items[] = {{0, 1, 1, 10, 10, {0x01, 0x02, 0x03, 0x04}, &itmdesc_pickaxe}, 
+                          {0, 1, 1, 10, 10, {0x01, 0x02, 0x03, 0x04}, &itmdesc_key}, 
+                          {0, 1, 1, 10, 10, {0x01, 0x02, 0x03, 0x04}, &itmdesc_mushrooms}};
 
 game_item * inventory_items[3] = {0, 0, 0};
 
