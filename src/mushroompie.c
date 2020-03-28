@@ -83,7 +83,9 @@ UBYTE ani_update = 0, walk_update = 0, bal_update = 0;
 UBYTE temp;
 
 const dyn_data * current_dyn = 0;       
-UBYTE      current_dyn_phase = 0;
+UBYTE current_dyn_phase = 0;
+
+UBYTE cloud_timer = 0;
 
 // current room coordinates and descriptor
 UBYTE current_room_x = 1, current_room_y = 1; 
@@ -197,6 +199,9 @@ void check_dizzy_collisions() {
                 delta_y = 0;
             } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
                 if (tile_pos_oy > 4) delta_y = 0;
+            } else if ((collision_buf[0] == 5) || (collision_buf[1] == 5) || (collision_buf[2] == 5)) {
+                cloud_timer++; cloud_timer &= 3;
+                if (cloud_timer) delta_y = 0;
             } else {
                 if (!current_dyn) {
                     if (dizzy_falling < MAX_STUN_HEIGHT) dizzy_falling++;
@@ -462,7 +467,7 @@ void main()
     DISPLAY_ON;
 
 // --- debugging --------------
-//current_room_x = 0, current_room_y = 1, dizzy_x = 80;  // set any for debugging
+//current_room_x = 0, current_room_y = 1, dizzy_x = 80;  //dizzy_y = 30;// set any for debugging
 inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
