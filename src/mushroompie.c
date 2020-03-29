@@ -145,18 +145,19 @@ void get_v_coll(WORD x, WORD y) {
 }
 void get_coll(WORD x, WORD y) {
     __temp_i = ((x > 0)?(x >> 3):0);
-    __temp_j = (x + 24) >> 3; if (__temp_j > room_width) __temp_j = room_width;
+    __temp_j = (x + 16) >> 3; if (__temp_j >= room_width) __temp_j = room_width - 1;
     __temp_k = ((y > 0)?(y >> 3):0);
-    __temp_l = (y +  24) >> 3; if (__temp_l > room_height) __temp_l = room_height;
+    __temp_l = (y + 16) >> 3; if (__temp_l >= room_height) __temp_l = room_height - 1;
     
     collision_buf[0] = 0; collision_buf[1] = 0;
-    for (__temp_k = __temp_k; __temp_k < __temp_l; __temp_k++) {
+    for (__temp_k = __temp_k; __temp_k <= __temp_l; __temp_k++) {
         __temp_coll_row = current_coll_idx[__temp_k];
-        for (__temp_i = __temp_i; __temp_i < __temp_j; __temp_i++) {
-            __temp_m = __temp_coll_row[__temp_i];
-            if (__temp_m == 7) { collision_buf[0] = __temp_m; return; }
-            else if (__temp_m == 6) { collision_buf[0] = __temp_m; }
-            else if (__temp_m == 4) { collision_buf[1] = __temp_m; }
+        for (__temp_m = __temp_i; __temp_m <= __temp_j; __temp_m++) {
+            switch (__temp_coll_row[__temp_m]) {
+                case 4 : collision_buf[1] = 4; break;
+                case 6 : collision_buf[0] = 6; break;
+                case 7 : collision_buf[0] = 7; return;
+            }
         }
     }
 }
@@ -254,11 +255,11 @@ void check_dizzy_collisions() {
 void check_dizzy_evil_collisions() {
     if (ani_type != ANI_DEAD) {
         if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 4);
-        get_coll(dizzy_x, dizzy_y + 8);
+        get_coll(dizzy_x, dizzy_y + 4);
+//set_win_tiles(2, 0, 2, 1, collision_buf);
         if (collision_buf[0] == 6) {
             if (dec_energy < 64) dec_energy += 2;
-        }
-        if (collision_buf[0] == 7) {
+        } else if (collision_buf[0] == 7) {
             dizzy_energy = 1; dec_energy = 1;
         }
     }

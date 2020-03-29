@@ -52,12 +52,12 @@ void draw_bats0() {
 
 void coll_bats(WORD x, WORD y) {
     if (!((bat1_pos_x > x + 16) || 
-          (bat1_pos_x + 16 < x + 4) ||
+          (bat1_pos_x + 16 < x) ||
           (bat1_pos_y > y + 20) ||
           (bat1_pos_y + 8 < y))) {
         dec_energy += 3;
     } else if (!((bat2_pos_x > x + 16) || 
-                 (bat2_pos_x + 16 < x + 4) ||
+                 (bat2_pos_x + 16 < x) ||
                  (bat2_pos_y > y + 20) ||
                  (bat2_pos_y + 8 < y))) {
         dec_energy += 3;
