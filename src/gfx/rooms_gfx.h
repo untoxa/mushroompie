@@ -20,8 +20,7 @@ typedef struct {
     tile_data_t * room_tiles;
     tile_data_t * raw_enemies_tiles;
     room_actions_t room_init, room_actions, room_animations;
-    room_checkcoll_t room_h_coll, room_v_coll;
-    room_actions_t room_evil_coll;
+    room_checkcoll_t room_h_coll, room_v_coll, room_evil_coll;
 } room_t;
 
 typedef struct {
@@ -31,6 +30,7 @@ typedef struct {
 
 // room 0_1 handlers
 void init_room0(); void move_bats0(); void draw_bats0();
+void coll_bats(WORD x, WORD y);
 // room 2_1 handlers
 void init_room2(); void move_elevator(); void draw_elevator(); 
 void hcoll_elevator(WORD x, WORD y);
@@ -51,7 +51,7 @@ const room_t const room_3_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0
 const room_t const room_4_0 = {&room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0, 0, 0, 0};  // empty room
 const room_t const room_5_0 = {&room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0, 0, 0, 0, 0, 0, 0};
 
-const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles, &init_room0, &move_bats0, &draw_bats0, 0, 0, 0};
+const room_t const room_0_1 = {&room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles, &init_room0, &move_bats0, &draw_bats0, 0, 0, &coll_bats};
 const room_t const room_1_1 = {&room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0, 0, 0, 0, 0, 0, 0};
 const room_t const room_2_1 = {&room_2_1_map, &room_2_1_coll, &room_2_1_tiles, &enemies_2_1_tiles, &init_room2, &move_elevator, &draw_elevator, &hcoll_elevator, 0, 0};
 const room_t const room_3_1 = {&room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float, &draw_float3, &hcoll_float3, 0, 0};

@@ -96,7 +96,7 @@ WORD  dizzy_x = 112, dizzy_y = 72, dizzy_tmp_xy = 0;
 WORD  delta_x = 0, delta_y = 0;
 
 // some general purpose variables
-UBYTE __temp_i, __temp_j, __temp_k; 
+UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m; 
 
 #include "include/energy.h"
 #include "include/inventory.h"
@@ -142,6 +142,23 @@ void get_v_coll(WORD x, WORD y) {
         }
         if (tile_pos_y < room_height - 1) collision_buf[1] = current_coll_idx[tile_pos_y + 1][tile_pos_x]; else collision_buf[1] = 0x00;
     } else { collision_buf[0] = 0x00; collision_buf[1] = 0x00;}
+}
+void get_coll(WORD x, WORD y) {
+    __temp_i = ((x > 0)?(x >> 3):0);
+    __temp_j = (x + 24) >> 3; if (__temp_j > room_width) __temp_j = room_width;
+    __temp_k = ((y > 0)?(y >> 3):0);
+    __temp_l = (y +  24) >> 3; if (__temp_l > room_height) __temp_l = room_height;
+    
+    collision_buf[0] = 0; collision_buf[1] = 0;
+    for (__temp_k = __temp_k; __temp_k < __temp_l; __temp_k++) {
+        __temp_coll_row = current_coll_idx[__temp_k];
+        for (__temp_i = __temp_i; __temp_i < __temp_j; __temp_i++) {
+            __temp_m = __temp_coll_row[__temp_i];
+            if (__temp_m == 7) { collision_buf[0] = __temp_m; return; }
+            else if (__temp_m == 6) { collision_buf[0] = __temp_m; }
+            else if (__temp_m == 4) { collision_buf[1] = __temp_m; }
+        }
+    }
 }
 
 // room specific handlers
@@ -235,7 +252,16 @@ void check_dizzy_collisions() {
 }
 
 void check_dizzy_evil_collisions() {
-    if (current_room->room_evil_coll) current_room->room_evil_coll();
+    if (ani_type != ANI_DEAD) {
+        if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 4);
+        get_coll(dizzy_x, dizzy_y + 8);
+        if (collision_buf[0] == 6) {
+            if (dec_energy < 64) dec_energy += 2;
+        }
+        if (collision_buf[0] == 7) {
+            dizzy_energy = 1; dec_energy = 1;
+        }
+    }
 }
 
 void set_room(UBYTE row, UBYTE col) {
@@ -467,7 +493,7 @@ void main()
     DISPLAY_ON;
 
 // --- debugging --------------
-//current_room_x = 0, current_room_y = 1, dizzy_x = 80;  //dizzy_y = 30;// set any for debugging
+//current_room_x = 0, current_room_y = 0, dizzy_x = 80;  //dizzy_y = 30;// set any for debugging
 inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
@@ -521,8 +547,6 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             check_dizzy_collisions();
             dizzy_x += delta_x; dizzy_y += delta_y;
 
-            check_dizzy_evil_collisions();
-
             set_dizzy_position();
 
             set_enemies_position();
@@ -553,6 +577,8 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                 }
             }
             ani_update = 0;
+
+            check_dizzy_evil_collisions();
         }        
     }
 }
