@@ -95,6 +95,13 @@ const room_t * current_room = 0;
 WORD  dizzy_x = 112, dizzy_y = 72, dizzy_tmp_xy = 0;
 WORD  delta_x = 0, delta_y = 0;
 
+// resurrection position
+UBYTE safe_room_x = 0, safe_room_y = 0; 
+UBYTE tmp_room_x, tmp_room_y; 
+WORD  safe_dizzy_x, safe_dizzy_y; 
+WORD  tmp_dizzy_x, tmp_dizzy_y;
+UBYTE is_position_safe = 1;
+
 // some general purpose variables
 UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m; 
 
@@ -221,6 +228,7 @@ void check_dizzy_collisions() {
                 cloud_timer++; cloud_timer &= 3;
                 if (cloud_timer) delta_y = 0;
             } else {
+                is_position_safe = 0;
                 if (!current_dyn) {
                     if (dizzy_falling < MAX_STUN_HEIGHT) dizzy_falling++;
                 }
@@ -504,29 +512,31 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
     while(1) {
         ani_type_old = ani_type;
 
-        joy = joypad();
-        temp = animation[ani_type]->interr;
-        if ((!current_dyn) && (!dizzy_falling) && ((temp == 255) || (temp == ani_phase))) {
-            if (!joy) {
-                ani_type = ANI_STAND;    
-            } else if (joy & J_LEFT) {
-                if ((joy & J_UP) || (joy & J_A)) {
-                    ani_type = ANI_JUMP_L;
-                } else {
-                    ani_type = ANI_WALK_L;
+        if (!death_pause) {
+            joy = joypad();
+            temp = animation[ani_type]->interr;
+            if ((!current_dyn) && (!dizzy_falling) && ((temp == 255) || (temp == ani_phase))) {
+                if (!joy) {
+                    ani_type = ANI_STAND;    
+                } else if (joy & J_LEFT) {
+                    if ((joy & J_UP) || (joy & J_A)) {
+                        ani_type = ANI_JUMP_L;
+                    } else {
+                        ani_type = ANI_WALK_L;
+                    }
+                } else if (joy & J_RIGHT) {
+                    if ((joy & J_UP) || (joy & J_A)) {
+                        ani_type = ANI_JUMP_R;
+                    } else {
+                        ani_type = ANI_WALK_R; 
+                    }
+                } else if ((joy == J_UP) || (joy == J_A)) {
+                    ani_type = ANI_UP;
                 }
-            } else if (joy & J_RIGHT) {
-                if ((joy & J_UP) || (joy & J_A)) {
-                    ani_type = ANI_JUMP_R;
-                } else {
-                    ani_type = ANI_WALK_R; 
-                }
-            } else if ((joy == J_UP) || (joy == J_A)) {
-                ani_type = ANI_UP;
             }
-        }
-        if (joy == J_B) {
-            show_inventory();
+            if (joy == J_B) {
+                show_inventory();
+            }
         }
         
         if (ani_type != ani_type_old) { 
@@ -536,6 +546,13 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
         }
                 
         if (walk_update) {
+            is_position_safe = 0;
+            if ((!current_dyn) && ((ani_type == ANI_STAND) || (ani_type == ANI_WALK_L) || (ani_type == ANI_WALK_R))) {
+                tmp_room_x = current_room_x; tmp_room_y = current_room_y;
+                tmp_dizzy_x = dizzy_x; tmp_dizzy_y = dizzy_y;
+                is_position_safe = 1;
+            }
+            
             delta_x = move_x_data[ani_type];
 
             if ((bal_update) && (current_dyn)) {
@@ -554,8 +571,15 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
 
             walk_update = 0; bal_update = 0;
             delta_x = delta_y = 0;
+
+            if ((dizzy_falling) || (dec_energy)) is_position_safe = 0;
             
             update_energy();
+            
+            if (is_position_safe) {
+                safe_room_x = tmp_room_x, safe_room_y = tmp_room_y; 
+                safe_dizzy_x = tmp_dizzy_x, safe_dizzy_y = tmp_dizzy_y; 
+            }
         };
         
         if (ani_update) {
@@ -564,7 +588,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             set_dizzy_animdata(current_animation->steps[ani_phase]);
             ani_phase++; 
             if (ani_phase >= current_animation->count) {
-                if (dizzy_stun) {
+                if ((dizzy_stun) && (ani_type != ANI_DEAD)) {
                     ani_type = ANI_STUN;
                     ani_phase = 0;
                     dizzy_stun = 0;
@@ -579,7 +603,19 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             }
             ani_update = 0;
 
-            check_dizzy_evil_collisions();
+            if (ani_type == ANI_DEAD) {
+                dizzy_stun = 0;
+                if ((!game_over) && (death_pause)) death_pause--;
+                if (!death_pause) {
+                    if (!game_over) {
+                        dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
+                        current_room_x = safe_room_x; current_room_y = safe_room_y;
+                        set_room(current_room_y, current_room_x);
+                        dizzy_energy = 1; inc_energy = 63;
+                        ani_type = ANI_STAND; ani_phase = 0;
+                    }
+                }
+            } else check_dizzy_evil_collisions();
         }        
     }
 }

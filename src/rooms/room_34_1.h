@@ -58,6 +58,7 @@ void hcoll_float3(WORD x, WORD y) {
                 tile_pos_y = y >> 3; tile_pos_oy = y & 7;
                 collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
                 delta_y = 0;
+                is_position_safe = 0;
                 return;
             }
         }
@@ -72,6 +73,7 @@ void hcoll_float4(WORD x, WORD y) {
                 tile_pos_y = y >> 3; tile_pos_oy = y & 7;
                 collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
                 delta_y = 0;
+                is_position_safe = 0;
                 return;
             }
         }

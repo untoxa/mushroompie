@@ -12,6 +12,9 @@ UBYTE dizzy_energy = 1, dizzy_energy_old;
 UBYTE inc_energy = 63;
 UBYTE dec_energy = 0;
 
+UBYTE game_over = 0;
+UBYTE death_pause = 0;
+
 void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char * dest) {
     UBYTE mask = (0xFF << (8 - npix));
     source++;
@@ -22,14 +25,16 @@ void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char *
     }        
 }
 
-void game_over() {
+void on_game_over() {
     // game over handling here
-    dizzy_lives = 3;
+    game_over = 1;
+//    dizzy_lives = 3;
 }
-void dizzy_die() {
+void on_dizzy_die() {
     ani_type = ANI_DEAD;
     ani_phase = 0; 
     current_dyn = 0; current_dyn_phase = 0;
+    death_pause = 32;
 }
 void show_lives() {
     for (__temp_i = 0; __temp_i < 3; __temp_i++) {
@@ -71,11 +76,12 @@ void update_energy() {
     }
     if (dizzy_energy != dizzy_energy_old) {
         if (!dizzy_energy) { 
-            if (dizzy_lives) {dizzy_lives--;
+            if ((!death_pause) && (dizzy_lives)) {
+                dizzy_lives--;
                 show_lives();
-                dizzy_die();
+                on_dizzy_die();
+                if (!dizzy_lives) on_game_over();
             }
-            if (!dizzy_lives) game_over();
         }
         show_energy();
     }
