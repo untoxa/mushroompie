@@ -3,6 +3,8 @@
 #include "include/rle_utils.h"
 #include "include/sprite_utils.h"
 
+#include "include/dialogs.h"
+
 #include "gfx/rooms_gfx.h"
 #include "gfx/dizzy_anim_gfx.h"
 #include "gfx/title_gfx.h"
@@ -401,6 +403,28 @@ __endasm;
 
 #include "include/inventory.h"
 
+void reset_world() {
+    for (UBYTE row = 0; row < WORLD_HEIGHT; row++) {
+        for (UBYTE col = 0; col < WORLD_WIDTH; col++) {
+            const room_t * cur_room = dizzy_world[row]->rooms[col];
+            if ((cur_room) && (cur_room->room_reset)) cur_room->room_reset();
+        }
+    }
+}
+
+void init_game() {
+    reset_world();
+    game_over = 0;
+    init_dizzy_lives(); show_lives();
+    init_dizzy_energy(); show_energy();
+    current_room_x = 1, current_room_y = 1; 
+    set_room(current_room_y, current_room_x);
+    set_dizzy_animdata(&m_stand_0);            
+    dizzy_x = 112, dizzy_y = 72;
+    ani_type = ANI_STAND; ani_phase = 0;
+    set_dizzy_position();
+}
+
 void main()
 {
     DISPLAY_OFF;
@@ -421,8 +445,6 @@ void main()
     
     SPRITES_8x8;
     init_dizzy();
-    set_dizzy_animdata(&m_stand_0);            
-    set_dizzy_position();
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
@@ -441,21 +463,28 @@ void main()
     window_tiles_hiwater += energy_tiles.count;
 
     set_win_tiles(0, 0, 20, 3, title_map);
-    
-    init_dizzy_lives(); show_lives();
-    init_dizzy_energy(); show_energy();
+        
+    current_room_x = 1, current_room_y = 1; 
+    set_room(current_room_y, current_room_x);
+
+    draw_fancy_frame(6);
+    set_win_tiles(5, 6, prepare_text("DIZZY  AND", coll_buf), 1, coll_buf);
+    set_win_tiles(2, 7, prepare_text("THE MUSHROOM PIE", coll_buf), 1, coll_buf);
+    set_win_tiles(4, 9, prepare_text("PRESS  START", coll_buf), 1, coll_buf);
+
+    SHOW_BKG;
     
     enable_interrupts();
     DISPLAY_ON;
-
+    
+    show_dialog_and_wait_key(J_START);
+    init_game();
+    
 // --- debugging --------------
-current_room_x = 2, current_room_y = 0, dizzy_x = 80; //dizzy_y = 30; // set any for debugging
+//current_room_x = 2, current_room_y = 0, dizzy_x = 80; //dizzy_y = 30; // set any for debugging
 inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
-    set_room(current_room_y, current_room_x);
-    SHOW_BKG;
-    
     while(1) {
         ani_type_old = ani_type;
 
@@ -485,7 +514,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                 show_inventory();
             }
             if (joy == J_SELECT) {
-                show_dialog_window(3);
+                show_dialog_window(5, &troll_dialog);
             }
         }
         
@@ -548,7 +577,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
 
             if (ani_type == ANI_DEAD) {
                 dizzy_stun = 0;
-                if ((!game_over) && (death_pause)) death_pause--;
+                if (death_pause) death_pause--;
                 if (!death_pause) {
                     if (!game_over) {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
@@ -556,6 +585,12 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                         set_room(current_room_y, current_room_x);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
+                    } else {
+                        draw_fancy_frame(5);
+                        set_win_tiles(2, 6, prepare_text("G A M E  O V E R", coll_buf), 1, coll_buf);
+                        set_win_tiles(4, 8, prepare_text("PRESS  START", coll_buf), 1, coll_buf); 
+                        show_dialog_and_wait_key(J_START);
+                        init_game();
                     }
                 }
             } else check_dizzy_evil_collisions();

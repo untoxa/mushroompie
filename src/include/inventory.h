@@ -98,6 +98,7 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
 }
   
 void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
+    wait_vbl_done();
     __temp_i = y;
     set_win_tiles(x, __temp_i, 2, 1, dlg_left0);
     rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center0);
@@ -128,13 +129,12 @@ void draw_fancy_frame(UBYTE lines) {
     draw_fancy_frame_xy(0, title_height, 16, lines);
 }
 
-unsigned char text_buf[32];
-
 void show_inventory() {
     unsigned char temp_tiles[4];        
     game_item * current_itm;
     const tile_data_t * tiledata;
-
+    unsigned char text_buf[20];
+    
     draw_fancy_frame(7);
     set_win_tiles(2, 11, prepare_text("A:USE/DROP B:OUT", text_buf), 1, text_buf);
 
@@ -187,18 +187,39 @@ void show_inventory() {
     waitpadup();
 }
 
-void show_dialog_window(UBYTE lines) {
-    draw_fancy_frame(lines);
-
-    wait_inventory();          // prevent inventory flicking
+void show_dialog_and_wait_key(const UBYTE key) {
+    wait_inventory();
     inventory = 1;
     while(inventory) {
         wait_vbl_done();
         joy = joypad();
-        if (joy & J_B) {
-            inventory = 0;
-            waitpadup();
-        } 
+        if (joy & key) inventory = 0;
     }
-    waitpadup();    
+    waitpadup();
+}
+
+void show_dialog_window(const UBYTE lines, const dialog_item* item) {
+    unsigned char text_buf[20];
+    const dialog_item* item_old = 0;
+    if (item) {
+        draw_fancy_frame(lines);
+        wait_inventory();          // prevent inventory flicking
+        inventory = 1;
+        while (item) {
+            wait_vbl_done();
+            if ((item_old != item) && (item)) {
+                set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, text_buf), 1, text_buf);
+                item_old = item;
+            }
+            if (item->key) {
+                joy = joypad();
+                if (joy & item->key) {
+                    waitpadup();
+                    item = item->next;
+                } 
+            } else item = item->next;
+        }    
+        waitpadup();
+    }
+    inventory = 0;
 }

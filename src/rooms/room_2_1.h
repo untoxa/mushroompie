@@ -4,15 +4,19 @@ const spr_ofs_t const elevator_offsets[] = {{0x00, 0x14}, {0x08, 0x14}, {0x10, 0
                                             {0x48, 0x08}, {0x48, 0x10}, {0x48, 0x18}, {0x48, 0x20}};
 #define elevator_sprite_count 13
 #define elevator_sprite_offset evil_sprite_offset
+
+#define elevator_pos_x (15 * 8)
+#define elevator_min_y (3 * 8)
+#define elevator_max_y (9 * 8)
+UBYTE elevator_pos_y, elevator_dir, elevator_move, elevator_enabled;
+void reset_room2() {
+    elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0;
+}
 void init_room2() {
     set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
     for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
         set_sprite_tile(elevator_sprite_offset + __temp_i, evil_sprites_tileoffset + elevator_map[__temp_i]);
 }
-#define elevator_pos_x (15 * 8)
-#define elevator_min_y (3 * 8)
-#define elevator_max_y (9 * 8)
-UBYTE elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0;
 void move_elevator() {
     if (elevator_enabled) {
         elevator_move++; elevator_move &= 1;

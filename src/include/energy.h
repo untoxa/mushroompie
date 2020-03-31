@@ -28,11 +28,6 @@ void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char *
 void init_dizzy_lives() {dizzy_lives = 3; }
 void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; }
 
-void on_game_over() {
-    // game over handling here
-    game_over = 1;
-//    dizzy_lives = 3;
-}
 void on_dizzy_die() {
     ani_type = ANI_DEAD;
     ani_phase = 0; 
@@ -79,11 +74,11 @@ void update_energy() {
     }
     if (dizzy_energy != dizzy_energy_old) {
         if (!dizzy_energy) { 
-            if ((!death_pause) && (dizzy_lives)) {
-                dizzy_lives--;
+            if (!death_pause) {
+                if (dizzy_lives) dizzy_lives--;
                 show_lives();
                 on_dizzy_die();
-                if (!dizzy_lives) on_game_over();
+                if (!dizzy_lives) game_over = 1;
             }
         }
         show_energy();

@@ -229,15 +229,16 @@ $decomp07:  dec     HL
 $decomp09:  ld      A, (BC)     ; just single tile
             inc     BC
             
-$decomp08:  ld      L, A
+$decomp08:  pop     HL
+            push    DE
+            ld      D, A
 $decomp0A:  ldh     A, (#_STAT_REG)
             and     #0x02
             jr      NZ, $decomp0A
-            ld      A, L
-            
-            pop     HL
-        
-            ld      (HL+), A
+            ld      (HL), D
+            inc     HL
+
+            pop     DE
             dec     D
             jr      NZ,$decomp05
             

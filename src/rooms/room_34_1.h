@@ -3,6 +3,10 @@ const spr_ofs_and_lim_t const float_offsets_r4[] = {{0x28, 0, 255, 0x08, 0, 64},
 #define float_sprites_tileoffset evil_sprites_tileoffset
 #define float_sprite_offset evil_sprite_offset
 #define float_sprite_count 4
+UBYTE troll_satisfied, troll_negotiated;
+void reset_room4(){
+    troll_satisfied = 0, troll_negotiated = 0;
+}
 void init_room34(){
     set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
     for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
@@ -10,7 +14,7 @@ void init_room34(){
 }
 #define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
 #define float34_pos_y (15 * 8)
-UBYTE float3_move = 1, float4_move = 0, troll_satisfied = 0;
+UBYTE float3_move = 1, float4_move = 0;
 #define float_length (4 * 8)
 #define float3_min_x (13 * 8)
 #define float3_max_x (room_width * 8)
@@ -81,6 +85,12 @@ void hcoll_float4(WORD x, WORD y) {
     get_h_coll(x, y);
 }
 void vcoll_troll(WORD x, WORD y) {
+    if (!troll_negotiated) {
+        if (x >= (22 * 8)) {
+            show_dialog_window(4, &troll_dialog);
+            troll_negotiated = 1;
+        }
+    }
     if ((!troll_satisfied) && (delta_x >= 0)) {
         if (x >= (22 * 8)) {
             tile_pos_x = x >> 3; 
