@@ -7,4 +7,7 @@
 *.cfg
 tilemapstudio.exe
 /unused.py
-
+/gfx/tiles/minimize.exe
+/gfx/tiles/rlecompress.exe
+/gfx/tiles/compress_tiles.exe
+/gfx/tiles/bin2txt.exe

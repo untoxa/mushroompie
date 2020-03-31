@@ -26,6 +26,8 @@ typedef struct {
     UBYTE y, min_y, max_y, x, min_x, max_x;
 } spr_ofs_and_lim_t;
 
+const unsigned char const empty_compressed_map[] = {0xFF, 0x00};    // 63 rle-compressed nulls
+
 const spr_ofs_t const dizzy_offsets[] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
                                          {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
                                          {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
@@ -80,7 +82,6 @@ const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &c
 enum  animation_type ani_type = ANI_STAND, ani_type_old;
 UBYTE ani_phase = 0;
 UBYTE ani_update = 0, walk_update = 0, bal_update = 0;
-UBYTE temp;
 
 const dyn_data * current_dyn = 0;       
 UBYTE current_dyn_phase = 0;
@@ -102,11 +103,13 @@ WORD  safe_dizzy_x, safe_dizzy_y;
 WORD  tmp_dizzy_x, tmp_dizzy_y;
 UBYTE is_position_safe = 1;
 
+// joystick
+UBYTE joy = 0;
+
 // some general purpose variables
 UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m; 
 
 #include "include/energy.h"
-#include "include/inventory.h"
 
 #define MAX_STUN_HEIGHT 32
 UBYTE dizzy_falling = 0, dizzy_stun = 0;
@@ -211,7 +214,7 @@ void check_dizzy_collisions() {
         if (current_room->room_h_coll) current_room->room_h_coll(dizzy_x, dizzy_y + 21); else get_h_coll(dizzy_x, dizzy_y + 21);
 //set_win_tiles(1, 1, 3, 1, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
-            if (tile_pos_oy <= 4) delta_y = -1;
+            if (tile_pos_oy <= 5) delta_y = -1;
         } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
             if (tile_pos_oy > 4) delta_y = -1; else if (tile_pos_oy < 4) delta_y = 1;
         } else if (!current_dyn) {
@@ -262,8 +265,8 @@ void check_dizzy_collisions() {
 
 void check_dizzy_evil_collisions() {
     if (ani_type != ANI_DEAD) {
-        if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 4);
-        get_coll(dizzy_x, dizzy_y + 4);
+        if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 2);
+        get_coll(dizzy_x, dizzy_y + 2);
 //set_win_tiles(2, 0, 2, 1, collision_buf);
         if (collision_buf[0] == 6) {
             if (dec_energy < 64) dec_energy += 2;
@@ -321,8 +324,8 @@ void check_change_room() {
 
 UBYTE tim_div = 0;    
 UBYTE __lcd_int_state = 0, inventory = 0;
-const UBYTE const __lyc_table[] = {0, 23,  0,  23,
-                                   0, 23, 55, 111};
+UBYTE lyc_table[] = {0, 23,  0,  23, 
+                     0, 23, 55, 111};
 void lcd_interrupt() __naked 
 {
 __asm
@@ -334,7 +337,7 @@ __asm
             ld      E, (HL)
             add     E
             
-            ld      HL, #___lyc_table
+            ld      HL, #_lyc_table
             add     L
             ld      L, A
             ld      A, H
@@ -396,64 +399,7 @@ $my_vbl01:  ld      A, (#___lcd_int_state)
 __endasm;
 }
 
-UBYTE joy = 0;
-void show_inventory() {
-    unsigned char temp_tiles[4];        
-    game_item * current_itm;
-    const tile_data_t * tiledata;
-
-    rle_decompress_tilemap(rle_decompress_to_win, 0, 3, 20, 7, inventory_window_map);
-
-    __temp_i = 0; __temp_j = 3; __temp_k = inventoty_tiles_start;
-    while (__temp_i < 3) {
-        current_itm = inventory_items[__temp_i];
-        if (current_itm) {
-            tiledata = current_itm->desc->data;
-            unshrink_tiles(__temp_k, tiledata->count, tiledata->data);
-            set_inc_tiles(__temp_k, tiledata->count, temp_tiles);
-            set_win_tiles(__temp_j, 5, 2, 2, temp_tiles);
-            __temp_j += 4; __temp_k += 4;
-        }
-        __temp_i++;
-    }
-    unshrink_tiles(__temp_k, exit_tiles.count, exit_tiles.data);
-    set_inc_tiles(__temp_k, exit_tiles.count, temp_tiles);
-    set_win_tiles(15, 5, 2, 2, temp_tiles);
-
-    UBYTE selection, old_selection;
-    
-    selection = old_selection = 3;
-    set_win_tiles(2 + (selection << 2), 4, 4, 1, selector_top);
-    set_win_tiles(2 + (selection << 2), 7, 4, 1, selector_bottom);
-      
-    wait_inventory();          // prevent inventory flicking
-    inventory = 1;
-    waitpadup();
-    while(inventory) {
-        wait_vbl_done();
-        old_selection = selection;
-        joy = joypad();
-        if (joy & J_LEFT) {
-            if (selection) selection--; else selection = 3;
-        } else if (joy & J_RIGHT) {
-            selection++; selection &= 3;
-        } else if (joy & J_B) {
-            inventory = 0;
-        } 
-        if (selection != old_selection) {
-            // erase old cursor
-            __temp_i = 2 + (old_selection << 2);
-            rle_decompress_tilemap(rle_decompress_to_win, __temp_i, 4, 4, 1, empty_compressed_map);
-            rle_decompress_tilemap(rle_decompress_to_win, __temp_i, 7, 4, 1, empty_compressed_map);
-            // draw new cursor
-            __temp_i = 2 + (selection << 2);
-            set_win_tiles(__temp_i, 4, 4, 1, selector_top);
-            set_win_tiles(__temp_i, 7, 4, 1, selector_bottom);
-            waitpadup();
-        }
-    }
-    waitpadup();
-}
+#include "include/inventory.h"
 
 void main()
 {
@@ -480,29 +426,30 @@ void main()
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
-    
-    unshrink_tiles(inventoty_tiles_start, title_shrinked_tiles.count, title_shrinked_tiles.data);
-    dizzy_live_symbol = inventoty_tiles_start += title_shrinked_tiles.count;
-   
-    unshrink_tiles(inventoty_tiles_start, lives_shrinked_tiles.count, lives_shrinked_tiles.data);
-    inventoty_tiles_start += lives_shrinked_tiles.count;
-    
-    unshrink_tiles(inventoty_tiles_start, inventory_frame_tiles.count, inventory_frame_tiles.data);
-    dizzy_energy_start = inventoty_tiles_start += inventory_frame_tiles.count;
+        
+    unshrink_tiles(window_tiles_hiwater, title_shrinked_tiles.count, title_shrinked_tiles.data);
+    inventoty_tiles_start = window_tiles_hiwater += title_shrinked_tiles.count;
+         
+    unshrink_tiles(window_tiles_hiwater, dialog_frame_tiles.count, dialog_frame_tiles.data);
+    font_tiles_start = window_tiles_hiwater += dialog_frame_tiles.count;
+    dizzy_live_symbol = font_tiles_start + 0x20;
 
-    unshrink_tiles(inventoty_tiles_start, energy_tiles.count, energy_tiles.data);
-    inventoty_tiles_start += energy_tiles.count;
+    unshrink_tiles(window_tiles_hiwater, font_tiles.count, font_tiles.data);
+    dizzy_energy_start = window_tiles_hiwater += font_tiles.count;
+
+    unshrink_tiles(window_tiles_hiwater, energy_tiles.count, energy_tiles.data);
+    window_tiles_hiwater += energy_tiles.count;
 
     set_win_tiles(0, 0, 20, 3, title_map);
     
-    show_lives();
-    show_energy();
+    init_dizzy_lives(); show_lives();
+    init_dizzy_energy(); show_energy();
     
     enable_interrupts();
     DISPLAY_ON;
 
 // --- debugging --------------
-//current_room_x = 0, current_room_y = 0, dizzy_x = 80;  //dizzy_y = 30;// set any for debugging
+current_room_x = 2, current_room_y = 0, dizzy_x = 80; //dizzy_y = 30; // set any for debugging
 inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
 // ----------------------------
 
@@ -514,8 +461,8 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
 
         if (!death_pause) {
             joy = joypad();
-            temp = animation[ani_type]->interr;
-            if ((!current_dyn) && (!dizzy_falling) && ((temp == 255) || (temp == ani_phase))) {
+            __temp_i = animation[ani_type]->interr;
+            if ((!current_dyn) && (!dizzy_falling) && ((__temp_i == 255) || (__temp_i == ani_phase))) {
                 if (!joy) {
                     ani_type = ANI_STAND;    
                 } else if (joy & J_LEFT) {
@@ -536,6 +483,9 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             }
             if (joy == J_B) {
                 show_inventory();
+            }
+            if (joy == J_SELECT) {
+                show_dialog_window(3);
             }
         }
         
@@ -572,14 +522,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             walk_update = 0; bal_update = 0;
             delta_x = delta_y = 0;
 
-            if ((dizzy_falling) || (dec_energy)) is_position_safe = 0;
-            
             update_energy();
-            
-            if (is_position_safe) {
-                safe_room_x = tmp_room_x, safe_room_y = tmp_room_y; 
-                safe_dizzy_x = tmp_dizzy_x, safe_dizzy_y = tmp_dizzy_y; 
-            }
         };
         
         if (ani_update) {
@@ -611,11 +554,19 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x);
-                        dizzy_energy = 1; inc_energy = 63;
+                        init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
                     }
                 }
             } else check_dizzy_evil_collisions();
+
+            if (is_position_safe) {
+                if (!((dizzy_falling) || (dec_energy))) {
+                    safe_room_x = tmp_room_x, safe_room_y = tmp_room_y; 
+                    safe_dizzy_x = tmp_dizzy_x, safe_dizzy_y = tmp_dizzy_y;
+                }
+                is_position_safe = 0;
+            }
         }        
     }
 }

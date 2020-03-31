@@ -8,8 +8,8 @@ unsigned char temp_tile_buffer[16];
 const unsigned char const ethalon_indicator[8] = {0, 1, 1, 1, 1, 1, 1, 2};
 const UBYTE const ethalon_tiles_offsets[3] = {0, 9, 18};  
 
-UBYTE dizzy_energy = 1, dizzy_energy_old;
-UBYTE inc_energy = 63;
+UBYTE dizzy_energy = 8, dizzy_energy_old;
+UBYTE inc_energy = 56;
 UBYTE dec_energy = 0;
 
 UBYTE game_over = 0;
@@ -24,6 +24,9 @@ void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char *
         source++;  
     }        
 }
+
+void init_dizzy_lives() {dizzy_lives = 3; }
+void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; }
 
 void on_game_over() {
     // game over handling here
