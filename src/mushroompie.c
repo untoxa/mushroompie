@@ -467,17 +467,12 @@ void main()
     current_room_x = 1, current_room_y = 1; 
     set_room(current_room_y, current_room_x);
 
-    draw_fancy_frame(6);
-    set_win_tiles(5, 6, prepare_text("DIZZY  AND", coll_buf), 1, coll_buf);
-    set_win_tiles(2, 7, prepare_text("THE MUSHROOM PIE", coll_buf), 1, coll_buf);
-    set_win_tiles(4, 9, prepare_text("PRESS  START", coll_buf), 1, coll_buf);
-
     SHOW_BKG;
     
     enable_interrupts();
     DISPLAY_ON;
     
-    show_dialog_and_wait_key(J_START);
+    show_dialog_window(6, &start_dialog);
     init_game();
     
 // --- debugging --------------
@@ -512,9 +507,6 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
             }
             if (joy == J_B) {
                 show_inventory();
-            }
-            if (joy == J_SELECT) {
-                show_dialog_window(5, &troll_dialog);
             }
         }
         
@@ -586,10 +578,7 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
                     } else {
-                        draw_fancy_frame(5);
-                        set_win_tiles(2, 6, prepare_text("G A M E  O V E R", coll_buf), 1, coll_buf);
-                        set_win_tiles(4, 8, prepare_text("PRESS  START", coll_buf), 1, coll_buf); 
-                        show_dialog_and_wait_key(J_START);
+                        show_dialog_window(5, &game_over_dialog);
                         init_game();
                     }
                 }

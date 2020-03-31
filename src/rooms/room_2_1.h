@@ -8,9 +8,9 @@ const spr_ofs_t const elevator_offsets[] = {{0x00, 0x14}, {0x08, 0x14}, {0x10, 0
 #define elevator_pos_x (15 * 8)
 #define elevator_min_y (3 * 8)
 #define elevator_max_y (9 * 8)
-UBYTE elevator_pos_y, elevator_dir, elevator_move, elevator_enabled;
+UBYTE elevator_pos_y, elevator_dir, elevator_move, elevator_enabled, dylan_negotiated;
 void reset_room2() {
-    elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0;
+    elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0; dylan_negotiated = 0;
 }
 void init_room2() {
     set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
@@ -51,4 +51,14 @@ void hcoll_elevator(WORD x, WORD y) {
         }
     }
     get_h_coll(x, y);
+}
+
+void vcoll_dylan(WORD x, WORD y) {
+    if (!dylan_negotiated) {
+        if ((x > (21 * 8)) && (x < (24 * 8)) && (y > (11 * 8))) {
+            show_dialog_window(6, &dylan_dialog);
+            dylan_negotiated = 1;
+        }
+    }
+    get_v_coll(x, y);
 }

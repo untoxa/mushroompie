@@ -98,7 +98,6 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
 }
   
 void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
-    wait_vbl_done();
     __temp_i = y;
     set_win_tiles(x, __temp_i, 2, 1, dlg_left0);
     rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center0);
@@ -135,6 +134,7 @@ void show_inventory() {
     const tile_data_t * tiledata;
     unsigned char text_buf[20];
     
+    wait_vbl_done();
     draw_fancy_frame(7);
     set_win_tiles(2, 11, prepare_text("A:USE/DROP B:OUT", text_buf), 1, text_buf);
 
@@ -187,31 +187,21 @@ void show_inventory() {
     waitpadup();
 }
 
-void show_dialog_and_wait_key(const UBYTE key) {
-    wait_inventory();
-    inventory = 1;
-    while(inventory) {
-        wait_vbl_done();
-        joy = joypad();
-        if (joy & key) inventory = 0;
-    }
-    waitpadup();
-}
-
 void show_dialog_window(const UBYTE lines, const dialog_item* item) {
     unsigned char text_buf[20];
     const dialog_item* item_old = 0;
     if (item) {
+        wait_vbl_done();
         draw_fancy_frame(lines);
         wait_inventory();          // prevent inventory flicking
         inventory = 1;
         while (item) {
-            wait_vbl_done();
             if ((item_old != item) && (item)) {
-                set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, text_buf), 1, text_buf);
+                if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, text_buf), 1, text_buf);
                 item_old = item;
             }
             if (item->key) {
+                wait_vbl_done();
                 joy = joypad();
                 if (joy & item->key) {
                     waitpadup();
