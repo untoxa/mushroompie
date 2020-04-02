@@ -76,7 +76,7 @@ const dyn_data   const move_y_dynamics = {32, {-4, -4, -3, -2, -2, -1, -2, -1, -
 const dyn_data * const move_y_data[]   = {0, &move_y_dynamics, 0,  0, 0,  0, 0, 0, &move_y_dynamics, &move_y_dynamics};
 const WORD       const move_x_data[]   = {0, 0,                1, -1, 1, -1, 0, 0, 1,                -1};
 
-unsigned char coll_buf[(room_height + 2) * room_width];   // 2 more lines more than actually needed
+unsigned char coll_buf[room_height * room_width];
 const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &coll_buf[30],  &coll_buf[60],  &coll_buf[90], &coll_buf[120], &coll_buf[150], 
                                                              &coll_buf[180], &coll_buf[210], &coll_buf[240], &coll_buf[270], &coll_buf[300], &coll_buf[330], 
                                                              &coll_buf[360], &coll_buf[390], &coll_buf[420], &coll_buf[450], &coll_buf[480]};

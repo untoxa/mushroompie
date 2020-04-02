@@ -316,18 +316,29 @@ __asm
             ld      H, (HL)     ; H = w
             ld      L, A        ; L = h
 
-            ld      A, H
+            ld      A, H        ; check x bound
             add     D
-            cp      #30
+            cp      #room_width
             jr      C, $putitm01
             ld      A, D
-            cp      #30
+            cp      #room_width
             jp      NC, $putitm06
-            ld      A, #30
+            ld      A, #room_width
             sub     D
-            ld      H, A            
-$putitm01:
-            push    HL          ; Store WH
+            ld      H, A
+
+$putitm01:  ld      A, L        ; check y bound
+            add     E
+            cp      #room_height
+            jr      C, $putitm07
+            ld      A, E
+            cp      #room_height
+            jp      NC, $putitm06
+            ld      A, #room_height
+            sub     E
+            ld      L, A
+
+$putitm07:  push    HL          ; Store WH
             
             lda     HL, 12(SP)  ; HL = origin
             ld      A, (HL+)
@@ -340,7 +351,7 @@ $putitm02:  push    BC          ; Store source
             or      E
             jr      Z, $putitm03
 
-            ld      BC, #30     ; room is 30 tiles width
+            ld      BC, #room_width
 $putitm04:  add     HL, BC      ; Y coordinate
             dec     E
             jr      NZ, $putitm04
@@ -372,7 +383,7 @@ $putitm05:  ld      A, (BC)     ; just single tile
             jr      Z,$putitm06
 
             push    BC          ; Next line
-            ld      BC, #30     ; room is 30 tiles width
+            ld      BC, #room_width
             add     HL,BC
             pop     BC
 
