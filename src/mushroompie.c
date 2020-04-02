@@ -76,7 +76,7 @@ const dyn_data   const move_y_dynamics = {32, {-4, -4, -3, -2, -2, -1, -2, -1, -
 const dyn_data * const move_y_data[]   = {0, &move_y_dynamics, 0,  0, 0,  0, 0, 0, &move_y_dynamics, &move_y_dynamics};
 const WORD       const move_x_data[]   = {0, 0,                1, -1, 1, -1, 0, 0, 1,                -1};
 
-unsigned char coll_buf[room_height * room_width];
+unsigned char coll_buf[(room_height + 2) * room_width];   // 2 more lines more than actually needed
 const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &coll_buf[30],  &coll_buf[60],  &coll_buf[90], &coll_buf[120], &coll_buf[150], 
                                                              &coll_buf[180], &coll_buf[210], &coll_buf[240], &coll_buf[270], &coll_buf[300], &coll_buf[330], 
                                                              &coll_buf[360], &coll_buf[390], &coll_buf[420], &coll_buf[450], &coll_buf[480]};
@@ -278,7 +278,7 @@ void check_dizzy_evil_collisions() {
     }
 }
 
-void place_room_items(const UBYTE row, const UBYTE col);
+void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf);
 
 void set_room(const UBYTE row, const UBYTE col) {
     wait_vbl_done();
@@ -301,11 +301,15 @@ void set_room(const UBYTE row, const UBYTE col) {
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
     // decompress background tiles and collision map
-    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
+    rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+    place_room_items(current_room_y, current_room_x, coll_buf);
+    // draw background
+    set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+    // decompress collision map
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
 
-    // place room items
-    place_room_items(row, col);
+    set_dizzy_position();
+
     enable_interrupts();
 }
 void check_change_room() {
@@ -481,7 +485,7 @@ void main()
     init_game();
     
 // --- debugging --------------
-//current_room_x = 0, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 // ----------------------------
 
     while(1) {
@@ -536,8 +540,10 @@ void main()
                             redraw_room = 1;
                         }
                         if (redraw_room) {
-                            rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
-                            place_room_items(current_room_y, current_room_x);
+                            rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+                            place_room_items(current_room_y, current_room_x, coll_buf);
+                            set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+                            rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
                         }
                     }
                 }

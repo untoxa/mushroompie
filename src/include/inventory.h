@@ -297,7 +297,107 @@ void init_game_items() {
     inventory_item_list.first = inventory_item_list.last = inventory_item_list.size = 0;
 }
 
-void place_room_items(const UBYTE row, const UBYTE col) {
+void place_item_to_room_buf(UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles, unsigned char * room_buf) __naked
+{
+    x; y; w; h; tiles; room_buf;
+__asm
+            push    BC          ; ret, bc, x, y, w, h, tiles, buf
+                        
+            lda     HL, 4(SP)    
+            ld      D, (HL)     ; D = x
+            inc     HL
+            ld      E, (HL)     ; E = y
+            lda     HL, 9(SP)
+            ld      B, (HL)     ; BC = tiles
+            dec     HL
+            ld      C, (HL)
+            dec     HL
+            ld      A, (HL-)    ; A = h
+            ld      H, (HL)     ; H = w
+            ld      L, A        ; L = h
+
+            ld      A, H
+            add     D
+            cp      #30
+            jr      C, $putitm01
+            ld      A, D
+            cp      #30
+            jp      NC, $putitm06
+            ld      A, #30
+            sub     D
+            ld      H, A            
+$putitm01:
+            push    HL          ; Store WH
+            
+            lda     HL, 12(SP)  ; HL = origin
+            ld      A, (HL+)
+            ld      H, (HL)
+            ld      L, A
+
+
+$putitm02:  push    BC          ; Store source
+            xor     A
+            or      E
+            jr      Z, $putitm03
+
+            ld      BC, #30     ; room is 30 tiles width
+$putitm04:  add     HL, BC      ; Y coordinate
+            dec     E
+            jr      NZ, $putitm04
+            
+$putitm03:  ld      B, #0x00    ; X coordinate
+            ld      C, D
+            add     HL, BC
+
+            pop     BC          ; BC = source
+            pop     DE          ; DE = WH
+            
+            push    HL          ; Store origin
+            push    DE          ; Store WH
+            push    BC
+                                    
+$putitm05:  ld      A, (BC)     ; just single tile
+            ld      (HL+), A
+            inc     BC
+
+            dec     D
+            jr      NZ,$putitm05
+            
+            pop     BC
+            
+            pop     HL          ; HL = WH
+            ld      D,H         ; Restore D = W
+            pop     HL          ; HL = origin
+            dec     E
+            jr      Z,$putitm06
+
+            push    BC          ; Next line
+            ld      BC, #30     ; room is 30 tiles width
+            add     HL,BC
+            pop     BC
+
+            push    HL
+            lda     HL, 8(SP)
+            ld      L, (HL)
+            
+            ld      H, #0
+            add     HL, BC
+            ld      B, H
+            ld      C, L
+            pop     HL
+            push    HL          ; Store current origin
+
+            push    DE          ; Store WH
+            push    BC
+            
+            jr      $putitm05
+            
+$putitm06:  pop     BC
+            ret
+__endasm;
+}
+
+void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) {
     item_tiles_hiwater = 0;
     __temp_game_item = game_item_list.first;
     while (__temp_game_item) {
@@ -306,7 +406,7 @@ void place_room_items(const UBYTE row, const UBYTE col) {
             item_tiles_hiwater -= __temp_tiledata->count;
             unshrink_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiledata->data);
             set_inc_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiles);
-            set_bkg_tiles(__temp_game_item->x, __temp_game_item->y + title_height, 2, 2, __temp_tiles);
+            place_item_to_room_buf(__temp_game_item->x, __temp_game_item->y, 2, 2, __temp_tiles, room_buf);
         }
         __temp_game_item = __temp_game_item->next;
     }
