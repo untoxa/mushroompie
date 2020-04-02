@@ -481,7 +481,7 @@ void main()
     init_game();
     
 // --- debugging --------------
-//current_room_x = 4, current_room_y = 1, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 0, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 // ----------------------------
 
     while(1) {
@@ -510,7 +510,7 @@ void main()
                 }
             }
             if (joy == J_B) {
-                if ((ani_type != ANI_DEAD) && (ani_type != ANI_STUN)) {
+                if (is_position_safe) {
                     waitpadup();
                     UBYTE redraw_room = 0, warning_shown = 0;
                     tile_pos_x = dizzy_x >> 3, tile_pos_y = dizzy_y >> 3;
@@ -609,6 +609,7 @@ void main()
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x);
+                        set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
                     } else {
