@@ -278,7 +278,9 @@ void check_dizzy_evil_collisions() {
     }
 }
 
-void set_room(UBYTE row, UBYTE col) {
+void place_room_items(const UBYTE row, const UBYTE col);
+
+void set_room(const UBYTE row, const UBYTE col) {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
@@ -302,6 +304,8 @@ void set_room(UBYTE row, UBYTE col) {
     rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
 
+    // place room items
+    place_room_items(row, col);
     enable_interrupts();
 }
 void check_change_room() {
@@ -414,6 +418,7 @@ void reset_world() {
 
 void init_game() {
     reset_world();
+    init_game_items();
     game_over = 0;
     init_dizzy_lives(); show_lives();
     init_dizzy_energy(); show_energy();
@@ -476,8 +481,7 @@ void main()
     init_game();
     
 // --- debugging --------------
-//current_room_x = 2, current_room_y = 0, dizzy_x = 80; //dizzy_y = 30; // set any for debugging
-inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; inventory_items[2] = &game_items[2]; // put test items to the inventory
+//current_room_x = 4, current_room_y = 1, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 // ----------------------------
 
     while(1) {
@@ -506,7 +510,37 @@ inventory_items[0] = &game_items[0]; inventory_items[1] = &game_items[1]; invent
                 }
             }
             if (joy == J_B) {
-                show_inventory();
+                if ((ani_type != ANI_DEAD) && (ani_type != ANI_STUN)) {
+                    waitpadup();
+                    UBYTE redraw_room = 0, warning_shown = 0;
+                    tile_pos_x = dizzy_x >> 3, tile_pos_y = dizzy_y >> 3;
+                    __temp_game_item3 = find_by_room_xy(&game_item_list, current_room_y, current_room_x, tile_pos_x, tile_pos_y);
+                    if (__temp_game_item3) {
+                        if (inventory_item_list.size < 3) {
+                            pop_by_id(&game_item_list, __temp_game_item3->desc->id);
+                            push_last(&inventory_item_list, __temp_game_item3);
+                            redraw_room = 1;
+                        } else {
+                            show_dialog_window(2, &too_much_items);
+                            warning_shown = 1;
+                        }
+                    }
+                    if (!warning_shown) {
+                        __temp_game_item3 = show_inventory();
+                        if (__temp_game_item3) { 
+                            // put item
+                            pop_by_id(&inventory_item_list, __temp_game_item3->desc->id);
+                            __temp_game_item3->room_row = current_room_y, __temp_game_item3->room_col = current_room_x;
+                            __temp_game_item3->x = tile_pos_x, __temp_game_item3->y = tile_pos_y + 1;
+                            push_last(&game_item_list, __temp_game_item3);
+                            redraw_room = 1;
+                        }
+                        if (redraw_room) {
+                            rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, current_room->room_map->rle_data);
+                            place_room_items(current_room_y, current_room_x);
+                        }
+                    }
+                }
             }
         }
         

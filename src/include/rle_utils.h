@@ -231,6 +231,7 @@ $decomp09:  ld      A, (BC)     ; just single tile
             
 $decomp08:  pop     HL
             push    DE
+            
             ld      D, A
 $decomp0A:  ldh     A, (#_STAT_REG)
             and     #0x02
