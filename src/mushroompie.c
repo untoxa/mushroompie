@@ -249,9 +249,9 @@ void check_dizzy_collisions() {
     
     if (delta_x) {
         if (delta_x < 0) {
-            if (current_room->room_v_coll) current_room->room_v_coll(dizzy_x + delta_x, dizzy_y); else get_v_coll(dizzy_x + delta_x, dizzy_y); 
+            if (current_room->room_v_coll) current_room->room_v_coll(dizzy_x + delta_x, dizzy_y + 8); else get_v_coll(dizzy_x + delta_x, dizzy_y + 8); 
         } else {
-            if (current_room->room_v_coll) current_room->room_v_coll(dizzy_x + delta_x + 16, dizzy_y); else get_v_coll(dizzy_x + delta_x + 16, dizzy_y);
+            if (current_room->room_v_coll) current_room->room_v_coll(dizzy_x + delta_x + 16, dizzy_y + 8); else get_v_coll(dizzy_x + delta_x + 16, dizzy_y + 8);
         }
 //set_win_tiles(0, 0, 1, 2, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[0] == 2) || (collision_buf[1] == 1)) {
@@ -486,6 +486,7 @@ void main()
     
 // --- debugging --------------
 //current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//elevator_enabled = 1;
 // ----------------------------
 
     while(1) {

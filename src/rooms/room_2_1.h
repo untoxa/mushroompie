@@ -39,7 +39,7 @@ void draw_elevator() {
 void hcoll_elevator(WORD x, WORD y) {
     if ((elevator_enabled) && (delta_y >= 0)) {
         if ((x >= elevator_pos_x - 8) && (x <= elevator_pos_x + (3 * 8))) {
-            if ((y >= elevator_pos_y + (4 * 8) - 1) && (y <= elevator_pos_y + ((4 * 8) + 7))) {
+            if ((y >= elevator_pos_y + ((4 * 8) - 1)) && (y <= elevator_pos_y + ((4 * 8) + 7))) {
                 tile_pos_x = x >> 3; tile_pos_ox = x & 7;
                 tile_pos_y = y >> 3; tile_pos_oy = (y - elevator_pos_y) & 7;
                 collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;

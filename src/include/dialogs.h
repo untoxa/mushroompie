@@ -15,9 +15,9 @@ const dialog_item const dylan_dialog4       = {0, 4, "-OK, I'LL SEE", 0, &dylan_
 const dialog_item const dylan_dialog5       = {2, 5, "WHAT I CAN DO!", J_B, 0};
 
 const dialog_item const dylan_thanks        = {0, 0, "-THANK YOU,", 0, &dylan_thanks1};
-const dialog_item const dylan_thanks1       = {7, 1, "DIZZY!", J_B, &dylan_thanks2};
+const dialog_item const dylan_thanks1       = {10, 1, "DIZZY!", J_B, &dylan_thanks2};
 const dialog_item const dylan_thanks2       = {0, 2, "-NOT AT ALL,", 0, &dylan_thanks3};
-const dialog_item const dylan_thanks3       = {7, 3, "DYLAN.", J_B, 0};
+const dialog_item const dylan_thanks3       = {10, 3, "DYLAN.", J_B, 0};
 
 const dialog_item const troll_dialog        = {0, 0, "-EERGH!!", J_B, &troll_dialog1};
 const dialog_item const troll_dialog1       = {0, 1, "-EXCUSE ME, SIR?", J_B, &troll_dialog2};

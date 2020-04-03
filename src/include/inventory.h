@@ -173,6 +173,8 @@ void draw_fancy_frame(UBYTE lines) {
 }
 
 game_item * show_inventory() {
+    wait_inventory();
+    wait_vbl_done();
     draw_fancy_frame(5);
     
     __temp_i = 0;
@@ -225,6 +227,7 @@ game_item * show_inventory() {
 void show_dialog_window(const UBYTE lines, const dialog_item* item) {
     const dialog_item* item_old = 0;
     if (item) {
+        wait_inventory();
         wait_vbl_done();
         draw_fancy_frame(lines);
         wait_inventory();          // prevent inventory flicking
