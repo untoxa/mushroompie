@@ -44,18 +44,24 @@ const game_item_desc * __temp_game_item_desc;
 const tile_data_t * __temp_tiledata;
 unsigned char __temp_tiles[4];
 unsigned char __temp_text_buf[20];
+unsigned char * __temp_text_ptr;
 
 // inventory
 game_item * inventory_items[3] = {0, 0, 0};
 items_list inventory_item_list = {0, 0, 0};
 
-const game_item_desc const itmdesc_pickaxe   = {0, 1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
-const game_item_desc const itmdesc_key       = {1, 1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
-const game_item_desc const itmdesc_grass     = {2, 1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
-const game_item_desc const itmdesc_mushrooms = {3, 1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
-const game_item_desc const itmdesc_coin0     = {4, 1, 1, 18,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin1     = {5, 0, 0, 20,  5, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin2     = {6, 1, 3,  1,  2, "COIN",          &coin_tiles};
+#define ID_ITEM_NONE 0
+#define ID_PICKAXE   1
+#define ID_KEY       2
+#define ID_ITEM_USED 255
+
+const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE, 1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
+const game_item_desc const itmdesc_key       = {ID_KEY,     1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
+const game_item_desc const itmdesc_grass     = {3, 1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
+const game_item_desc const itmdesc_mushrooms = {4, 1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
+const game_item_desc const itmdesc_coin0     = {5, 1, 1, 18,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin1     = {6, 0, 0, 20,  5, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin2     = {7, 1, 3,  1,  2, "COIN",          &coin_tiles};
 
 const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass,
                                                                  &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2};
@@ -93,16 +99,14 @@ const tile_data_t const grass_tiles = {4, {
 
 const unsigned char const dlg_left0[]   = {0x00,0x92};
 const unsigned char const dlg_left1[]   = {0x93,0x94};
-const unsigned char const dlg_left2[]   = {0x00,0x97};
-const unsigned char const dlg_left3[]   = {0x00,0x98};
+const unsigned char const dlg_left2[]   = {0x00,0x98};
 
 const unsigned char const dlg_right0[]  = {0x92,0x00};
 const unsigned char const dlg_right1[]  = {0x94,0x96};
-const unsigned char const dlg_right2[]  = {0x97,0x00};
-const unsigned char const dlg_right3[]  = {0x98,0x00};
+const unsigned char const dlg_right2[]  = {0x98,0x00};
 
-const unsigned char const dlg_center0[] = {0xD0,0x00};
-const unsigned char const dlg_center1[] = {0xD0,0x95};
+const unsigned char const dlg_center[]  = {0xFF,0x95};
+const unsigned char const dlg_vert[]    = {0xFF,0x97}; 
 
 const tile_data_t const dialog_frame_tiles = {7, {
 0x03,0x00,0x3C,0x52,0x6A,0x52,0x6A,0x52,0x6A,
@@ -123,7 +127,9 @@ UBYTE __prepare_text_len;
 UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
     __prepare_text_len = 0;
     while((*src)) {
-        *dest = *src - 32 + font_tiles_start;
+        if ((*src > ' ') && (*src < '[')) {
+            *dest = *src - 33 + font_tiles_start;
+        } else *dest = 0;
         src++; dest++;
         __prepare_text_len++;
     }
@@ -132,28 +138,32 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
 }
   
 void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
-    __temp_i = y;
-    set_win_tiles(x, __temp_i, 2, 1, dlg_left0);
-    rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center0);
-    set_win_tiles(x + width + 2, __temp_i, 2, 1, dlg_right0);
-    __temp_i++;
-    set_win_tiles(x, __temp_i, 2, 1, dlg_left1);
-    rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center1);
-    set_win_tiles(x + width + 2, __temp_i, 2, 1, dlg_right1); 
-    for (__temp_j = 0; __temp_j < height; __temp_j++) {
-        __temp_i++;
-        set_win_tiles(x, __temp_i, 2, 1, dlg_left2);
-        rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center0);
-        set_win_tiles(x + width + 2, __temp_i, 2, 1, dlg_right2);        
-    }
-    __temp_i++;
-    set_win_tiles(x, __temp_i, 2, 1, dlg_left1);
-    rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center1);
-    set_win_tiles(x + width + 2, __temp_i, 2, 1, dlg_right1);
-    __temp_i++;
-    set_win_tiles(x, __temp_i, 2, 1, dlg_left3);
-    rle_decompress_tilemap(rle_decompress_to_win, x + 2, __temp_i, width, 1, dlg_center0);
-    set_win_tiles(x + width + 2, __temp_i, 2, 1, dlg_right3);
+    __temp_i = x + 2; __temp_l = __temp_i + width;
+    __temp_j = y;
+    
+    set_win_tiles(x, __temp_j, 2, 1, dlg_left0);
+    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
+    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right0);
+    __temp_j++;
+    
+    set_win_tiles(x, __temp_j, 2, 1, dlg_left1);
+    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, dlg_center);
+    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right1); 
+    __temp_j++;
+    
+    rle_decompress_tilemap(rle_decompress_to_win, x, __temp_j, width + 4, height, empty_compressed_map);
+    rle_decompress_tilemap(rle_decompress_to_win, x + 1, __temp_j, 1, height, dlg_vert);
+    rle_decompress_tilemap(rle_decompress_to_win, __temp_l, __temp_j, 1, height, dlg_vert);
+
+    __temp_j += height;
+    set_win_tiles(x, __temp_j, 2, 1, dlg_left1);
+    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, dlg_center);
+    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right1);
+    __temp_j++;
+    
+    set_win_tiles(x, __temp_j, 2, 1, dlg_left2);
+    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
+    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right2);
 }
 
 void draw_fancy_frame(UBYTE lines) {

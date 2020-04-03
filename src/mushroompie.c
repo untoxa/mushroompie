@@ -28,23 +28,23 @@ typedef struct {
     UBYTE y, min_y, max_y, x, min_x, max_x;
 } spr_ofs_and_lim_t;
 
-const unsigned char const empty_compressed_map[] = {0xFF, 0x00};    // 63 rle-compressed nulls
+const unsigned char const empty_compressed_map[] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
+                                                    0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00}; // 504 rle-compressed nulls to clear screen regions
 
-const spr_ofs_t const dizzy_offsets[] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
-                                         {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
-                                         {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
+#define dizzy_sprite_count 9
+const spr_ofs_t const dizzy_offsets[dizzy_sprite_count] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
+                                                           {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
+                                                           {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
 #define dizzy_sprites_tileoffset 0x00U
 #define dizzy_sprite_offset 0x00U
-#define dizzy_sprite_count 9
 #define dizzy_sprite_tile_count 9
 
-const spr_ofs_t const evil_hide[] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 
-                                     {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
+#define evil_sprite_total_count 16
+const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 
+                                                            {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
 #define evil_sprites_tileoffset dizzy_sprite_tile_count
 #define evil_sprite_offset dizzy_sprite_count
-      
-#define evil_sprite_total_count 16
-      
+            
 enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L};
       
 const ani_data const stand_ani  = { 2, 0, 255, ANI_STAND,  ANI_STAND,  {&m_stand_0, &m_stand_1}};
@@ -174,11 +174,6 @@ void get_coll(WORD x, WORD y) {
     }
 }
 
-// room specific handlers
-#include "rooms/room_0_1.h"
-#include "rooms/room_2_1.h" 
-#include "rooms/room_34_1.h" 
-
 void set_enemies_position() {
     if (current_room) {
         if (current_room->room_actions) current_room->room_actions();
@@ -216,7 +211,7 @@ void check_dizzy_collisions() {
         if (current_room->room_h_coll) current_room->room_h_coll(dizzy_x, dizzy_y + 21); else get_h_coll(dizzy_x, dizzy_y + 21);
 //set_win_tiles(1, 1, 3, 1, collision_buf);
         if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
-            if (tile_pos_oy <= 5) delta_y = -1;
+            if (tile_pos_oy < 7) delta_y = -1;
         } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
             if (tile_pos_oy > 4) delta_y = -1; else if (tile_pos_oy < 4) delta_y = 1;
         } else if (!current_dyn) {
@@ -411,6 +406,11 @@ __endasm;
 
 #include "include/inventory.h"
 
+// room specific handlers
+#include "rooms/room_0_1.h"
+#include "rooms/room_2_1.h" 
+#include "rooms/room_34_1.h" 
+
 void reset_world() {
     for (UBYTE row = 0; row < WORLD_HEIGHT; row++) {
         for (UBYTE col = 0; col < WORLD_WIDTH; col++) {
@@ -463,7 +463,7 @@ void main()
          
     unshrink_tiles(window_tiles_hiwater, dialog_frame_tiles.count, dialog_frame_tiles.data);
     font_tiles_start = window_tiles_hiwater += dialog_frame_tiles.count;
-    dizzy_live_symbol = font_tiles_start + 0x20;
+    dizzy_live_symbol = font_tiles_start + 0x1F;
 
     unshrink_tiles(window_tiles_hiwater, font_tiles.count, font_tiles.data);
     dizzy_energy_start = window_tiles_hiwater += font_tiles.count;
@@ -516,12 +516,13 @@ void main()
             if (joy == J_B) {
                 if (is_position_safe) {
                     waitpadup();
-                    UBYTE redraw_room = 0, warning_shown = 0;
+                    UBYTE redraw_room = 0, warning_shown = 0, current_item_id = 0;
                     tile_pos_x = dizzy_x >> 3, tile_pos_y = dizzy_y >> 3;
                     __temp_game_item3 = find_by_room_xy(&game_item_list, current_room_y, current_room_x, tile_pos_x, tile_pos_y);
                     if (__temp_game_item3) {
+                        current_item_id = __temp_game_item3->desc->id;
                         if (inventory_item_list.size < 3) {
-                            pop_by_id(&game_item_list, __temp_game_item3->desc->id);
+                            pop_by_id(&game_item_list, current_item_id);
                             push_last(&inventory_item_list, __temp_game_item3);
                             redraw_room = 1;
                         } else {
@@ -531,13 +532,20 @@ void main()
                     }
                     if (!warning_shown) {
                         __temp_game_item3 = show_inventory();
-                        if (__temp_game_item3) { 
-                            // put item
-                            pop_by_id(&inventory_item_list, __temp_game_item3->desc->id);
-                            __temp_game_item3->room_row = current_room_y, __temp_game_item3->room_col = current_room_x;
-                            __temp_game_item3->x = tile_pos_x, __temp_game_item3->y = tile_pos_y + 1;
-                            push_last(&game_item_list, __temp_game_item3);
-                            redraw_room = 1;
+                        if (__temp_game_item3) {
+                            current_item_id = __temp_game_item3->desc->id;
+                            pop_by_id(&inventory_item_list, current_item_id);
+                            // put or use item
+                            if (current_room->room_use) {
+                                current_item_id = current_room->room_use(tile_pos_x, tile_pos_y + 1, current_item_id);
+                                if (current_item_id) __temp_game_item3 = pop_by_id(&game_item_list, current_item_id);
+                            }
+                            if (__temp_game_item3) {
+                                __temp_game_item3->room_row = current_room_y, __temp_game_item3->room_col = current_room_x;
+                                __temp_game_item3->x = tile_pos_x, __temp_game_item3->y = tile_pos_y + 1;
+                                push_last(&game_item_list, __temp_game_item3);
+                                redraw_room = 1;
+                            }
                         }
                         if (redraw_room) {
                             rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);

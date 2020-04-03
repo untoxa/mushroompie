@@ -46,6 +46,7 @@ void hcoll_elevator(WORD x, WORD y) {
                 if (!elevator_move) {
                     if (!elevator_dir) delta_y = -1; else delta_y = 0;
                 }
+                is_position_safe = 0;
                 return;
             }
         }
@@ -61,4 +62,16 @@ void vcoll_dylan(WORD x, WORD y) {
         }
     }
     get_v_coll(x, y);
+}
+
+UBYTE dylan_gets_key(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+    if ((!elevator_enabled) && (id == ID_KEY)) {
+        if ((tile_y == 12) && (tile_x > 19) && (tile_x < 24)) {
+            show_dialog_window(4, &dylan_thanks);
+            elevator_enabled = 1;
+            dylan_negotiated = 1;
+            return ID_ITEM_USED;
+        }
+    }
+    return ID_ITEM_NONE;
 }
