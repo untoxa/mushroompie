@@ -33,3 +33,12 @@ const dialog_item const start_dialog2       = {2, 4, "PRESS  START", J_START, 0}
 
 const dialog_item const too_much_items      = {0, 0, "YOU CAN CARRY", 0, &too_much_items1};
 const dialog_item const too_much_items1     = {3, 1, "3 ITEMS ONLY!", J_B, 0};
+
+const dialog_item const cleared_path        = {0, 0, "YOU HAVE CLEARED", 0, &cleared_path1};
+const dialog_item const cleared_path1       = {3, 1, "THE PATH!", J_B, 0};
+
+const dialog_item const intro               = {0, 0, "AS YOU ENTER THE", 0, &intro1};
+const dialog_item const intro1              = {1, 1, "CAVE, YOU HEAR", 0, &intro2};
+const dialog_item const intro2              = {0, 2, "HOW THE ENTRANCE", 0, &intro3};
+const dialog_item const intro3              = {0, 3, "COLLAPSED BEHIND", 0, &intro4};
+const dialog_item const intro4              = {5, 4, "YOU...", J_B, 0};

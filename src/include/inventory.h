@@ -30,7 +30,7 @@ UBYTE inventoty_tiles_start, font_tiles_start;
 UBYTE item_tiles_hiwater; // grow down !!!
 
 // all items
-#define GAME_ITEMS_COUNT 7
+#define GAME_ITEMS_COUNT 10
 struct game_item game_items[GAME_ITEMS_COUNT];
 
 // items in the game
@@ -53,18 +53,23 @@ items_list inventory_item_list = {0, 0, 0};
 #define ID_ITEM_NONE 0
 #define ID_PICKAXE   1
 #define ID_KEY       2
+#define ID_BOULDER   8
 #define ID_ITEM_USED 255
 
 const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE, 1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
 const game_item_desc const itmdesc_key       = {ID_KEY,     1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
-const game_item_desc const itmdesc_grass     = {3, 1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
-const game_item_desc const itmdesc_mushrooms = {4, 1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
-const game_item_desc const itmdesc_coin0     = {5, 1, 1, 18,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin1     = {6, 0, 0, 20,  5, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin2     = {7, 1, 3,  1,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_grass     = {3,          1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
+const game_item_desc const itmdesc_mushrooms = {4,          1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
+const game_item_desc const itmdesc_coin0     = {5,          1, 1, 18,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin1     = {6,          0, 0, 20,  5, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin2     = {7,          1, 3,  1,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_blockage2 = {ID_BOULDER, 1, 1, 18, 10, "BOULDERS",      &blockage2_tiles};
+const game_item_desc const itmdesc_blockage1 = {ID_BOULDER, 1, 1, 17, 10, "BOULDERS",      &blockage1_tiles};
+const game_item_desc const itmdesc_blockage0 = {ID_BOULDER, 1, 1, 17,  9, "BOULDERS",      &blockage0_tiles};
 
 const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass,
-                                                                 &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2};
+                                                                 &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2, 
+                                                                 &itmdesc_blockage2, &itmdesc_blockage1, &itmdesc_blockage0};
 
 const tile_data_t const coin_tiles = {4, {
 0x01, 0x00,0x03,0x0C,0x13,0x2E,0x2C,0x58,0x59,
@@ -91,11 +96,30 @@ const tile_data_t const mushrooms_tiles = {4, {
 0x03, 0x7C,0x3C,0x8C,0x20,0x4E,0x46,0xCA,0x00
 }};
 const tile_data_t const grass_tiles = {4, {
-0x02,0x09,0x09,0x09,0x18,0x18,0x18,0x98,0x91,
-0x02,0x06,0x84,0x84,0x84,0x84,0x84,0xA2,0xA2,
-0x02,0x91,0x91,0x91,0x09,0x0D,0x0D,0x4D,0x4D,
-0x02,0xA2,0x12,0x12,0x52,0x52,0x52,0x52,0x52,
+0x02, 0x09,0x09,0x09,0x18,0x18,0x18,0x98,0x91,
+0x02, 0x06,0x84,0x84,0x84,0x84,0x84,0xA2,0xA2,
+0x02, 0x91,0x91,0x91,0x09,0x0D,0x0D,0x4D,0x4D,
+0x02, 0xA2,0x12,0x12,0x52,0x52,0x52,0x52,0x52
 }};
+const tile_data_t const blockage0_tiles = {4, {
+0x03, 0x0F,0x3E,0x77,0xFA,0xD4,0x60,0x34,0x0F,
+0x03, 0xE0,0xB8,0x56,0x89,0x41,0x02,0x1C,0xE0,
+0x03, 0x0F,0x1F,0x3A,0x7F,0xEA,0xFD,0xDA,0x7F,
+0x03, 0xC0,0x60,0xB0,0x58,0xE6,0x51,0x81,0xD1
+}};
+const tile_data_t const blockage1_tiles = {4, {
+0x00, 
+0x00,
+0x03, 0x18,0x3C,0x6E,0x97,0x8B,0x95,0x42,0x3C,
+0x03, 0x07,0x1F,0x3A,0x6D,0xFA,0xD5,0xFA,0x7F
+}};
+const tile_data_t const blockage2_tiles = {4, {
+0x00, 
+0x00,
+0x00,
+0x03, 0xC0,0x70,0x88,0x54,0x02,0x41,0x01,0xFE
+}};
+
 
 const unsigned char const dlg_left0[]   = {0x00,0x92};
 const unsigned char const dlg_left1[]   = {0x93,0x94};
@@ -128,12 +152,11 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
     __prepare_text_len = 0;
     while((*src)) {
         if ((*src > ' ') && (*src < '[')) {
-            *dest = *src - 33 + font_tiles_start;
-        } else *dest = 0;
-        src++; dest++;
+            *dest++ = *src - (' ' + 1) + font_tiles_start;
+        } else *dest++ = 0;
+        src++;
         __prepare_text_len++;
     }
-    *dest = 0;
     return __prepare_text_len;
 }
   

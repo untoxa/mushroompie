@@ -22,6 +22,7 @@ call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_1.c -o %OBJ%\02_rooms_gfx_dat
 call sdcc4\sdcc-compile.bat src\%PROJ%.c -o %OBJ%\%PROJ%.rel
 
 echo LINKING WITH GBDK...
-%GBDK%\bin\lcc.exe -Wl-m -Wl-j -Wl-yt2 -Wl-yo8 -Wl-ya1 -o %PROJ%.gb %OBJ%\sdcc4_stub.rel %OBJ%\00_title_gfx_data.rel %OBJ%\01_anim_gfx_data.rel %OBJ%\02_rooms_gfx_data0.rel %OBJ%\02_rooms_gfx_data1_0.rel %OBJ%\02_rooms_gfx_data1_1.rel %OBJ%\%PROJ%.rel
+@rem %GBDK%\bin\lcc.exe -Wl-m -Wl-j -Wl-yt2 -Wl-yo8 -Wl-ya1 -o %PROJ%.gb %OBJ%\sdcc4_stub.rel %OBJ%\00_title_gfx_data.rel %OBJ%\01_anim_gfx_data.rel %OBJ%\02_rooms_gfx_data0.rel %OBJ%\02_rooms_gfx_data1_0.rel %OBJ%\02_rooms_gfx_data1_1.rel %OBJ%\%PROJ%.rel
+%GBDK%\bin\lcc.exe -Wl-m -Wl-j -Wl-yt1 -Wl-yo8 -o %PROJ%.gb %OBJ%\sdcc4_stub.rel %OBJ%\00_title_gfx_data.rel %OBJ%\01_anim_gfx_data.rel %OBJ%\02_rooms_gfx_data0.rel %OBJ%\02_rooms_gfx_data1_0.rel %OBJ%\02_rooms_gfx_data1_1.rel %OBJ%\%PROJ%.rel
 
 echo DONE!

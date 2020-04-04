@@ -414,6 +414,7 @@ __endasm;
 
 // room specific handlers
 #include "rooms/room_0_1.h"
+#include "rooms/room_1_1.h"
 #include "rooms/room_2_1.h" 
 #include "rooms/room_34_1.h" 
 
@@ -435,7 +436,7 @@ void init_game() {
     current_room_x = 1, current_room_y = 1; 
     set_room(current_room_y, current_room_x);
     set_dizzy_animdata(&m_stand_0);            
-    dizzy_x = 112, dizzy_y = 72;
+    dizzy_x = 104, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
     set_dizzy_position();
 }

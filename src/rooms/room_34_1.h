@@ -4,10 +4,10 @@ const spr_ofs_and_lim_t const float_offsets_r4[] = {{0x28, 0, 255, 0x08, 0, 64},
 #define float_sprite_offset evil_sprite_offset
 #define float_sprite_count 4
 UBYTE troll_satisfied, troll_negotiated;
-void reset_room4(){
+void reset_room4() {
     troll_satisfied = 0, troll_negotiated = 0;
 }
-void init_room34(){
+void init_room34() {
     set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
     for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
         set_sprite_tile(__temp_i, evil_sprites_tileoffset);
