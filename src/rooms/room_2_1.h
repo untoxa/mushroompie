@@ -56,7 +56,7 @@ void hcoll_elevator(WORD x, WORD y) {
 
 void vcoll_dylan(WORD x, WORD y) {
     if (!dylan_negotiated) {
-        if ((x > (21 * 8)) && (x < (24 * 8)) && (y > (11 * 8))) {
+        if ((x > (21 * 8)) && (x < (24 * 8)) && (y > (10 * 8))) {
             show_dialog_window(6, &dylan_dialog);
             dylan_negotiated = 1;
         }

@@ -211,9 +211,9 @@ game_item * show_inventory() {
             waitpadup();
         }
         joy = joypad();
-        if (joy & J_UP) {
+        if (joy & (J_UP | J_LEFT)) {
             if (inventory_selection) inventory_selection--; else inventory_selection = __temp_i;
-        } else if (joy & J_DOWN) {
+        } else if (joy & (J_DOWN | J_RIGHT)) {
             inventory_selection++; if (inventory_selection > __temp_i) inventory_selection = 0;
         } else if (joy & J_B) {
             waitpadup();

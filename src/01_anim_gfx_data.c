@@ -1,13 +1,6 @@
-typedef struct {
-    UBYTE count;
-    UBYTE rev;
-    unsigned char data[];
-} s_data; 
-
-typedef struct {
-    UBYTE count, cycle, interr, next_state, fall_state;
-    s_data * steps[];
-} ani_data;
+//#pragma bank 2
+#include <gb/gb.h>
+#include "gfx/gfx_types.h"
 
 const s_data const m_empty     = {9, 0, {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
                                   

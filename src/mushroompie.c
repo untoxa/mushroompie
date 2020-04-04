@@ -1,13 +1,15 @@
 #include <gb/gb.h>
 
+#include "gfx/gfx_types.h"
+
 #include "include/rle_utils.h"
 #include "include/sprite_utils.h"
 
 #include "include/dialogs.h"
 
+#include "gfx/title_gfx_data.h"
+#include "gfx/anim_gfx_data.h"
 #include "gfx/rooms_gfx.h"
-#include "gfx/dizzy_anim_gfx.h"
-#include "gfx/title_gfx.h"
 
 #define room_width 30
 #define room_height 17
@@ -356,7 +358,7 @@ __asm
             inc     A
             and     #3
             ld      (#___lcd_int_state), A  ; __lcd_int_state++; __lcd_int_state&=3;
-            
+
             and     #1
             sla     A
             ld      E,A
