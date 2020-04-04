@@ -5,6 +5,8 @@
 *.out
 *.gb
 *.cfg
+*.map
+*.sym
 tilemapstudio.exe
 /unused.py
 /gfx/tiles/minimize.exe

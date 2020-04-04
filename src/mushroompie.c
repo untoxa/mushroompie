@@ -47,7 +47,7 @@ const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 
 #define evil_sprites_tileoffset dizzy_sprite_tile_count
 #define evil_sprite_offset dizzy_sprite_count
             
-enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L};
+enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L };
       
 const ani_data const stand_ani  = { 2, 0, 255, ANI_STAND,  ANI_STAND,  {&m_stand_0, &m_stand_1}};
 const ani_data const up_ani     = {16, 0,   0, ANI_STAND,  ANI_UP,     {&m_stand_0, &m_up_0, &m_up_1, &m_up_2, &m_up_3, &m_up_4, &m_up_5, &m_up_6, 
@@ -189,6 +189,7 @@ void init_dizzy() {
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
 void set_dizzy_animdata(const s_data * sprite) {
+    SWITCH_ROM_MBC1(2);
     __temp_k = (sprite->rev)?S_FLIPX:0;
     if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
         multiple_clear_sprite_tiles(0, dizzy_sprite_tile_count);
@@ -281,6 +282,9 @@ void set_room(const UBYTE row, const UBYTE col) {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
+    
+    SWITCH_ROM_MBC1(current_room->bank);
+    
     // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
@@ -460,6 +464,7 @@ void main()
     
     WX_REG = 7; WY_REG = 0;
         
+    SWITCH_ROM_MBC1(1);
     unshrink_tiles(window_tiles_hiwater, title_shrinked_tiles.count, title_shrinked_tiles.data);
     inventoty_tiles_start = window_tiles_hiwater += title_shrinked_tiles.count;
          
@@ -476,6 +481,7 @@ void main()
     set_win_tiles(0, 0, 20, 3, title_map);
         
     current_room_x = 1, current_room_y = 1; 
+
     set_room(current_room_y, current_room_x);
 
     SHOW_BKG;
@@ -551,6 +557,7 @@ void main()
                             }
                         }
                         if (redraw_room) {
+                            SWITCH_ROM_MBC1(current_room->bank);
                             rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
                             place_room_items(current_room_y, current_room_x, coll_buf);
                             set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
