@@ -84,15 +84,25 @@ void hcoll_float4(WORD x, WORD y) {
     }
     get_h_coll(x, y);
 }
+
+#define troll_x_position (22 * 8)
 void vcoll_troll(WORD x, WORD y) {
     if (!troll_negotiated) {
-        if (x >= (22 * 8)) {
+        if (x >= troll_x_position) {
             show_dialog_window(4, &troll_dialog);
             troll_negotiated = 1;
         }
     }
+    if ((!troll_satisfied) && (coins >= 3)) {
+        if (x >= troll_x_position) {
+        show_dialog_window(4, &troll_toll);
+        sub_coins(3);
+        show_coins();
+        troll_satisfied = 1;
+        }
+    }
     if ((!troll_satisfied) && (delta_x >= 0)) {
-        if (x >= (22 * 8)) {
+        if (x >= troll_x_position) {
             tile_pos_x = x >> 3; 
             collision_buf[0] = 1; collision_buf[1] = 1;
             delta_x = -1;

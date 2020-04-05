@@ -20,11 +20,15 @@ const ani_data const dead_ani   = { 4, 3, 254, ANI_DEAD,   ANI_DEAD,   {&m_dead_
         
 const ani_data * const animation[] = {&stand_ani, &up_ani, &walk_r_ani, &walk_l_ani, &roll_r_ani, &roll_l_ani, &stun_ani, &dead_ani, &jump_r_ani, &jump_l_ani};
 
-const dyn_data   const move_y_dynamics = {32, {-4, -4, -3, -2, -2, -1, -2, -1, -1, -1, -1, -1,  0, -1,  0,  0,  
-                                                0,  0,  1,  0,  1,  1,  1,  1,  1,  2,  1,  2,  2,  3,  4,  4}
-                                         };
-const dyn_data * const move_y_data[]   = {0, &move_y_dynamics, 0,  0, 0,  0, 0, 0, &move_y_dynamics, &move_y_dynamics};
-const WORD       const move_x_data[]   = {0, 0,                1, -1, 1, -1, 0, 0, 1,                -1};
+const dyn_data   const move_y_dynamics   = {32, {-4, -4, -3, -2, -2, -1, -2, -1, -1, -1, -1, -1,  0, -1,  0,  0,  
+                                                  0,  0,  1,  0,  1,  1,  1,  1,  1,  2,  1,  2,  2,  3,  4,  4}
+                                           };
+const dyn_data   const double_y_dynamics = {32, {-8, -8, -6, -4, -4, -4, -3, -3, -3, -2, -2, -1, -1, -1,  -0,  0,  
+                                                  0,  0,  1,  1,  1,  2,  2,  3,  3,  3,  4,  4,  4,  6,   8,  8}
+                                           };
+const dyn_data * const move_y_data[]   = {0, &move_y_dynamics,   0,  0, 0,  0, 0, 0, &move_y_dynamics,   &move_y_dynamics};
+const dyn_data * const double_y_data[] = {0, &double_y_dynamics, 0,  0, 0,  0, 0, 0, &double_y_dynamics, &double_y_dynamics};
+const WORD       const move_x_data[]   = {0, 0,                  1, -1, 1, -1, 0, 0, 1,                  -1};
 
 extern s_data m_empty;
             

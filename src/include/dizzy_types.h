@@ -31,3 +31,10 @@ typedef struct {
     UBYTE count;
     WORD steps[];
 } dyn_data;
+
+typedef struct dialog_item {
+  UBYTE x, y;  
+  unsigned char * text;
+  UBYTE key; 
+  struct dialog_item* next;
+} dialog_item;

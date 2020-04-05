@@ -1,6 +1,8 @@
 #include <gb/gb.h>
 
-#include "gfx/gfx_types.h"
+#include "include/bank_stack.h"
+
+#include "include/dizzy_types.h"
 
 #include "include/rle_utils.h"
 #include "include/sprite_utils.h"
@@ -35,7 +37,7 @@ const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 
                                                             {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
 #define evil_sprites_tileoffset dizzy_sprite_tile_count
 #define evil_sprite_offset dizzy_sprite_count
-            
+          
 unsigned char coll_buf[room_height * room_width];
 const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &coll_buf[30],  &coll_buf[60],  &coll_buf[90], &coll_buf[120], &coll_buf[150], 
                                                              &coll_buf[180], &coll_buf[210], &coll_buf[240], &coll_buf[270], &coll_buf[300], &coll_buf[330], 
@@ -46,7 +48,7 @@ enum  animation_type ani_type = ANI_STAND, ani_type_old;
 UBYTE ani_phase = 0;
 
 const dyn_data * current_dyn = 0;       
-UBYTE current_dyn_phase = 0;
+UBYTE double_dyn = 0, current_dyn_phase = 0;
 
 UBYTE ani_update = 0, walk_update = 0, bal_update = 0;
 UBYTE cloud_timer = 0;
@@ -148,7 +150,7 @@ void init_dizzy() {
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
 void set_dizzy_animdata(const s_data * sprite) {
-    SWITCH_ROM_MBC1(2);
+    set_bank(2);
     __temp_k = (sprite->rev)?S_FLIPX:0;
     if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
         multiple_clear_sprite_tiles(0, dizzy_sprite_tile_count);
@@ -242,7 +244,7 @@ void set_room(const UBYTE row, const UBYTE col) {
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
     
-    SWITCH_ROM_MBC1(current_room->bank);
+    set_bank(current_room->bank);
     
     // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
@@ -375,7 +377,8 @@ __endasm;
 #include "rooms/room_0_1.h"
 #include "rooms/room_1_1.h"
 #include "rooms/room_2_1.h" 
-#include "rooms/room_34_1.h" 
+#include "rooms/room_34_1.h"
+#include "rooms/room_5_1.h" 
 
 void reset_world() {
     for (UBYTE row = 0; row < WORLD_HEIGHT; row++) {
@@ -425,7 +428,7 @@ void main()
     
     WX_REG = 7; WY_REG = 0;
         
-    SWITCH_ROM_MBC1(1);
+    set_bank(1);
     unshrink_tiles(window_tiles_hiwater, title_shrinked_tiles.count, title_shrinked_tiles.data);
     inventoty_tiles_start = window_tiles_hiwater += title_shrinked_tiles.count;
          
@@ -455,8 +458,9 @@ void main()
     init_game();
         
 // --- debugging --------------
-//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 5, current_room_y = 1, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
+//coins = 3; show_coins();
 // ----------------------------
 
     while(1) {
@@ -529,7 +533,7 @@ void main()
                         }
                     }
                     if (redraw_room) {
-                        SWITCH_ROM_MBC1(current_room->bank);
+                        set_bank(current_room->bank);
                         rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
                         place_room_items(current_room_y, current_room_x, coll_buf);
                         set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
@@ -542,8 +546,12 @@ void main()
         if (ani_type != ani_type_old) { 
             ani_phase = 0; 
             ani_update = 1;
-            if (!current_dyn) current_dyn = move_y_data[ani_type]; current_dyn_phase = 0;
+            if (!current_dyn) {
+                if (double_dyn) current_dyn = double_y_data[ani_type]; else current_dyn = move_y_data[ani_type]; 
+            }
+            current_dyn_phase = 0;
         }
+        double_dyn = 0;     
                 
         if (walk_update) {
             is_position_safe = 0;

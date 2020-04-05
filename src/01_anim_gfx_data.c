@@ -1,5 +1,5 @@
 #include <gb/gb.h>
-#include "gfx/gfx_types.h"
+#include "include/dizzy_types.h"
 
 const s_data const m_empty     = {9, 0, {0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00,0x00}};
                                   
