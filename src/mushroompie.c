@@ -97,7 +97,7 @@ UBYTE current_room_x = 1, current_room_y = 1;
 const room_t * current_room = 0;
 
 // dizzy position within a room
-WORD  dizzy_x = 112, dizzy_y = 72, dizzy_tmp_xy = 0;
+WORD  dizzy_x = 104, dizzy_y = 72, dizzy_tmp_xy = 0;
 WORD  delta_x = 0, delta_y = 0;
 
 // resurrection position

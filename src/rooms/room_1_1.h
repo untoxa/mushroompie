@@ -12,7 +12,6 @@ void hcoll_blockage(WORD x, WORD y) {
     get_h_coll(x, y);
 }
 
-
 void vcoll_blockage(WORD x, WORD y) {
     if ((!path_cleaned) && (delta_x >= 0)) {
         if (x >= (17 * 8)) {

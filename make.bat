@@ -1,7 +1,10 @@
 @echo off
 set PROJ=mushroompie
 set GBDK=..\..\gbdk
+set GBDKLIB="%GBDK%"\lib\small\asxxxx\
 set OBJ=build
+
+echo Cleanup...
 
 if exist %OBJ% rd /s/q %OBJ%
 if exist %PROJ%.gb del %PROJ%.gb
@@ -11,18 +14,19 @@ if exist %PROJ%.map del %PROJ%.map
 if not exist %OBJ% mkdir %OBJ%
 
 echo COMPILING WITH SDCC4...
-call sdcc4\sdcc-assemble.bat %OBJ%\sdcc4_stub.rel src\sdcc4\__sdcc_call_hl.s src\sdcc4\div.s src\sdcc4\mul.s
 
-call sdcc4\sdcc-compile.bat src\00_title_gfx_data.c -o %OBJ%\00_title_gfx_data.rel
-call sdcc4\sdcc-compile.bat src\01_anim_gfx_data.c -o %OBJ%\01_anim_gfx_data.rel
-call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data0.c -o %OBJ%\02_rooms_gfx_data0.rel
-call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_0.c -o %OBJ%\02_rooms_gfx_data1_0.rel
-call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_1.c -o %OBJ%\02_rooms_gfx_data1_1.rel
+call sdcc4\sdcc-assemble.bat %OBJ%\sdcc4_stub.rel sdcc4\sdcc4stub\__sdcc_call_hl.s sdcc4\sdcc4stub\div.s sdcc4\sdcc4stub\mul.s
+
+call sdcc4\sdcc-compile.bat src\00_title_gfx_data.c -bo1 -o %OBJ%\00_title_gfx_data.rel
+call sdcc4\sdcc-compile.bat src\01_anim_gfx_data.c -bo2 -o %OBJ%\01_anim_gfx_data.rel
+call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data0.c -bo3 -o %OBJ%\02_rooms_gfx_data0.rel
+call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_0.c -bo4 -o %OBJ%\02_rooms_gfx_data1_0.rel
+call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_1.c -bo5 -o %OBJ%\02_rooms_gfx_data1_1.rel
 
 call sdcc4\sdcc-compile.bat src\%PROJ%.c -o %OBJ%\%PROJ%.rel
 
 echo LINKING WITH GBDK...
-@rem %GBDK%\bin\lcc.exe -Wl-m -Wl-j -Wl-yt2 -Wl-yo8 -Wl-ya1 -o %PROJ%.gb %OBJ%\sdcc4_stub.rel %OBJ%\00_title_gfx_data.rel %OBJ%\01_anim_gfx_data.rel %OBJ%\02_rooms_gfx_data0.rel %OBJ%\02_rooms_gfx_data1_0.rel %OBJ%\02_rooms_gfx_data1_1.rel %OBJ%\%PROJ%.rel
-%GBDK%\bin\lcc.exe -Wl-m -Wl-j -Wl-yt1 -Wl-yo8 -o %PROJ%.gb %OBJ%\sdcc4_stub.rel %OBJ%\00_title_gfx_data.rel %OBJ%\01_anim_gfx_data.rel %OBJ%\02_rooms_gfx_data0.rel %OBJ%\02_rooms_gfx_data1_0.rel %OBJ%\02_rooms_gfx_data1_1.rel %OBJ%\%PROJ%.rel
+
+%GBDK%\bin\link-gbz80.exe -n -- -z -m -j -yt1 -yo8 -k%GBDKLIB%\gbz80\ -lgbz80.lib -k%GBDKLIB%\gb\ -lgb.lib mushroompie.gb %GBDKLIB%\gb\crt0.o build\sdcc4_stub.rel build\00_title_gfx_data.rel build\01_anim_gfx_data.rel build\02_rooms_gfx_data0.rel build\02_rooms_gfx_data1_0.rel build\02_rooms_gfx_data1_1.rel build\mushroompie.rel
 
 echo DONE!

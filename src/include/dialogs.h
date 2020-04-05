@@ -12,7 +12,7 @@ const dialog_item const dylan_dialog1       = {0, 1, "-HI, DYLAN!", J_B, &dylan_
 const dialog_item const dylan_dialog2       = {0, 2, "-I'VE LOST MY", 0, &dylan_dialog3};
 const dialog_item const dylan_dialog3       = {1, 3, "ELEVATOR KEY...", J_B, &dylan_dialog4};
 const dialog_item const dylan_dialog4       = {0, 4, "-OK, I'LL SEE", 0, &dylan_dialog5};
-const dialog_item const dylan_dialog5       = {2, 5, "WHAT I CAN DO!", J_B, 0};
+const dialog_item const dylan_dialog5       = {2, 5, "WHAT I CAN DO.", J_B, 0};
 
 const dialog_item const dylan_thanks        = {0, 0, "-THANK YOU,", 0, &dylan_thanks1};
 const dialog_item const dylan_thanks1       = {10, 1, "DIZZY!", J_B, &dylan_thanks2};

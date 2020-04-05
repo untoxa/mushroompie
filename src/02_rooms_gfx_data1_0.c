@@ -1,4 +1,3 @@
-#pragma bank 4
 #include <gb/gb.h>
 #include "gfx/gfx_types.h"
 
