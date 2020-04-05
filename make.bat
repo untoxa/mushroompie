@@ -15,7 +15,7 @@ if not exist %OBJ% mkdir %OBJ%
 
 echo COMPILING WITH SDCC4...
 
-call sdcc4\sdcc-assemble.bat %OBJ%\sdcc4_stub.rel sdcc4\sdcc4stub\__sdcc_call_hl.s sdcc4\sdcc4stub\div.s sdcc4\sdcc4stub\mul.s
+call sdcc4\sdcc-assemble.bat %OBJ%\sdcc4_stub.rel sdcc4\sdcc4stub\__sdcc_call_hl.s
 
 call sdcc4\sdcc-compile.bat src\00_title_gfx_data.c -bo1 -o %OBJ%\00_title_gfx_data.rel
 call sdcc4\sdcc-compile.bat src\01_anim_gfx_data.c -bo2 -o %OBJ%\01_anim_gfx_data.rel

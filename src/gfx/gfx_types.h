@@ -18,3 +18,16 @@ typedef struct {
     UBYTE count;
     unsigned char data[];
 } tile_data_t;
+
+typedef struct {
+    UBYTE y, x;
+} spr_ofs_t;
+
+typedef struct {
+    UBYTE y, min_y, max_y, x, min_x, max_x;
+} spr_ofs_and_lim_t;
+
+typedef struct {
+    UBYTE count;
+    WORD steps[];
+} dyn_data;

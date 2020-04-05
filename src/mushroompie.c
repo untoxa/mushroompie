@@ -7,6 +7,11 @@
 
 #include "include/dialogs.h"
 
+#define dizzy_sprite_count 9
+#define dizzy_sprites_tileoffset 0x00U
+#define dizzy_sprite_offset 0x00U
+#define dizzy_sprite_tile_count 9
+
 #include "gfx/title_gfx_data.h"
 #include "gfx/anim_gfx_data.h"
 #include "gfx/rooms_gfx.h"
@@ -22,24 +27,8 @@
 #define MIN_DIZZY_Y 0
 #define MAX_DIZZY_Y ((room_height - 2) * 8)
 
-typedef struct {
-    UBYTE y, x;
-} spr_ofs_t;
-
-typedef struct {
-    UBYTE y, min_y, max_y, x, min_x, max_x;
-} spr_ofs_and_lim_t;
-
 const unsigned char const empty_compressed_map[] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
                                                     0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00}; // 504 rle-compressed nulls to clear screen regions
-
-#define dizzy_sprite_count 9
-const spr_ofs_t const dizzy_offsets[dizzy_sprite_count] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
-                                                           {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
-                                                           {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
-#define dizzy_sprites_tileoffset 0x00U
-#define dizzy_sprite_offset 0x00U
-#define dizzy_sprite_tile_count 9
 
 #define evil_sprite_total_count 16
 const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 
@@ -47,49 +36,19 @@ const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 
 #define evil_sprites_tileoffset dizzy_sprite_tile_count
 #define evil_sprite_offset dizzy_sprite_count
             
-enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L };
-      
-const ani_data const stand_ani  = { 2, 0, 255, ANI_STAND,  ANI_STAND,  {&m_stand_0, &m_stand_1}};
-const ani_data const up_ani     = {16, 0,   0, ANI_STAND,  ANI_UP,     {&m_stand_0, &m_up_0, &m_up_1, &m_up_2, &m_up_3, &m_up_4, &m_up_5, &m_up_6, 
-                                                                        &m_stand_0, &m_up_0, &m_up_1, &m_up_2, &m_up_3, &m_up_4, &m_up_5, &m_up_6}};
-const ani_data const walk_r_ani = { 8, 0, 255, ANI_STAND,  ANI_ROLL_R, {&m_walk_r_0, &m_walk_r_1, &m_walk_r_2, &m_walk_r_1, &m_walk_r_0, &m_walk_r_3, &m_walk_r_2, &m_walk_r_3}};
-const ani_data const walk_l_ani = { 8, 0, 255, ANI_STAND,  ANI_ROLL_L, {&m_walk_l_0, &m_walk_l_1, &m_walk_l_2, &m_walk_l_1, &m_walk_l_0, &m_walk_l_3, &m_walk_l_2, &m_walk_l_3}};
-const ani_data const roll_r_ani = { 8, 0, 254, ANI_WALK_R, ANI_ROLL_R, {&m_walk_r_0, &m_roll_r_0, &m_roll_r_1, &m_roll_r_2, &m_roll_r_3, &m_roll_r_4, &m_roll_r_5, &m_roll_r_6}};
-const ani_data const roll_l_ani = { 8, 0, 254, ANI_WALK_L, ANI_ROLL_L, {&m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6}};
-const ani_data const jump_r_ani = {16, 0,   0, ANI_WALK_R, ANI_ROLL_R, {&m_walk_r_0, &m_roll_r_0, &m_roll_r_1, &m_roll_r_2, &m_roll_r_3, &m_roll_r_4, &m_roll_r_5, &m_roll_r_6,
-                                                                        &m_walk_r_0, &m_roll_r_0, &m_roll_r_1, &m_roll_r_2, &m_roll_r_3, &m_roll_r_4, &m_roll_r_5, &m_roll_r_6}};
-const ani_data const jump_l_ani = {16, 0,   0, ANI_WALK_L, ANI_ROLL_L, {&m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6,
-                                                                        &m_walk_l_0, &m_roll_l_0, &m_roll_l_1, &m_roll_l_2, &m_roll_l_3, &m_roll_l_4, &m_roll_l_5, &m_roll_l_6}};
-const ani_data const stun_ani   = { 8, 0, 254, ANI_STAND,  ANI_STAND,  {&m_stun_0, &m_stun_1, &m_stun_0, &m_stun_2, &m_stun_3, &m_stun_2, &m_stun_3, &m_stun_4}};
-const ani_data const dead_ani   = { 4, 3, 254, ANI_DEAD,   ANI_DEAD,   {&m_dead_0, &m_dead_1, &m_dead_2, &m_dead_1}};
-        
-const ani_data * const animation[] = {&stand_ani, &up_ani, &walk_r_ani, &walk_l_ani, &roll_r_ani, &roll_l_ani, &stun_ani, &dead_ani, &jump_r_ani, &jump_l_ani};
-
-const ani_data * current_animation;
-
-typedef struct {
-    UBYTE count;
-    WORD steps[];
-} dyn_data;
-
-const dyn_data   const move_y_dynamics = {32, {-4, -4, -3, -2, -2, -1, -2, -1, -1, -1, -1, -1,  0, -1,  0,  0,  
-                                                0,  0,  1,  0,  1,  1,  1,  1,  1,  2,  1,  2,  2,  3,  4,  4}
-                                         };
-const dyn_data * const move_y_data[]   = {0, &move_y_dynamics, 0,  0, 0,  0, 0, 0, &move_y_dynamics, &move_y_dynamics};
-const WORD       const move_x_data[]   = {0, 0,                1, -1, 1, -1, 0, 0, 1,                -1};
-
 unsigned char coll_buf[room_height * room_width];
 const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &coll_buf[30],  &coll_buf[60],  &coll_buf[90], &coll_buf[120], &coll_buf[150], 
                                                              &coll_buf[180], &coll_buf[210], &coll_buf[240], &coll_buf[270], &coll_buf[300], &coll_buf[330], 
                                                              &coll_buf[360], &coll_buf[390], &coll_buf[420], &coll_buf[450], &coll_buf[480]};
              
+const ani_data * current_animation;
 enum  animation_type ani_type = ANI_STAND, ani_type_old;
 UBYTE ani_phase = 0;
-UBYTE ani_update = 0, walk_update = 0, bal_update = 0;
 
 const dyn_data * current_dyn = 0;       
 UBYTE current_dyn_phase = 0;
 
+UBYTE ani_update = 0, walk_update = 0, bal_update = 0;
 UBYTE cloud_timer = 0;
 
 // current room coordinates and descriptor
@@ -431,6 +390,7 @@ void init_game() {
     reset_world();
     init_game_items();
     game_over = 0;
+    init_dizzy_coins(); show_coins();
     init_dizzy_lives(); show_lives();
     init_dizzy_energy(); show_energy();
     current_room_x = 1, current_room_y = 1; 
@@ -471,6 +431,7 @@ void main()
          
     unshrink_tiles(window_tiles_hiwater, dialog_frame_tiles.count, dialog_frame_tiles.data);
     font_tiles_start = window_tiles_hiwater += dialog_frame_tiles.count;
+    digits_start = font_tiles_start + 0x0F;
     dizzy_live_symbol = font_tiles_start + 0x1F;
 
     unshrink_tiles(window_tiles_hiwater, font_tiles.count, font_tiles.data);
@@ -492,7 +453,7 @@ void main()
     
     show_dialog_window(6, &start_dialog);
     init_game();
-    
+        
 // --- debugging --------------
 //current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
@@ -531,12 +492,21 @@ void main()
                     __temp_game_item3 = find_by_room_xy(&game_item_list, current_room_y, current_room_x, tile_pos_x, tile_pos_y);
                     if (__temp_game_item3) {
                         current_item_id = __temp_game_item3->desc->id;
-                        if (inventory_item_list.size < 3) {
-                            pop_by_id(&game_item_list, current_item_id);
-                            push_last(&inventory_item_list, __temp_game_item3);
-                            redraw_room = 1;
+                        if (!(current_item_id & ID_TREASURE)) {
+                            if (inventory_item_list.size < 3) {
+                                pop_by_id(&game_item_list, current_item_id);
+                                push_last(&inventory_item_list, __temp_game_item3);
+                                redraw_room = 1;
+                            } else {
+                                show_dialog_window(2, &too_much_items);
+                                warning_shown = 1;
+                            }
                         } else {
-                            show_dialog_window(2, &too_much_items);
+                            pop_by_id(&game_item_list, current_item_id);
+                            show_dialog_window(2, &coin_found);
+                            add_coins(1); 
+                            show_coins();
+                            redraw_room = 1;
                             warning_shown = 1;
                         }
                     }
@@ -557,13 +527,13 @@ void main()
                                 redraw_room = 1;
                             }
                         }
-                        if (redraw_room) {
-                            SWITCH_ROM_MBC1(current_room->bank);
-                            rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
-                            place_room_items(current_room_y, current_room_x, coll_buf);
-                            set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
-                            rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
-                        }
+                    }
+                    if (redraw_room) {
+                        SWITCH_ROM_MBC1(current_room->bank);
+                        rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+                        place_room_items(current_room_y, current_room_x, coll_buf);
+                        set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+                        rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
                     }
                 }
             }

@@ -1,5 +1,6 @@
 UBYTE dizzy_live_symbol = 0x00;
 UBYTE dizzy_energy_start = 0x00;
+UBYTE digits_start = 0x00;
 
 const tile_data_t const energy_tiles = {4, {
 0x01, 0x00,0x3F,0x7F,0x7F,0x7F,0x7F,0x3F,0x00,
@@ -8,16 +9,19 @@ const tile_data_t const energy_tiles = {4, {
 0x00
 }};
 
-UBYTE dizzy_lives = 3;
+UBYTE dizzy_lives;
 unsigned char dizzy_lives_indicator[3] = {0x00, 0x00, 0x00};
 unsigned char dizzy_energy_indicator[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
 unsigned char temp_tile_buffer[16];
 const unsigned char const ethalon_indicator[8] = {0, 1, 1, 1, 1, 1, 1, 2};
 const UBYTE const ethalon_tiles_offsets[3] = {0, 9, 18};  
 
-UBYTE dizzy_energy = 8, dizzy_energy_old;
-UBYTE inc_energy = 56;
-UBYTE dec_energy = 0;
+UBYTE coins;
+unsigned char coins_indicator[2] = {0x00, 0x00};
+
+UBYTE dizzy_energy, dizzy_energy_old;
+UBYTE inc_energy;
+UBYTE dec_energy;
 
 UBYTE game_over = 0;
 UBYTE death_pause = 0;
@@ -32,8 +36,9 @@ void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char *
     }        
 }
 
-void init_dizzy_lives() {dizzy_lives = 3; }
-void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; }
+void init_dizzy_coins() { coins = 0; }
+void init_dizzy_lives() { dizzy_lives = 3; }
+void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; dec_energy = 0; }
 
 void on_dizzy_die() {
     ani_type = ANI_DEAD;
@@ -47,6 +52,37 @@ void show_lives() {
     }
     set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);    
 }
+
+void add_coins(UBYTE n) __naked 
+{
+    n;
+__asm 
+            ld      A, (#_coins)
+            lda     HL, 2(SP)
+            add     (HL)
+            daa
+            ld      (#_coins), A
+            ret
+__endasm;
+}
+void sub_coins(UBYTE n) __naked 
+{
+    n;
+__asm 
+            ld      A, (#_coins)
+            lda     HL, 2(SP)
+            sub     (HL)
+            daa
+            ld      (#_coins), A
+            ret
+__endasm;
+}
+void show_coins() {
+    coins_indicator[0] = (coins >> 4) + digits_start;
+    coins_indicator[1] = (coins & 0x0F) + digits_start;
+    set_win_tiles(2, 1, sizeof(coins_indicator), 1, coins_indicator);
+}
+
 void show_energy() {
     __temp_k = dizzy_energy;
     for (__temp_i = 0; __temp_i < 8; __temp_i++) {

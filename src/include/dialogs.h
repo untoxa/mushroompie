@@ -40,5 +40,8 @@ const dialog_item const cleared_path1       = {3, 1, "THE PATH!", J_B, 0};
 const dialog_item const intro               = {0, 0, "AS YOU ENTER THE", 0, &intro1};
 const dialog_item const intro1              = {1, 1, "CAVE, YOU HEAR", 0, &intro2};
 const dialog_item const intro2              = {0, 2, "HOW THE ENTRANCE", 0, &intro3};
-const dialog_item const intro3              = {0, 3, "COLLAPSED BEHIND", 0, &intro4};
+const dialog_item const intro3              = {0, 3, "COLLAPSES BEHIND", 0, &intro4};
 const dialog_item const intro4              = {5, 4, "YOU...", J_B, 0};
+
+const dialog_item const coin_found          = {1, 0, "YOU HAVE FOUND", 0, &coin_found1};
+const dialog_item const coin_found1         = {5, 1, "A COIN!", J_B, 0};

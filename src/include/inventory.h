@@ -54,18 +54,19 @@ items_list inventory_item_list = {0, 0, 0};
 #define ID_PICKAXE   1
 #define ID_KEY       2
 #define ID_BOULDER   8
+#define ID_TREASURE  128
 #define ID_ITEM_USED 255
 
-const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE, 1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
-const game_item_desc const itmdesc_key       = {ID_KEY,     1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
-const game_item_desc const itmdesc_grass     = {3,          1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
-const game_item_desc const itmdesc_mushrooms = {4,          1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
-const game_item_desc const itmdesc_coin0     = {5,          1, 1, 18,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin1     = {6,          0, 0, 20,  5, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin2     = {7,          1, 3,  1,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_blockage2 = {ID_BOULDER, 1, 1, 18, 10, "BOULDERS",      &blockage2_tiles};
-const game_item_desc const itmdesc_blockage1 = {ID_BOULDER, 1, 1, 17, 10, "BOULDERS",      &blockage1_tiles};
-const game_item_desc const itmdesc_blockage0 = {ID_BOULDER, 1, 1, 17,  9, "BOULDERS",      &blockage0_tiles};
+const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,      1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
+const game_item_desc const itmdesc_key       = {ID_KEY,          1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
+const game_item_desc const itmdesc_grass     = {3,               1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
+const game_item_desc const itmdesc_mushrooms = {4,               1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
+const game_item_desc const itmdesc_coin0     = {1 | ID_TREASURE, 1, 1, 18,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin1     = {2 | ID_TREASURE, 0, 0, 20,  5, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin2     = {3 | ID_TREASURE, 1, 3,  1,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_blockage2 = {ID_BOULDER,      1, 1, 18, 10, "BOULDERS",      &blockage2_tiles};
+const game_item_desc const itmdesc_blockage1 = {ID_BOULDER,      1, 1, 17, 10, "BOULDERS",      &blockage1_tiles};
+const game_item_desc const itmdesc_blockage0 = {ID_BOULDER,      1, 1, 17,  9, "BOULDERS",      &blockage0_tiles};
 
 const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass,
                                                                  &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2, 
@@ -212,7 +213,7 @@ game_item * show_inventory() {
             __temp_game_item = __temp_game_item->next;
         }
     } else {
-        set_win_tiles(3, 5, prepare_text("N O T H I N G", __temp_text_buf), 1, __temp_text_buf);
+        set_win_tiles(3, 6, prepare_text("N O T H I N G", __temp_text_buf), 1, __temp_text_buf);
     }
     set_win_tiles(5, 9, prepare_text("DON'T DROP", __temp_text_buf), 1, __temp_text_buf);
     prepare_text("><", __temp_text_buf);
