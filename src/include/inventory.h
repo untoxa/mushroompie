@@ -30,7 +30,7 @@ UBYTE inventoty_tiles_start, font_tiles_start;
 UBYTE item_tiles_hiwater; // grow down !!!
 
 // all items
-#define GAME_ITEMS_COUNT 10
+#define GAME_ITEMS_COUNT 11
 struct game_item game_items[GAME_ITEMS_COUNT];
 
 // items in the game
@@ -53,22 +53,25 @@ items_list inventory_item_list = {0, 0, 0};
 #define ID_ITEM_NONE 0
 #define ID_PICKAXE   1
 #define ID_KEY       2
+#define ID_MUSHROOMS 4
+#define ID_PIE       5
 #define ID_BOULDER   120
 #define ID_TREASURE  128
 #define ID_ITEM_USED 255
 
-const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,      1, 0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
-const game_item_desc const itmdesc_key       = {ID_KEY,          1, 4, 14, 12, "ELEVATOR KEY",  &key_tiles};
-const game_item_desc const itmdesc_grass     = {3,               1, 4, 14, 12, "TUFT OF GRASS", &grass_tiles};
-const game_item_desc const itmdesc_mushrooms = {4,               1, 0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
-const game_item_desc const itmdesc_coin0     = {1 | ID_TREASURE, 1, 1, 18,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin1     = {2 | ID_TREASURE, 0, 0, 20,  5, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin2     = {3 | ID_TREASURE, 1, 3,  1,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_blockage2 = {ID_BOULDER,      1, 1, 18, 10, "BOULDERS",      &blockage2_tiles};
-const game_item_desc const itmdesc_blockage1 = {ID_BOULDER + 1,  1, 1, 17, 10, "BOULDERS",      &blockage1_tiles};
-const game_item_desc const itmdesc_blockage0 = {ID_BOULDER + 2,  1, 1, 17,  9, "BOULDERS",      &blockage0_tiles};
+const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,        1,   0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
+const game_item_desc const itmdesc_key       = {ID_KEY,            1,   4, 14, 12, "ELEVATOR KEY",  &key_tiles};
+const game_item_desc const itmdesc_grass     = {3,                 1,   4, 14, 12, "TUFT OF GRASS", &grass_tiles};
+const game_item_desc const itmdesc_mushrooms = {ID_MUSHROOMS,      1,   0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
+const game_item_desc const itmdesc_pie       = {ID_PIE,          255, 255,  0,  0, "MUSHROOM PIE",  &pie_tiles};
+const game_item_desc const itmdesc_coin0     = {1 | ID_TREASURE,   1,   1, 18,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin1     = {2 | ID_TREASURE,   0,   0, 20,  5, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin2     = {3 | ID_TREASURE,   1,   3,  1,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_blockage2 = {ID_BOULDER,        1,   1, 18, 10, "BOULDERS",      &blockage2_tiles};
+const game_item_desc const itmdesc_blockage1 = {ID_BOULDER + 1,    1,   1, 17, 10, "BOULDERS",      &blockage1_tiles};
+const game_item_desc const itmdesc_blockage0 = {ID_BOULDER + 2,    1,   1, 17,  9, "BOULDERS",      &blockage0_tiles};
 
-const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass,
+const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass, &itmdesc_pie,
                                                                  &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2, 
                                                                  &itmdesc_blockage2, &itmdesc_blockage1, &itmdesc_blockage0};
 
@@ -80,6 +83,7 @@ extern tile_data_t grass_tiles;
 extern tile_data_t blockage0_tiles;
 extern tile_data_t blockage1_tiles;
 extern tile_data_t blockage2_tiles;
+extern tile_data_t pie_tiles;
 
 const unsigned char const dlg_left0[]   = {0x00,0x92};
 const unsigned char const dlg_left1[]   = {0x93,0x94};
@@ -196,7 +200,7 @@ game_item * show_inventory() {
     return 0;
 }
 
-void show_dialog_window(const UBYTE lines, const dialog_item* item) {
+void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
     push_bank(1);
     const dialog_item* item_old = 0;
     if (item) {
@@ -395,7 +399,7 @@ $putitm06:  pop     BC
 __endasm;
 }
 
-void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) {
+void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) NONBANKED {
     item_tiles_hiwater = 0;
     push_bank(1);
     __temp_game_item = game_item_list.first;

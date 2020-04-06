@@ -25,10 +25,20 @@ void hcoll_mushroom(WORD x, WORD y) {
 
 void vcoll_daisy(WORD x, WORD y) {
     if (!dasy_negotiated) {
-        if ((x > (17 * 8)) && (x < (19 * 8)) && (y > (14 * 8))) {
+        if ((y > (14 * 8)) && (x > (17 * 8)) && (x < (19 * 8))) {
             show_dialog_window(5, &daisy_dialog);
             dasy_negotiated = 1;
         }
     }
     get_v_coll(x, y);
+}
+
+UBYTE daisy_gets_mushrooms(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+    if (id == ID_MUSHROOMS) {
+        if ((tile_y == 14) && (tile_x > 14) && (tile_x < 19)) {
+            show_dialog_window(7, &daisy_gives_pie);
+            return ID_PIE;
+        }
+    }
+    return ID_ITEM_NONE;
 }

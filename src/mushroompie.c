@@ -149,7 +149,7 @@ void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
-void set_dizzy_animdata(const s_data * sprite) {
+void set_dizzy_animdata(const s_data * sprite) NONBANKED {
     set_bank(2);
     __temp_k = (sprite->rev)?S_FLIPX:0;
     if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
@@ -239,7 +239,7 @@ void check_dizzy_evil_collisions() {
 
 void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf);
 
-void set_room(const UBYTE row, const UBYTE col) {
+void set_room(const UBYTE row, const UBYTE col) NONBANKED {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
@@ -298,7 +298,7 @@ UBYTE tim_div = 0;
 UBYTE __lcd_int_state = 0, inventory = 0;
 UBYTE lyc_table[] = {0, 23,  0,  23, 
                      0, 23, 55, 111};
-void lcd_interrupt() __naked 
+void lcd_interrupt() NONBANKED __naked 
 {
 __asm
             ld      A, (#_inventory)        ; if inventory then use lyc_table 0..3 else 4..7
@@ -338,7 +338,7 @@ __asm
             ret
 __endasm;
 }    
-void vbl_interrupt() __naked
+void vbl_interrupt() NONBANKED __naked
 {
 __asm
             ld      A, (#_bkg_scroll_x_target)
@@ -404,8 +404,7 @@ void init_game() {
     set_dizzy_position();
 }
 
-void main()
-{
+void main() {
     DISPLAY_OFF;
     disable_interrupts();
     
@@ -458,7 +457,7 @@ void main()
     init_game();
         
 // --- debugging --------------
-//current_room_x = 5, current_room_y = 1, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
 //coins = 3; show_coins();
 // ----------------------------

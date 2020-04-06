@@ -49,3 +49,11 @@ const dialog_item const daisy_dialog1       = {1,  1, "MUSHROOMS FOR", 0, &daisy
 const dialog_item const daisy_dialog2       = {1,  2, "THE PIE, DIZZY?", J_B, &daisy_dialog3};
 const dialog_item const daisy_dialog3       = {0,  3, "-JUST A MOMENT,", 0, &daisy_dialog4};
 const dialog_item const daisy_dialog4       = {10, 4, "DAISY!", J_B, 0};
+
+const dialog_item const daisy_gives_pie     = {0,  0, "AN HOUR LATER...", J_B, &daisy_gives_pie1};
+const dialog_item const daisy_gives_pie1    = {0,  2, "-TAKE THIS PIE", 0, &daisy_gives_pie2};
+const dialog_item const daisy_gives_pie2    = {1,  3, "TO THE GRANDPA,", 0, &daisy_gives_pie3};
+const dialog_item const daisy_gives_pie3    = {10, 4, "DIZZY!", J_B, &daisy_gives_pie4};
+const dialog_item const daisy_gives_pie4    = {0,  5, "-THANK YOU,", 0, &daisy_gives_pie5};
+const dialog_item const daisy_gives_pie5    = {8,  6, "I'LL DO!", J_B, 0};
+

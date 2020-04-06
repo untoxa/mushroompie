@@ -13,4 +13,4 @@ extern dialog_item troll_dialog;
 extern dialog_item troll_toll;      
 extern dialog_item cleared_path;    
 extern dialog_item daisy_dialog;    
- 
+extern dialog_item daisy_gives_pie;
