@@ -17,3 +17,4 @@ extern dialog_item daisy_gives_pie;
 extern dialog_item firefly_out;
 extern dialog_item firefly_caught;
 extern dialog_item darkness_warn;
+extern dialog_item grandpa_thanks;

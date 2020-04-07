@@ -133,11 +133,14 @@ game_item * show_inventory() {
     inventory = 1;    
     do {
         if (inventory_selection != old_inventory_selection) {
+            __temp_l = selector_offset[old_inventory_selection], __temp_k = selector_offset[inventory_selection];
             wait_vbl_done();
-            set_win_tiles(2, selector_offset[old_inventory_selection], 1, 1, selector_empty);
-            set_win_tiles(17, selector_offset[old_inventory_selection], 1, 1, selector_empty);
-            set_win_tiles(2, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[0]);
-            set_win_tiles(17, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[1]);
+            set_win_tiles(2, __temp_l, 1, 1, selector_empty);
+            set_win_tiles(17, __temp_l, 1, 1, selector_empty);
+            wait_vbl_done();
+            set_win_tiles(2, __temp_k, 1, 1, __temp_text_buf);
+            set_win_tiles(17, __temp_k, 1, 1, __temp_text_buf + 1);
+
             old_inventory_selection = inventory_selection;
             waitpadup();
         }

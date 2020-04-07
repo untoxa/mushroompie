@@ -375,6 +375,7 @@ __endasm;
 // room specific handlers
 #include "rooms/room_defaults.h"
 #include "rooms/room_4_0.h"
+#include "rooms/room_5_0.h"
 #include "rooms/room_0_1.h"
 #include "rooms/room_1_1.h"
 #include "rooms/room_2_1.h" 

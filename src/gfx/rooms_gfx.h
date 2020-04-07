@@ -28,7 +28,8 @@ UBYTE default_drop(UBYTE id);
 // room 4_0 handlers
 void init_room4_0(); void move_flies4_0(); void draw_flies4_0();
 UBYTE dizzy_catches_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id);
-
+// room 5_0 handlers
+UBYTE grand_gets_pie(UBYTE tile_x, UBYTE tile_y, UBYTE id);
 // room 0_1 handlers
 void reset_room0_1();
 void init_room0_1(); void move_bats0(); void draw_bats0();
@@ -68,7 +69,7 @@ const room_t const room_1_0 = {3, &room_1_0_map, &room_1_0_coll, &room_1_0_tiles
 const room_t const room_2_0 = {3, &room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0,                   0,             0,              0,              0,               0,               0,          0,                      0,              0};
 const room_t const room_3_0 = {3, &room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0,                   0,             0,              0,              0,               0,               0,          0,                      0,              0};  // empty room
 const room_t const room_4_0 = {3, &room_4_0_map, &room_4_0_coll, &room_4_0_tiles, &enemies_4_0_tiles,  &init_room4_0, &move_flies4_0, &draw_flies4_0, 0,               0,               0,          &dizzy_catches_firefly, 0,              0};
-const room_t const room_5_0 = {3, &room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0,                   0,             0,              0,              0,               0,               0,          0,                      0,              0};
+const room_t const room_5_0 = {3, &room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0,                   0,             0,              0,              0,               0,               0,          &grand_gets_pie,        0,              0};
 
 const room_t const room_0_1 = {4, &room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles,  &init_room0_1, &move_bats0,    &draw_bats0,    &hcoll_darkness, 0,               &coll_bats, &dizzy_drops_firefly,   &reset_room0_1, &draw_room0_1};
 const room_t const room_1_1 = {4, &room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0,                   0,             0,              0,              &hcoll_blockage, &vcoll_blockage, 0,          &cleaning_path,         &reset_room1,   0};

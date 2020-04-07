@@ -52,7 +52,7 @@ const dialog_item const daisy_dialog4       = {10, 4, "DAISY!", J_B, 0};
 
 const dialog_item const daisy_gives_pie     = {0,  0, "AN HOUR LATER...", J_B, &daisy_gives_pie1};
 const dialog_item const daisy_gives_pie1    = {0,  2, "-TAKE THIS PIE", 0, &daisy_gives_pie2};
-const dialog_item const daisy_gives_pie2    = {1,  3, "TO THE GRANDPA,", 0, &daisy_gives_pie3};
+const dialog_item const daisy_gives_pie2    = {1,  3, "TO OUR GRANDPA,", 0, &daisy_gives_pie3};
 const dialog_item const daisy_gives_pie3    = {10, 4, "DIZZY!", J_B, &daisy_gives_pie4};
 const dialog_item const daisy_gives_pie4    = {0,  5, "-THANK YOU,", 0, &daisy_gives_pie5};
 const dialog_item const daisy_gives_pie5    = {8,  6, "I'LL DO!", J_B, 0};
@@ -69,3 +69,9 @@ const dialog_item const darkness_warn       = {0, 0, "YOU ENTER A VERY", 0, &dar
 const dialog_item const darkness_warn1      = {0, 1, "DARK  ROOM, EVIL", 0, &darkness_warn2};
 const dialog_item const darkness_warn2      = {2, 2, "RED EYES ARE"    , 0, &darkness_warn3};
 const dialog_item const darkness_warn3      = {0, 3, "SHINING AHEAD...", J_B, 0};
+
+const dialog_item const grandpa_thanks      = {0,  0, "-THANK YOU,", 0, &grandpa_thanks1};
+const dialog_item const grandpa_thanks1     = {10, 1, "DIZZY!", 0, &grandpa_thanks2};
+const dialog_item const grandpa_thanks2     = {0,  3, "CONGRATULATIONS!", 0, &grandpa_thanks3};
+const dialog_item const grandpa_thanks3     = {1,  4, "YOUR QUEST IS", 0, &grandpa_thanks4};
+const dialog_item const grandpa_thanks4     = {3,  5, "COMPLETE!", J_B, 0};
