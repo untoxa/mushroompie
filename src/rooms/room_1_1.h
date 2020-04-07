@@ -36,5 +36,5 @@ UBYTE cleaning_path(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
             return ID_ITEM_NONE;
         }
     }
-    return ID_ITEM_NONE;
+    return default_drop(id);
 }

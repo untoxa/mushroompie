@@ -12,6 +12,7 @@ void init_room34() {
     for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
         set_sprite_tile(__temp_i, evil_sprites_tileoffset);
 }
+UBYTE float_move_timer;
 #define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
 #define float34_pos_y (15 * 8)
 UBYTE float3_move = 1, float4_move = 0;
@@ -23,6 +24,8 @@ WORD float3_pos_x = float3_min_x, float3_dir = 1;
 #define float4_max_x ((8 * 8) - float_length)
 WORD float4_pos_x = float4_min_x, float4_dir = 1;
 void move_float() {             // two floats in room 3 and 4 move in sync with each other
+    float_move_timer++;
+    if (float_move_timer & 1) return;
     if (float3_move) {
         if (float3_dir) {
             float3_pos_x++;

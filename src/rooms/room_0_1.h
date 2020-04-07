@@ -1,13 +1,13 @@
+#include "flies.h"
+
 const spr_ofs_t const bat1_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 const spr_ofs_t const bat2_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
-const spr_ofs_t const fly_offsets[]  = {{0x28, 0x08}};
 #define bat_sprite_count 2
 #define bat1_sprite_offset evil_sprite_offset
 #define bat2_sprite_offset (evil_sprite_offset + bat_sprite_count)
 
-#define fly_sprite_offset (bat2_sprite_offset + bat_sprite_count)
-
-const UBYTE * const ptr_div_reg = (UBYTE *)0xFF04; 
+#define fly_sprite_count 1
+#define fly_sprite_offset1 (bat2_sprite_offset + bat_sprite_count)
 
 UBYTE room_dark, bite_timer, warning_shown;
 void reset_room0_1() {
@@ -39,7 +39,6 @@ void draw_room0_1() {
 UBYTE bat_phase = 0;  
 
 WORD firefly_pos_x, firefly_pos_y;
-const WORD const fly_delta[8] = { -4, -3, -2, 0, 0, 2, 3, 4 };
 
 WORD bat1_pos_x = bat1_min_x, bat1_dir = 1;
 WORD bat2_pos_x = bat2_min_x, bat2_dir = 1;
@@ -72,13 +71,13 @@ void draw_bats0() {
         set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 1);
         set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 2);
         set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 3);
-        set_sprite_tile(fly_sprite_offset,      evil_sprites_tileoffset + 4);
+        set_sprite_tile(fly_sprite_offset1,     evil_sprites_tileoffset + 4);
     } else if (bat_phase == 4) {
         set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 0);
         set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 1);
         set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 2);
         set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 3);
-        set_sprite_tile(fly_sprite_offset,      evil_sprites_tileoffset + 5);
+        set_sprite_tile(fly_sprite_offset1,     evil_sprites_tileoffset + 5);
     }
     bat_phase++; bat_phase &= 7;
     multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
@@ -87,7 +86,7 @@ void draw_bats0() {
     multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
                           bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
                           (unsigned char *)bat2_offsets);    
-    multiple_move_sprites(fly_sprite_offset, 1, 
+    multiple_move_sprites(fly_sprite_offset1, fly_sprite_count, 
                           firefly_pos_x - bkg_scroll_x_target, firefly_pos_y - bkg_scroll_y_target,
                           (unsigned char *)fly_offsets);
 }
@@ -125,14 +124,7 @@ void hcoll_darkness(WORD x, WORD y) {
 UBYTE dizzy_drops_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
     game_item * temp_item;
     if (id == ID_FIREFLY) {
-        show_dialog_window(4, &firefly_out);
-        firefly_pos_x = tile_x << 3, firefly_pos_y = tile_y << 3;
-        
-        temp_item = pop_by_id(&item_stack, ID_JAR);
-        if (temp_item) push_last(&inventory_item_list, temp_item);
-                
-        room_dark = 0;
-        return ID_LID;
+        room_dark = 0; firefly_pos_x = (25 * 8); firefly_pos_y = (9 * 8);
     } else if (id == ID_LID) {
         temp_item = find_by_id(&inventory_item_list, ID_JAR);
         if (temp_item) {
@@ -155,5 +147,5 @@ UBYTE dizzy_drops_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
             }
         }
     }
-    return ID_ITEM_NONE;
+    return default_drop(id);
 }

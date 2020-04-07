@@ -73,5 +73,5 @@ UBYTE dylan_gets_key(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
             return ID_ITEM_USED;
         }
     }
-    return ID_ITEM_NONE;
+    return default_drop(id);
 }

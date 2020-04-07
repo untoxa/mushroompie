@@ -1,20 +1,20 @@
 #include "dizzy_types.h"
 
-UBYTE dizzy_live_symbol = 0x00;
-UBYTE dizzy_energy_start = 0x00;
-UBYTE digits_start = 0x00;
+UBYTE dizzy_live_symbol;
+UBYTE dizzy_energy_start;
+UBYTE digits_start;
 
 extern tile_data_t energy_tiles;
 
 UBYTE dizzy_lives;
-unsigned char dizzy_lives_indicator[3] = {0x00, 0x00, 0x00};
-unsigned char dizzy_energy_indicator[8] = {0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
+unsigned char dizzy_lives_indicator[3];
+unsigned char dizzy_energy_indicator[8];
 unsigned char temp_tile_buffer[16];
 const unsigned char const ethalon_indicator[8] = {0, 1, 1, 1, 1, 1, 1, 2};
 const UBYTE const ethalon_tiles_offsets[3] = {0, 9, 18};  
 
 UBYTE coins;
-unsigned char coins_indicator[2] = {0x00, 0x00};
+unsigned char coins_indicator[2];
 
 UBYTE dizzy_energy, dizzy_energy_old;
 UBYTE inc_energy;

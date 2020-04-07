@@ -29,6 +29,8 @@
 #define MIN_DIZZY_Y 0
 #define MAX_DIZZY_Y ((room_height - 2) * 8)
 
+const UBYTE * const ptr_div_reg = (UBYTE *)0xFF04; 
+
 const unsigned char const empty_compressed_map[] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
                                                     0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00}; // 504 rle-compressed nulls to clear screen regions
 
@@ -371,6 +373,8 @@ __endasm;
 #include "include/inventory.h"
 
 // room specific handlers
+#include "rooms/room_defaults.h"
+#include "rooms/room_4_0.h"
 #include "rooms/room_0_1.h"
 #include "rooms/room_1_1.h"
 #include "rooms/room_2_1.h" 
@@ -395,7 +399,7 @@ void init_game() {
     init_dizzy_energy(); show_energy();
     current_room_x = 1, current_room_y = 1; 
     set_room(current_room_y, current_room_x);
-    wait_inventory();
+    wait_vbl_done();
     set_dizzy_animdata(&m_stand_0);            
     dizzy_x = 104, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
@@ -455,7 +459,7 @@ void main() {
     init_game();
         
 // --- debugging --------------
-//current_room_x = 2, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
 //coins = 3; show_coins();
 // ----------------------------
@@ -512,24 +516,29 @@ void main() {
                         }
                     }
                     if (!warning_shown) {
+                        push_bank(1);
                         __temp_game_item3 = show_inventory();
+                        pop_bank();
                         if (__temp_game_item3) {
                             current_item_id = __temp_game_item3->id;
                             pop_by_id(&inventory_item_list, current_item_id);
+
                             // put or use item
                             if (current_room->room_use) {
                                 current_item_id = current_room->room_use(tile_pos_x, tile_pos_y + 1, current_item_id);
-                                if (current_item_id) {
-                                    push_last(&item_stack, __temp_game_item3);
-                                    if (current_item_id == ID_ITEM_USED) {
-                                        __temp_game_item3 = 0;
-                                        redraw_room = 1;
-                                    } else {
-                                        __temp_game_item3 = pop_by_id(&game_item_list, current_item_id);
-                                        if (!__temp_game_item3) __temp_game_item3 = pop_by_id(&item_stack, current_item_id);
-                                    }
+                            } else current_item_id = default_drop(current_item_id);
+
+                            if (current_item_id) {
+                                push_last(&item_stack, __temp_game_item3);
+                                if (current_item_id == ID_ITEM_USED) {
+                                    __temp_game_item3 = 0;
+                                    redraw_room = 1;
+                                } else {
+                                    __temp_game_item3 = pop_by_id(&game_item_list, current_item_id);
+                                    if (!__temp_game_item3) __temp_game_item3 = pop_by_id(&item_stack, current_item_id);
                                 }
-                            } 
+                            }
+                             
                             if (__temp_game_item3) {
                                 __temp_game_item3->room_row = current_room_y, __temp_game_item3->room_col = current_room_x;
                                 __temp_game_item3->x = tile_pos_x, __temp_game_item3->y = tile_pos_y + 1;
@@ -540,7 +549,7 @@ void main() {
                     }
                     if (redraw_room) {
                         push_bank(current_room->bank);
-                        wait_inventory();
+                        wait_vbl_done();
                         if (!current_room->room_customdraw) { 
                             rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
                             place_room_items(current_room_y, current_room_x, coll_buf);
@@ -595,7 +604,7 @@ void main() {
         
         if (ani_update) {
             current_animation = animation[ani_type];
-            wait_inventory();
+            wait_vbl_done();
             set_dizzy_animdata(current_animation->steps[ani_phase]);
             ani_phase++; 
             if (ani_phase >= current_animation->count) {
@@ -622,7 +631,7 @@ void main() {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x);
-                        wait_inventory();
+                        wait_vbl_done();
                         set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;

@@ -40,5 +40,5 @@ UBYTE daisy_gets_mushrooms(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
             return ID_PIE;
         }
     }
-    return ID_ITEM_NONE;
+    return default_drop(id);
 }

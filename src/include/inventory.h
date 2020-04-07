@@ -19,7 +19,7 @@ enum  item_identifiers { ID_ITEM_NONE, ID_PICKAXE, ID_KEY, ID_GRASS, ID_MUSHROOM
 struct game_item game_items[GAME_ITEMS_COUNT];
 
 // items in the game
-items_list game_item_list = {0, 0, 0};
+items_list game_item_list;
 
 // temp variables
 game_item * __temp_game_item;
@@ -32,9 +32,8 @@ unsigned char __temp_text_buf[20];
 unsigned char * __temp_text_ptr;
 
 // inventory
-game_item * inventory_items[3] = {0, 0, 0};
-items_list inventory_item_list = {0, 0, 0};
-items_list item_stack = {0, 0, 0};
+items_list inventory_item_list;
+items_list item_stack;
 
 const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,               1,   1,  3, 10, "HEAVY PICKAXE", &pickaxe_tiles};
 const game_item_desc const itmdesc_key       = {ID_KEY,                   1,   4, 14, 12, "ELEVATOR KEY",  &key_tiles};
@@ -43,9 +42,6 @@ const game_item_desc const itmdesc_mushrooms = {ID_MUSHROOMS,             1,   0
 const game_item_desc const itmdesc_pie       = {ID_PIE,                 255, 255,  0,  0, "MUSHROOM PIE",  &pie_tiles};
 const game_item_desc const itmdesc_jar       = {ID_JAR,                   0,   5,  2, 14, "GLASS JAR",     &jar_tiles};
 const game_item_desc const itmdesc_lid       = {ID_LID,                   0,   2,  7,  4, "WOODEN LID",    &lid_tiles};
-
-//const game_item_desc const itmdesc_jar       = {ID_JAR,                   1,   1,  0,  8, "GLASS JAR",     &jar_tiles};
-//const game_item_desc const itmdesc_lid       = {ID_LID,                   1,   1,  0,  8, "WOODEN LID",    &lid_tiles};
 
 const game_item_desc const itmdesc_firefly   = {ID_FIREFLY,             255, 255,  0,  0, "FIREFLY",       0};
 
@@ -76,10 +72,6 @@ extern tile_data_t pie_tiles;
 extern tile_data_t jar_tiles;
 extern tile_data_t lid_tiles;
 
-const UBYTE const selector_offset[4] = {(6 + title_height), (2 + title_height), (3 + title_height), (4 + title_height)};
-const unsigned char const selector_empty[]  = {0x00};  
-UBYTE inventory_selection, old_inventory_selection;
-
 UBYTE __prepare_text_len;
 UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
     __prepare_text_len = 0;
@@ -93,65 +85,7 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
     return __prepare_text_len;
 }
 
-void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height);
-
-void draw_fancy_frame(UBYTE lines) {
-    __temp_j = ((lines + 4) << 3); __temp_k = ((144 - __temp_j) >> 1);
-    lyc_table[6] = __temp_k; lyc_table[7] = __temp_k + __temp_j;
-    push_bank(1);    
-    draw_fancy_frame_xy(0, title_height, 16, lines);
-    pop_bank();
-}
-
-game_item * show_inventory() {
-    wait_inventory();
-    draw_fancy_frame(5);
-    
-    __temp_i = 0;
-    if (inventory_item_list.size > 0) {
-        __temp_j = (2 + title_height);
-        __temp_game_item = inventory_item_list.first;        
-        while (__temp_game_item) {
-            wait_inventory();
-            inventory_items[__temp_i] = __temp_game_item;
-            set_win_tiles(3, __temp_j, prepare_text(__temp_game_item->desc->name, __temp_text_buf), 1, __temp_text_buf);
-            __temp_i++; __temp_j ++;
-            __temp_game_item = __temp_game_item->next;
-        }
-    } else {
-        set_win_tiles(3, 6, prepare_text("N O T H I N G", __temp_text_buf), 1, __temp_text_buf);
-    }
-    set_win_tiles(5, 9, prepare_text("DON'T DROP", __temp_text_buf), 1, __temp_text_buf);
-    prepare_text("><", __temp_text_buf);
-     
-    inventory_selection = 0, old_inventory_selection = 1;
-     
-    wait_inventory();
-    inventory = 1;    
-    do {
-        if (inventory_selection != old_inventory_selection) {
-            wait_inventory();
-            set_win_tiles(2, selector_offset[old_inventory_selection], 1, 1, selector_empty);
-            set_win_tiles(17, selector_offset[old_inventory_selection], 1, 1, selector_empty);
-            set_win_tiles(2, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[0]);
-            set_win_tiles(17, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[1]);
-            old_inventory_selection = inventory_selection;
-            waitpadup();
-        }
-        joy = joypad();
-        if (joy & (J_UP | J_LEFT)) {
-            if (inventory_selection) inventory_selection--; else inventory_selection = __temp_i;
-        } else if (joy & (J_DOWN | J_RIGHT)) {
-            inventory_selection++; if (inventory_selection > __temp_i) inventory_selection = 0;
-        } else if (joy & J_B) {
-            waitpadup();
-            inventory = 0;
-            if (inventory_selection) return inventory_items[inventory_selection - 1];
-        }
-    } while(inventory);
-    return 0;
-}
-
+game_item * show_inventory();
 void execute_dialog(const UBYTE lines, const dialog_item* item);
 
 void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
@@ -210,6 +144,7 @@ game_item * find_by_room_xy(items_list * list, const UBYTE row, const UBYTE col,
 
 
 void init_game_items() {
+    game_item_list.first = game_item_list.last = game_item_list.size = 0;
     for (__temp_i = 0; __temp_i < GAME_ITEMS_COUNT; __temp_i++) {
         __temp_game_item = &game_items[__temp_i];
         __temp_game_item_desc = all_items_desc[__temp_i];
