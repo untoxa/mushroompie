@@ -151,14 +151,7 @@ void init_dizzy() {
 }
 void set_dizzy_animdata(const s_data * sprite) NONBANKED {
     set_bank(2);
-    __temp_k = (sprite->rev)?S_FLIPX:0;
-    if ((get_sprite_prop(0) & S_FLIPX) != __temp_k) {
-        multiple_clear_sprite_tiles(0, dizzy_sprite_tile_count);
-        multiple_set_sprite_prop(0, dizzy_sprite_count, __temp_k);
-        wait_vbl_done();
-    }
-    for (__temp_i = 0; __temp_i < dizzy_sprite_tile_count; __temp_i++)
-        set_sprite_data(dizzy_sprites_tileoffset + __temp_i, 1, &dizzy_anim_tiles[sprite->data[__temp_i] << 4]);
+    set_sprite_data(dizzy_sprites_tileoffset, dizzy_sprite_count, sprite->data);
 }
 WORD dizzy_old_pos_x = -1, dizzy_old_pos_y = -1; 
 void set_dizzy_position() {
@@ -244,32 +237,33 @@ void set_room(const UBYTE row, const UBYTE col) NONBANKED {
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
     
-    set_bank(current_room->bank);
-    
     // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
     // clear screen to avoid flickering
-    for (__temp_j = 3; __temp_j < (3 + room_height); __temp_j++)
-        rle_decompress_tilemap(rle_decompress_to_bkg, 0, __temp_j, 32, 1, empty_compressed_map);
+    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, empty_compressed_map);
 
+    push_bank(current_room->bank);
     // unshrink background tiles
     unshrink_tiles(0x00, current_room->room_tiles->count, current_room->room_tiles->data); 
+
+    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
+    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
     // init room handler
     if (current_room->room_init) current_room->room_init();
  
-    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
-    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
-
-    // decompress background tiles and collision map
-    rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
-    place_room_items(current_room_y, current_room_x, coll_buf);
-    // draw background
-    set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+    if (!current_room->room_customdraw) { 
+        // decompress tiles and collision map
+        rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+        place_room_items(current_room_y, current_room_x, coll_buf);
+        // draw background
+        set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+    } else current_room->room_customdraw();
     // decompress collision map
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
-
+    pop_bank();
+    
     set_dizzy_position();
 
     enable_interrupts();
@@ -361,9 +355,12 @@ $vblint02:  ld      A, #1
             ret
 __endasm;
 } 
-void wait_inventory() __naked
+void wait_inventory() NONBANKED __naked
 {
 __asm
+$my_vbl00:  ld      A, (#___lcd_int_state)
+            and     #1
+            jr      Z, $my_vbl00
 $my_vbl01:  ld      A, (#___lcd_int_state)
             and     #1
             jr      NZ, $my_vbl01
@@ -398,6 +395,7 @@ void init_game() {
     init_dizzy_energy(); show_energy();
     current_room_x = 1, current_room_y = 1; 
     set_room(current_room_y, current_room_x);
+    wait_inventory();
     set_dizzy_animdata(&m_stand_0);            
     dizzy_x = 104, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
@@ -428,8 +426,8 @@ void main() {
     WX_REG = 7; WY_REG = 0;
         
     set_bank(1);
-    unshrink_tiles(window_tiles_hiwater, title_shrinked_tiles.count, title_shrinked_tiles.data);
-    inventoty_tiles_start = window_tiles_hiwater += title_shrinked_tiles.count;
+    unshrink_tiles(window_tiles_hiwater, title_tiles.count, title_tiles.data);
+    inventoty_tiles_start = window_tiles_hiwater += title_tiles.count;
          
     unshrink_tiles(window_tiles_hiwater, dialog_frame_tiles.count, dialog_frame_tiles.data);
     font_tiles_start = window_tiles_hiwater += dialog_frame_tiles.count;
@@ -457,7 +455,7 @@ void main() {
     init_game();
         
 // --- debugging --------------
-//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 2, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
 //coins = 3; show_coins();
 // ----------------------------
@@ -494,8 +492,15 @@ void main() {
                     tile_pos_x = dizzy_x >> 3, tile_pos_y = dizzy_y >> 3;
                     __temp_game_item3 = find_by_room_xy(&game_item_list, current_room_y, current_room_x, tile_pos_x, tile_pos_y);
                     if (__temp_game_item3) {
-                        current_item_id = __temp_game_item3->desc->id;
-                        if (!(current_item_id & ID_TREASURE)) {
+                        current_item_id = __temp_game_item3->id;
+                        if (current_item_id & ID_TREASURE) {
+                            pop_by_id(&game_item_list, current_item_id);
+                            show_dialog_window(2, &coin_found);
+                            add_coins(1); 
+                            show_coins();
+                            redraw_room = 1;
+                            warning_shown = 1;
+                        } else {
                             if (inventory_item_list.size < 3) {
                                 pop_by_id(&game_item_list, current_item_id);
                                 push_last(&inventory_item_list, __temp_game_item3);
@@ -504,25 +509,27 @@ void main() {
                                 show_dialog_window(2, &too_much_items);
                                 warning_shown = 1;
                             }
-                        } else {
-                            pop_by_id(&game_item_list, current_item_id);
-                            show_dialog_window(2, &coin_found);
-                            add_coins(1); 
-                            show_coins();
-                            redraw_room = 1;
-                            warning_shown = 1;
                         }
                     }
                     if (!warning_shown) {
                         __temp_game_item3 = show_inventory();
                         if (__temp_game_item3) {
-                            current_item_id = __temp_game_item3->desc->id;
+                            current_item_id = __temp_game_item3->id;
                             pop_by_id(&inventory_item_list, current_item_id);
                             // put or use item
                             if (current_room->room_use) {
                                 current_item_id = current_room->room_use(tile_pos_x, tile_pos_y + 1, current_item_id);
-                                if (current_item_id) __temp_game_item3 = pop_by_id(&game_item_list, current_item_id);
-                            }
+                                if (current_item_id) {
+                                    push_last(&item_stack, __temp_game_item3);
+                                    if (current_item_id == ID_ITEM_USED) {
+                                        __temp_game_item3 = 0;
+                                        redraw_room = 1;
+                                    } else {
+                                        __temp_game_item3 = pop_by_id(&game_item_list, current_item_id);
+                                        if (!__temp_game_item3) __temp_game_item3 = pop_by_id(&item_stack, current_item_id);
+                                    }
+                                }
+                            } 
                             if (__temp_game_item3) {
                                 __temp_game_item3->room_row = current_room_y, __temp_game_item3->room_col = current_room_x;
                                 __temp_game_item3->x = tile_pos_x, __temp_game_item3->y = tile_pos_y + 1;
@@ -532,11 +539,15 @@ void main() {
                         }
                     }
                     if (redraw_room) {
-                        set_bank(current_room->bank);
-                        rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
-                        place_room_items(current_room_y, current_room_x, coll_buf);
-                        set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+                        push_bank(current_room->bank);
+                        wait_inventory();
+                        if (!current_room->room_customdraw) { 
+                            rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+                            place_room_items(current_room_y, current_room_x, coll_buf);
+                            set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+                        } else current_room->room_customdraw();
                         rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
+                        pop_bank();
                     }
                 }
             }
@@ -584,7 +595,7 @@ void main() {
         
         if (ani_update) {
             current_animation = animation[ani_type];
-            wait_vbl_done();
+            wait_inventory();
             set_dizzy_animdata(current_animation->steps[ani_phase]);
             ani_phase++; 
             if (ani_phase >= current_animation->count) {
@@ -611,6 +622,7 @@ void main() {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x);
+                        wait_inventory();
                         set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;

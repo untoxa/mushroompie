@@ -1,6 +1,8 @@
+#ifndef __DIZZY_TYTPES_INCLUDE
+#define __DIZZY_TYTPES_INCLUDE
+
 typedef struct {
     UBYTE count;
-    UBYTE rev;
     unsigned char data[];
 } s_data; 
 
@@ -38,3 +40,25 @@ typedef struct dialog_item {
   UBYTE key; 
   struct dialog_item* next;
 } dialog_item;
+
+typedef struct {
+    UBYTE id;
+    UBYTE room_row, room_col, x, y;
+    unsigned char * name;
+    const tile_data_t * data;    
+} game_item_desc;
+
+typedef struct game_item {
+    UBYTE id;
+    UBYTE room_row, room_col, x, y;
+    const game_item_desc * desc;
+    struct game_item * next;
+} game_item;
+
+typedef struct {
+    UBYTE size;
+    game_item * first;
+    game_item * last;
+} items_list;
+
+#endif

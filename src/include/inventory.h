@@ -1,36 +1,21 @@
+#include "dizzy_types.h"
+
 #define title_height 3
-
-#define ITEM_VISIBLE  0x01
-#define ITEM_PICKED   0x02
-#define ITEM_TREASURE 0x04
-
-typedef struct {
-    UBYTE id;
-    UBYTE room_row, room_col, x, y;
-    unsigned char * name;
-    const tile_data_t * data;    
-} game_item_desc;
-
-typedef struct game_item {
-    UBYTE status;
-    UBYTE room_row, room_col, x, y;
-    const game_item_desc * desc;
-    struct game_item * next;
-} game_item;
-
-typedef struct {
-    UBYTE size;
-    game_item * first;
-    game_item * last;
-} items_list;
 
 UBYTE window_tiles_hiwater = 0x80;
 UBYTE inventoty_tiles_start, font_tiles_start;
 
 UBYTE item_tiles_hiwater; // grow down !!!
 
+enum  item_identifiers { ID_ITEM_NONE, ID_PICKAXE, ID_KEY, ID_GRASS, ID_MUSHROOMS, ID_PIE, ID_JAR, ID_LID, ID_FIREFLY,
+                         ID_COIN0, ID_COIN1, ID_COIN2, 
+                         ID_BOULDER0, ID_BOULDER1, ID_BOULDER2, 
+                         __ID_LAST_ITEM };
+#define ID_TREASURE  0x80
+#define ID_ITEM_USED __ID_LAST_ITEM
+
 // all items
-#define GAME_ITEMS_COUNT 11
+#define GAME_ITEMS_COUNT (__ID_LAST_ITEM - 1)
 struct game_item game_items[GAME_ITEMS_COUNT];
 
 // items in the game
@@ -49,31 +34,35 @@ unsigned char * __temp_text_ptr;
 // inventory
 game_item * inventory_items[3] = {0, 0, 0};
 items_list inventory_item_list = {0, 0, 0};
+items_list item_stack = {0, 0, 0};
 
-#define ID_ITEM_NONE 0
-#define ID_PICKAXE   1
-#define ID_KEY       2
-#define ID_MUSHROOMS 4
-#define ID_PIE       5
-#define ID_BOULDER   120
-#define ID_TREASURE  128
-#define ID_ITEM_USED 255
+const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,               1,   1,  3, 10, "HEAVY PICKAXE", &pickaxe_tiles};
+const game_item_desc const itmdesc_key       = {ID_KEY,                   1,   4, 14, 12, "ELEVATOR KEY",  &key_tiles};
+const game_item_desc const itmdesc_grass     = {ID_GRASS,                 1,   4, 14, 12, "TUFT OF GRASS", &grass_tiles};
+const game_item_desc const itmdesc_mushrooms = {ID_MUSHROOMS,             1,   0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
+const game_item_desc const itmdesc_pie       = {ID_PIE,                 255, 255,  0,  0, "MUSHROOM PIE",  &pie_tiles};
+const game_item_desc const itmdesc_jar       = {ID_JAR,                   0,   5,  2, 14, "GLASS JAR",     &jar_tiles};
+const game_item_desc const itmdesc_lid       = {ID_LID,                   0,   2,  7,  4, "WOODEN LID",    &lid_tiles};
 
-const game_item_desc const itmdesc_pickaxe   = {ID_PICKAXE,        1,   0, 19, 13, "HEAVY PICKAXE", &pickaxe_tiles};
-const game_item_desc const itmdesc_key       = {ID_KEY,            1,   4, 14, 12, "ELEVATOR KEY",  &key_tiles};
-const game_item_desc const itmdesc_grass     = {3,                 1,   4, 14, 12, "TUFT OF GRASS", &grass_tiles};
-const game_item_desc const itmdesc_mushrooms = {ID_MUSHROOMS,      1,   0,  7,  6, "MUSHROOMS",     &mushrooms_tiles};
-const game_item_desc const itmdesc_pie       = {ID_PIE,          255, 255,  0,  0, "MUSHROOM PIE",  &pie_tiles};
-const game_item_desc const itmdesc_coin0     = {1 | ID_TREASURE,   1,   1, 18,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin1     = {2 | ID_TREASURE,   0,   0, 20,  5, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_coin2     = {3 | ID_TREASURE,   1,   3,  1,  2, "COIN",          &coin_tiles};
-const game_item_desc const itmdesc_blockage2 = {ID_BOULDER,        1,   1, 18, 10, "BOULDERS",      &blockage2_tiles};
-const game_item_desc const itmdesc_blockage1 = {ID_BOULDER + 1,    1,   1, 17, 10, "BOULDERS",      &blockage1_tiles};
-const game_item_desc const itmdesc_blockage0 = {ID_BOULDER + 2,    1,   1, 17,  9, "BOULDERS",      &blockage0_tiles};
+//const game_item_desc const itmdesc_jar       = {ID_JAR,                   1,   1,  0,  8, "GLASS JAR",     &jar_tiles};
+//const game_item_desc const itmdesc_lid       = {ID_LID,                   1,   1,  0,  8, "WOODEN LID",    &lid_tiles};
 
+const game_item_desc const itmdesc_firefly   = {ID_FIREFLY,             255, 255,  0,  0, "FIREFLY",       0};
+
+// decoration objects 
+const game_item_desc const itmdesc_blockage2 = {ID_BOULDER0,              1,   1, 18, 10, "BOULDERS",      &blockage2_tiles};
+const game_item_desc const itmdesc_blockage1 = {ID_BOULDER1,              1,   1, 17, 10, "BOULDERS",      &blockage1_tiles};
+const game_item_desc const itmdesc_blockage0 = {ID_BOULDER2,              1,   1, 17,  9, "BOULDERS",      &blockage0_tiles};
+
+// treasures
+const game_item_desc const itmdesc_coin0     = {ID_COIN0 | ID_TREASURE,   1,   1, 18,  2, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin1     = {ID_COIN1 | ID_TREASURE,   0,   0, 20,  5, "COIN",          &coin_tiles};
+const game_item_desc const itmdesc_coin2     = {ID_COIN2 | ID_TREASURE,   1,   3,  1,  2, "COIN",          &coin_tiles};
+                                                                                                                                                  
 const game_item_desc * const all_items_desc[GAME_ITEMS_COUNT] = {&itmdesc_pickaxe, &itmdesc_key, &itmdesc_mushrooms, &itmdesc_grass, &itmdesc_pie,
-                                                                 &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2, 
-                                                                 &itmdesc_blockage2, &itmdesc_blockage1, &itmdesc_blockage0};
+                                                                 &itmdesc_jar, &itmdesc_lid, &itmdesc_firefly,
+                                                                 &itmdesc_blockage2, &itmdesc_blockage1, &itmdesc_blockage0,
+                                                                 &itmdesc_coin0, &itmdesc_coin1, &itmdesc_coin2};
 
 extern tile_data_t coin_tiles;
 extern tile_data_t pickaxe_tiles;
@@ -84,24 +73,15 @@ extern tile_data_t blockage0_tiles;
 extern tile_data_t blockage1_tiles;
 extern tile_data_t blockage2_tiles;
 extern tile_data_t pie_tiles;
-
-const unsigned char const dlg_left0[]   = {0x00,0x92};
-const unsigned char const dlg_left1[]   = {0x93,0x94};
-const unsigned char const dlg_left2[]   = {0x00,0x98};
-
-const unsigned char const dlg_right0[]  = {0x92,0x00};
-const unsigned char const dlg_right1[]  = {0x94,0x96};
-const unsigned char const dlg_right2[]  = {0x98,0x00};
-
-const unsigned char const dlg_center[]  = {0xFF,0x95};
-const unsigned char const dlg_vert[]    = {0xFF,0x97}; 
+extern tile_data_t jar_tiles;
+extern tile_data_t lid_tiles;
 
 const UBYTE const selector_offset[4] = {(6 + title_height), (2 + title_height), (3 + title_height), (4 + title_height)};
 const unsigned char const selector_empty[]  = {0x00};  
 UBYTE inventory_selection, old_inventory_selection;
 
 UBYTE __prepare_text_len;
-UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
+UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
     __prepare_text_len = 0;
     while((*src)) {
         if ((*src > ' ') && (*src < '[')) {
@@ -112,45 +92,19 @@ UBYTE prepare_text(const unsigned char * src, unsigned char * dest){
     }
     return __prepare_text_len;
 }
-  
-void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
-    __temp_i = x + 2; __temp_l = __temp_i + width;
-    __temp_j = y;
-    
-    set_win_tiles(x, __temp_j, 2, 1, dlg_left0);
-    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
-    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right0);
-    __temp_j++;
-    
-    set_win_tiles(x, __temp_j, 2, 1, dlg_left1);
-    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, dlg_center);
-    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right1); 
-    __temp_j++;
-    
-    rle_decompress_tilemap(rle_decompress_to_win, x, __temp_j, width + 4, height, empty_compressed_map);
-    rle_decompress_tilemap(rle_decompress_to_win, x + 1, __temp_j, 1, height, dlg_vert);
-    rle_decompress_tilemap(rle_decompress_to_win, __temp_l, __temp_j, 1, height, dlg_vert);
 
-    __temp_j += height;
-    set_win_tiles(x, __temp_j, 2, 1, dlg_left1);
-    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, dlg_center);
-    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right1);
-    __temp_j++;
-    
-    set_win_tiles(x, __temp_j, 2, 1, dlg_left2);
-    rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
-    set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right2);
-}
+void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height);
 
 void draw_fancy_frame(UBYTE lines) {
     __temp_j = ((lines + 4) << 3); __temp_k = ((144 - __temp_j) >> 1);
-    lyc_table[6] = __temp_k; lyc_table[7] = __temp_k + __temp_j;    
+    lyc_table[6] = __temp_k; lyc_table[7] = __temp_k + __temp_j;
+    push_bank(1);    
     draw_fancy_frame_xy(0, title_height, 16, lines);
+    pop_bank();
 }
 
 game_item * show_inventory() {
     wait_inventory();
-    wait_vbl_done();
     draw_fancy_frame(5);
     
     __temp_i = 0;
@@ -175,12 +129,10 @@ game_item * show_inventory() {
     wait_inventory();
     inventory = 1;    
     do {
-        wait_vbl_done();
         if (inventory_selection != old_inventory_selection) {
             wait_inventory();
             set_win_tiles(2, selector_offset[old_inventory_selection], 1, 1, selector_empty);
             set_win_tiles(17, selector_offset[old_inventory_selection], 1, 1, selector_empty);
-            wait_inventory();
             set_win_tiles(2, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[0]);
             set_win_tiles(17, selector_offset[inventory_selection], 1, 1, &__temp_text_buf[1]);
             old_inventory_selection = inventory_selection;
@@ -200,33 +152,11 @@ game_item * show_inventory() {
     return 0;
 }
 
+void execute_dialog(const UBYTE lines, const dialog_item* item);
+
 void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
     push_bank(1);
-    const dialog_item* item_old = 0;
-    if (item) {
-        wait_inventory();
-        wait_vbl_done();
-        draw_fancy_frame(lines);
-        wait_inventory();          // prevent inventory flicking
-        inventory = 1;
-        while (item) {
-            if ((item_old != item) && (item)) {
-                if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, __temp_text_buf), 1, __temp_text_buf);
-                item_old = item;
-            }
-            if (item->key) {
-                wait_vbl_done();
-                joy = joypad();
-                if (joy & item->key) {
-                    waitpadup();
-                    item = item->next;
-                    wait_vbl_done();
-                } 
-            } else item = item->next;
-        }    
-        waitpadup();
-    }
-    inventory = 0;
+    execute_dialog(lines, item);
     pop_bank();
 }
 
@@ -242,13 +172,22 @@ game_item * pop_by_id(items_list * list, const UBYTE id) {
     __temp_game_item2 = 0;
     __temp_game_item = list->first;
     while (__temp_game_item) {
-        if (__temp_game_item->desc->id == id) {
+        if (__temp_game_item->id == id) {
             if (__temp_game_item2) __temp_game_item2->next = __temp_game_item->next; else list->first = __temp_game_item->next;
             if (!__temp_game_item->next) list->last = __temp_game_item2;
             list->size--;
             return __temp_game_item;
         }
         __temp_game_item2 = __temp_game_item;
+        __temp_game_item = __temp_game_item->next;
+    }
+    return 0;
+}
+game_item * find_by_id(items_list * list, const UBYTE id) {
+    if (!list) return 0;
+    __temp_game_item = list->first;
+    while (__temp_game_item) {
+        if (__temp_game_item->id == id) return __temp_game_item;
         __temp_game_item = __temp_game_item->next;
     }
     return 0;
@@ -275,7 +214,7 @@ void init_game_items() {
         __temp_game_item = &game_items[__temp_i];
         __temp_game_item_desc = all_items_desc[__temp_i];
         
-        __temp_game_item->status = ITEM_VISIBLE;
+        __temp_game_item->id = __temp_game_item_desc->id;
  
         __temp_game_item->room_row = __temp_game_item_desc->room_row; 
         __temp_game_item->room_col = __temp_game_item_desc->room_col; 
@@ -286,6 +225,7 @@ void init_game_items() {
         push_last((items_list *)&game_item_list, __temp_game_item);
     }    
     inventory_item_list.first = inventory_item_list.last = inventory_item_list.size = 0;
+    item_stack.first = item_stack.last = item_stack.size = 0;
 }
 
 void place_item_to_room_buf(UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles, unsigned char * room_buf) __naked
@@ -406,10 +346,12 @@ void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf
     while (__temp_game_item) {
         if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
             __temp_tiledata = __temp_game_item->desc->data;
-            item_tiles_hiwater -= __temp_tiledata->count;
-            unshrink_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiledata->data);
-            set_inc_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiles);
-            place_item_to_room_buf(__temp_game_item->x, __temp_game_item->y, 2, 2, __temp_tiles, room_buf);
+            if (__temp_tiledata) {
+                item_tiles_hiwater -= __temp_tiledata->count;
+                unshrink_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiledata->data);
+                set_inc_tiles(item_tiles_hiwater, __temp_tiledata->count, __temp_tiles);
+                place_item_to_room_buf(__temp_game_item->x, __temp_game_item->y, 2, 2, __temp_tiles, room_buf);
+            }
         }
         __temp_game_item = __temp_game_item->next;
     }

@@ -14,7 +14,7 @@ typedef struct {
     room_actions_t room_init, room_actions, room_animations;
     room_checkcoll_t room_h_coll, room_v_coll, room_evil_coll;
     room_useitem_t room_use;
-    room_actions_t room_reset;
+    room_actions_t room_reset, room_customdraw;
 } room_t;
 
 typedef struct {
@@ -23,8 +23,12 @@ typedef struct {
 } world_row;
 
 // room 0_1 handlers
-void init_room0(); void move_bats0(); void draw_bats0();
+void reset_room0_1();
+void init_room0_1(); void move_bats0(); void draw_bats0();
 void coll_bats(WORD x, WORD y);
+void draw_room0_1();
+void hcoll_darkness(WORD x, WORD y);
+UBYTE dizzy_drops_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id);
 // room 1_1 handlers
 void reset_room1();
 void hcoll_blockage(WORD x, WORD y);
@@ -52,19 +56,19 @@ UBYTE daisy_gets_mushrooms(UBYTE tile_x, UBYTE tile_y, UBYTE id);
 const world_row const world_row_0 = {0, {&room_0_0, &room_1_0, &room_2_0, &room_3_0, &room_4_0, &room_5_0}};
 const world_row const world_row_1 = {1, {&room_0_1, &room_1_1, &room_2_1, &room_3_1, &room_4_1, &room_5_1}};
 
-const room_t const room_0_0 = {3, &room_0_0_map, &room_0_0_coll, &room_0_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const room_t const room_1_0 = {3, &room_1_0_map, &room_1_0_coll, &room_1_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const room_t const room_2_0 = {3, &room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-const room_t const room_3_0 = {3, &room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // empty room
-const room_t const room_4_0 = {3, &room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // empty room
-const room_t const room_5_0 = {3, &room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const room_t const room_0_0 = {3, &room_0_0_map, &room_0_0_coll, &room_0_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const room_t const room_1_0 = {3, &room_1_0_map, &room_1_0_coll, &room_1_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const room_t const room_2_0 = {3, &room_2_0_map, &room_2_0_coll, &room_2_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const room_t const room_3_0 = {3, &room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // empty room
+const room_t const room_4_0 = {3, &room_3_0_map, &room_3_0_coll, &room_3_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};  // empty room
+const room_t const room_5_0 = {3, &room_5_0_map, &room_5_0_coll, &room_5_0_tiles, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
 
-const room_t const room_0_1 = {4, &room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles,  &init_room0,  &move_bats0,    &draw_bats0,    0,               0,               &coll_bats, 0,                     0};
-const room_t const room_1_1 = {4, &room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0,                   0,            0,              0,              &hcoll_blockage, &vcoll_blockage, 0,          &cleaning_path,        &reset_room1};
-const room_t const room_2_1 = {4, &room_2_1_map, &room_2_1_coll, &room_2_1_tiles, &enemies_2_1_tiles,  &init_room2,  &move_elevator, &draw_elevator, &hcoll_elevator, &vcoll_dylan,    0,          &dylan_gets_key,       &reset_room2};
-const room_t const room_3_1 = {5, &room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float,    &draw_float3,   &hcoll_float3,   0,               0,          0,                     0};
-const room_t const room_4_1 = {5, &room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &enemies_34_1_tiles, &init_room34, &move_float,    &draw_float4,   &hcoll_float4,   &vcoll_troll,    0,          0,                     &reset_room4};
-const room_t const room_5_1 = {5, &room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0,                   0,            0,              0,              &hcoll_mushroom, &vcoll_daisy,    0,          &daisy_gets_mushrooms, &reset_room5_1};
+const room_t const room_0_1 = {4, &room_0_1_map, &room_0_1_coll, &room_0_1_tiles, &enemies_0_1_tiles,  &init_room0_1, &move_bats0,    &draw_bats0,    &hcoll_darkness, 0,               &coll_bats, &dizzy_drops_firefly,  &reset_room0_1, &draw_room0_1};
+const room_t const room_1_1 = {4, &room_1_1_map, &room_1_1_coll, &room_1_1_tiles, 0,                   0,             0,              0,              &hcoll_blockage, &vcoll_blockage, 0,          &cleaning_path,        &reset_room1,   0};
+const room_t const room_2_1 = {4, &room_2_1_map, &room_2_1_coll, &room_2_1_tiles, &enemies_2_1_tiles,  &init_room2,   &move_elevator, &draw_elevator, &hcoll_elevator, &vcoll_dylan,    0,          &dylan_gets_key,       &reset_room2,   0};
+const room_t const room_3_1 = {5, &room_3_1_map, &room_3_1_coll, &room_3_1_tiles, &enemies_34_1_tiles, &init_room34,  &move_float,    &draw_float3,   &hcoll_float3,   0,               0,          0,                     0,              0};
+const room_t const room_4_1 = {5, &room_4_1_map, &room_4_1_coll, &room_4_1_tiles, &enemies_34_1_tiles, &init_room34,  &move_float,    &draw_float4,   &hcoll_float4,   &vcoll_troll,    0,          0,                     &reset_room4,   0};
+const room_t const room_5_1 = {5, &room_5_1_map, &room_5_1_coll, &room_5_1_tiles, 0,                   0,             0,              0,              &hcoll_mushroom, &vcoll_daisy,    0,          &daisy_gets_mushrooms, &reset_room5_1, 0};
 
 extern rle_data_t  room_0_0_map;
 extern rle_data_t  room_0_0_coll;

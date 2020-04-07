@@ -29,9 +29,9 @@ UBYTE cleaning_path(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
         if (tile_x >= 14) {
             show_dialog_window(2, &cleared_path);
             // remove boulders: 3 items with the same ID
-            pop_by_id(&game_item_list, ID_BOULDER);
-            pop_by_id(&game_item_list, ID_BOULDER + 1);
-            pop_by_id(&game_item_list, ID_BOULDER + 2);
+            pop_by_id(&game_item_list, ID_BOULDER0);
+            pop_by_id(&game_item_list, ID_BOULDER1);
+            pop_by_id(&game_item_list, ID_BOULDER2);
             path_cleaned = 1;
             return ID_ITEM_NONE;
         }

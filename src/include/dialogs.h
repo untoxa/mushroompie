@@ -14,3 +14,6 @@ extern dialog_item troll_toll;
 extern dialog_item cleared_path;    
 extern dialog_item daisy_dialog;    
 extern dialog_item daisy_gives_pie;
+extern dialog_item firefly_out;
+extern dialog_item firefly_caught;
+extern dialog_item darkness_warn;

@@ -1,13 +1,10 @@
+#include "dizzy_types.h"
+
 UBYTE dizzy_live_symbol = 0x00;
 UBYTE dizzy_energy_start = 0x00;
 UBYTE digits_start = 0x00;
 
-const tile_data_t const energy_tiles = {4, {
-0x01, 0x00,0x3F,0x7F,0x7F,0x7F,0x7F,0x3F,0x00,
-0x01, 0x00,0xFF,0xFF,0xFF,0xFF,0xFF,0xFF,0x00,
-0x01, 0x00,0xFC,0xFE,0xFE,0xFE,0xFE,0xFC,0x00,
-0x00
-}};
+extern tile_data_t energy_tiles;
 
 UBYTE dizzy_lives;
 unsigned char dizzy_lives_indicator[3] = {0x00, 0x00, 0x00};
@@ -84,6 +81,7 @@ void show_coins() {
 }
 
 void show_energy() {
+    push_bank(1);
     __temp_k = dizzy_energy;
     for (__temp_i = 0; __temp_i < 8; __temp_i++) {
         if (__temp_k) {
@@ -100,7 +98,8 @@ void show_energy() {
             dizzy_energy_indicator[__temp_i] = 0x00;
         }
     }
-    set_win_tiles(6, 1, sizeof(dizzy_energy_indicator), 1, dizzy_energy_indicator);    
+    set_win_tiles(6, 1, sizeof(dizzy_energy_indicator), 1, dizzy_energy_indicator);
+    pop_bank();
 }
 void update_energy() {
     dizzy_energy_old = dizzy_energy;

@@ -57,3 +57,15 @@ const dialog_item const daisy_gives_pie3    = {10, 4, "DIZZY!", J_B, &daisy_give
 const dialog_item const daisy_gives_pie4    = {0,  5, "-THANK YOU,", 0, &daisy_gives_pie5};
 const dialog_item const daisy_gives_pie5    = {8,  6, "I'LL DO!", J_B, 0};
 
+const dialog_item const firefly_out         = {0, 0, "YOU DROP THE JAR", 0, &firefly_out1};
+const dialog_item const firefly_out1        = {0, 1, "IT OPENS,AND THE", 0, &firefly_out2};
+const dialog_item const firefly_out2        = {1, 2, "FIREFLY BREAKS", 0, &firefly_out3};
+const dialog_item const firefly_out3        = {5, 3, "FREE...", J_B, 0};
+
+const dialog_item const firefly_caught      = {0, 0, "YOU HAVE  CAUGHT", 0, &firefly_caught1};
+const dialog_item const firefly_caught1     = {3, 1, "A FIREFLY!", J_B, 0};
+
+const dialog_item const darkness_warn       = {0, 0, "YOU ENTER A VERY", 0, &darkness_warn1};
+const dialog_item const darkness_warn1      = {0, 1, "DARK  ROOM, EVIL", 0, &darkness_warn2};
+const dialog_item const darkness_warn2      = {2, 2, "RED EYES ARE"    , 0, &darkness_warn3};
+const dialog_item const darkness_warn3      = {0, 3, "SHINING AHEAD...", J_B, 0};
