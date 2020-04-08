@@ -15,16 +15,16 @@ extern unsigned char __temp_text_buf[];
 extern UBYTE inventory;
 extern UBYTE inventoty_tiles_start, font_tiles_start;
 
-const unsigned char const dlg_left0[]   = {0x00,0x92};
-const unsigned char const dlg_left1[]   = {0x93,0x94};
-const unsigned char const dlg_left2[]   = {0x00,0x98};
-
-const unsigned char const dlg_right0[]  = {0x92,0x00};
-const unsigned char const dlg_right1[]  = {0x94,0x96};
-const unsigned char const dlg_right2[]  = {0x98,0x00};
-
-const unsigned char const dlg_center[]  = {0xFF,0x95};
-const unsigned char const dlg_vert[]    = {0xFF,0x97}; 
+const unsigned char const dlg_left0[]   = {0x00,0xE7};  //{0x00,0x92};
+const unsigned char const dlg_left1[]   = {0xE8,0xE9};  //{0x93,0x94};
+const unsigned char const dlg_left2[]   = {0x00,0xED};  //{0x00,0x98};
+                                                        
+const unsigned char const dlg_right0[]  = {0xE7,0x00};  //{0x92,0x00};
+const unsigned char const dlg_right1[]  = {0xE9,0xEB};  //{0x94,0x96};
+const unsigned char const dlg_right2[]  = {0xED,0x00};  //{0x98,0x00};
+                                                        
+const unsigned char const dlg_center[]  = {0xFF,0xEA};  //{0xFF,0x95};
+const unsigned char const dlg_vert[]    = {0xFF,0xEC};  //{0xFF,0x97};
 
 void wait_inventory();
 
@@ -158,3 +158,36 @@ game_item * show_inventory() {
     return 0;
 }
 
+// fade in/out
+
+#define PAL_DEF(C3, C2, C1, C0) ((C0 << 4 << 2) | (C1 << 4) | (C2 << 2) | C3)
+
+UINT8 FadeInOp(UINT16 c, UINT16 i) {
+    return ((c) - (i) & 0x8000u) ? 0: (c - i);
+}
+
+void FadeDMG(UINT8 fadeout) {
+	UINT8 colors[12];
+	UINT8* const pals[] = {(UINT8*)0xFF47, (UINT8*)0xFF48, (UINT8*)0xFF49};
+	UINT8 i, j; 
+	UINT8* c = colors;
+	UINT8 p;
+
+	//Pick current palette colors
+	for(i = 0; i != 3; ++i) {
+		p = (UINT8)*(pals[i]);
+		for(j = 0; j != 8; j += 2, ++c) {
+			*c = (p >> j) & 0x3;
+		}
+	}
+
+	for(i = 0; i != 4; ++i) {
+        p = fadeout ? 3 - i : i;
+        wait_vbl_done();
+		for(j = 0; j != 3; ++j) {
+			c = &colors[j << 2];
+			*pals[j] = PAL_DEF(FadeInOp(c[0], p), FadeInOp(c[1], p), FadeInOp(c[2], p), FadeInOp(c[3], p));
+		}
+		delay(50);
+	}
+}

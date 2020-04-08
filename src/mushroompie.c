@@ -151,7 +151,7 @@ void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
-void set_dizzy_animdata(const s_data * sprite) NONBANKED {
+void set_dizzy_animdata(const s_data * sprite) {
     set_bank(2);
     set_sprite_data(dizzy_sprites_tileoffset, dizzy_sprite_count, sprite->data);
 }
@@ -232,9 +232,13 @@ void check_dizzy_evil_collisions() {
     }
 }
 
-void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf);
+void FadeDMG(UINT8 fadeout);
 
-void set_room(const UBYTE row, const UBYTE col) NONBANKED {
+void default_draw();
+
+void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
+    if (fade) { set_bank(1); BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU; FadeDMG(0); DISPLAY_OFF; } else { HIDE_SPRITES; HIDE_BKG; }
+
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
@@ -242,51 +246,42 @@ void set_room(const UBYTE row, const UBYTE col) NONBANKED {
     // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
-    // clear screen to avoid flickering
-    rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, empty_compressed_map);
-
     push_bank(current_room->bank);
     // unshrink background tiles
     unshrink_tiles(0x00, current_room->room_tiles->count, current_room->room_tiles->data); 
-
-    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
-    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
-
     // init room handler
     if (current_room->room_init) current_room->room_init();
- 
-    if (!current_room->room_customdraw) { 
-        // decompress tiles and collision map
-        rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
-        place_room_items(current_room_y, current_room_x, coll_buf);
-        // draw background
-        set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
-    } else current_room->room_customdraw();
+     // draw room with items
+    if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
     // decompress collision map
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
     pop_bank();
     
     set_dizzy_position();
 
-    enable_interrupts();
+    SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
+    SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
+
+    enable_interrupts();    
+    if (fade) { set_bank(1); DISPLAY_ON; BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU; FadeDMG(1); } else { SHOW_BKG; SHOW_SPRITES; }
 }
 void check_change_room() {
     dizzy_tmp_xy = dizzy_x + delta_x;
     if (dizzy_tmp_xy < MIN_DIZZY_X) {
-        if (current_room_x) { current_room_x--; dizzy_x = MAX_DIZZY_X; set_room(current_room_y, current_room_x); }
+        if (current_room_x) { current_room_x--; dizzy_x = MAX_DIZZY_X; set_room(current_room_y, current_room_x, 1); }
         delta_x = 0;
     } else if (dizzy_tmp_xy > MAX_DIZZY_X) { 
         current_room_x++; 
-        if (current_room_x < WORLD_WIDTH) { dizzy_x = MIN_DIZZY_X; set_room(current_room_y, current_room_x); } else current_room_x = WORLD_WIDTH - 1;
+        if (current_room_x < WORLD_WIDTH) { dizzy_x = MIN_DIZZY_X; set_room(current_room_y, current_room_x, 1); } else current_room_x = WORLD_WIDTH - 1;
         delta_x = 0;
     }
     
     dizzy_tmp_xy = dizzy_y + delta_y;
     if (dizzy_tmp_xy < MIN_DIZZY_Y) {
-        if (current_room_y) { current_room_y--; dizzy_y = MAX_DIZZY_Y; set_room(current_room_y, current_room_x); }
+        if (current_room_y) { current_room_y--; dizzy_y = MAX_DIZZY_Y; set_room(current_room_y, current_room_x, 1); }
     } else if (dizzy_tmp_xy > MAX_DIZZY_Y) {
         current_room_y++; 
-        if (current_room_y < WORLD_HEIGHT) { dizzy_y = MIN_DIZZY_Y; set_room(current_room_y, current_room_x); } else current_room_y = WORLD_HEIGHT - 1;
+        if (current_room_y < WORLD_HEIGHT) { dizzy_y = MIN_DIZZY_Y; set_room(current_room_y, current_room_x, 1); } else current_room_y = WORLD_HEIGHT - 1;
     }    
 }
 
@@ -399,7 +394,7 @@ void init_game() {
     init_dizzy_lives(); show_lives();
     init_dizzy_energy(); show_energy();
     current_room_x = 1, current_room_y = 1; 
-    set_room(current_room_y, current_room_x);
+    set_room(current_room_y, current_room_x, 0);
     wait_vbl_done();
     set_dizzy_animdata(&m_stand_0);            
     dizzy_x = 104, dizzy_y = 72;
@@ -431,29 +426,32 @@ void main() {
     WX_REG = 7; WY_REG = 0;
         
     set_bank(1);
+
+    window_tiles_hiwater = 0;
+    
+    window_tiles_hiwater -= title_tiles.count;
     unshrink_tiles(window_tiles_hiwater, title_tiles.count, title_tiles.data);
-    inventoty_tiles_start = window_tiles_hiwater += title_tiles.count;
-         
+    
+    inventoty_tiles_start = window_tiles_hiwater -= dialog_frame_tiles.count;
     unshrink_tiles(window_tiles_hiwater, dialog_frame_tiles.count, dialog_frame_tiles.data);
-    font_tiles_start = window_tiles_hiwater += dialog_frame_tiles.count;
+    
+    dizzy_energy_start = window_tiles_hiwater -= energy_tiles.count;
+    unshrink_tiles(window_tiles_hiwater, energy_tiles.count, energy_tiles.data);
+
+    font_tiles_start = window_tiles_hiwater -= font_tiles.count;
     digits_start = font_tiles_start + 0x0F;
     dizzy_live_symbol = font_tiles_start + 0x1F;
-
     unshrink_tiles(window_tiles_hiwater, font_tiles.count, font_tiles.data);
-    dizzy_energy_start = window_tiles_hiwater += font_tiles.count;
-
-    unshrink_tiles(window_tiles_hiwater, energy_tiles.count, energy_tiles.data);
-    window_tiles_hiwater += energy_tiles.count;
-
+    
     set_win_tiles(0, 0, 20, 3, title_map);
         
     current_room_x = 1, current_room_y = 1; 
 
-    set_room(current_room_y, current_room_x);
+    enable_interrupts();
+
+    set_room(current_room_y, current_room_x, 0);
 
     SHOW_BKG;
-    
-    enable_interrupts();
     DISPLAY_ON;
     
     show_dialog_window(6, &start_dialog);
@@ -551,11 +549,11 @@ void main() {
                     if (redraw_room) {
                         push_bank(current_room->bank);
                         wait_vbl_done();
-                        if (!current_room->room_customdraw) { 
-                            rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
-                            place_room_items(current_room_y, current_room_x, coll_buf);
-                            set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
-                        } else current_room->room_customdraw();
+                        HIDE_BKG;
+                        // draw room with items
+                        if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
+                        SHOW_BKG;
+                        // restore collision map
                         rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
                         pop_bank();
                     }
@@ -631,7 +629,7 @@ void main() {
                     if (!game_over) {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
-                        set_room(current_room_y, current_room_x);
+                        set_room(current_room_y, current_room_x, 1);
                         wait_vbl_done();
                         set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 

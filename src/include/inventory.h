@@ -2,7 +2,7 @@
 
 #define title_height 3
 
-UBYTE window_tiles_hiwater = 0x80;
+UBYTE window_tiles_hiwater;
 UBYTE inventoty_tiles_start, font_tiles_start;
 
 UBYTE item_tiles_hiwater; // grow down !!!
@@ -275,7 +275,8 @@ __endasm;
 }
 
 void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) NONBANKED {
-    item_tiles_hiwater = 0;
+//    item_tiles_hiwater = 0;
+    item_tiles_hiwater = window_tiles_hiwater;
     push_bank(1);
     __temp_game_item = game_item_list.first;
     while (__temp_game_item) {

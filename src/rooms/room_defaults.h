@@ -1,3 +1,11 @@
+void default_draw() {
+    // decompress tiles and collision map
+    rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+    place_room_items(current_room_y, current_room_x, coll_buf);
+    // draw background
+    set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+}
+
 UBYTE default_drop(UBYTE id) {
     game_item * temp_item;
     if (id == ID_FIREFLY) {
