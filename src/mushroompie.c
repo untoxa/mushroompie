@@ -4,41 +4,25 @@
 
 #include "include/dizzy_types.h"
 
+#define rle_decompress_to_bkg 0
+#define rle_decompress_to_win 1
+
 #include "include/rle_utils.h"
 #include "include/sprite_utils.h"
 
 #include "include/dialogs.h"
 
-#define dizzy_sprite_count 9
-#define dizzy_sprites_tileoffset 0x00U
-#define dizzy_sprite_offset 0x00U
-#define dizzy_sprite_tile_count 9
-
 #include "gfx/title_gfx_data.h"
 #include "gfx/anim_gfx_data.h"
 #include "gfx/rooms_gfx.h"
-
-#define room_width 30
-#define room_height 17
-
-#define rle_decompress_to_bkg 0
-#define rle_decompress_to_win 1
-
-#define MIN_DIZZY_X 0
-#define MAX_DIZZY_X ((room_width - 2) * 8)
-#define MIN_DIZZY_Y 0
-#define MAX_DIZZY_Y ((room_height - 2) * 8)
 
 const UBYTE * const ptr_div_reg = (UBYTE *)0xFF04; 
 
 const unsigned char const empty_compressed_map[] = {0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00,
                                                     0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00, 0xFF, 0x00}; // 504 rle-compressed nulls to clear screen regions
 
-#define evil_sprite_total_count 16
 const spr_ofs_t const evil_hide[evil_sprite_total_count] = {{0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, 
                                                             {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}, {0, 0}};
-#define evil_sprites_tileoffset dizzy_sprite_tile_count
-#define evil_sprite_offset dizzy_sprite_count
           
 unsigned char coll_buf[room_height * room_width];
 const unsigned char * const current_coll_idx[room_height] = {  &coll_buf[0],  &coll_buf[30],  &coll_buf[60],  &coll_buf[90], &coll_buf[120], &coll_buf[150], 
@@ -80,6 +64,9 @@ UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m;
 
 #define MAX_STUN_HEIGHT 32
 UBYTE dizzy_falling = 0, dizzy_stun = 0;
+
+void wait_inventory_2_4();
+void wait_inventory_4();
 
 UBYTE bkg_scroll_x_target, bkg_scroll_y_target;
 WORD __temp_scroll_value;
@@ -151,9 +138,11 @@ void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
-void set_dizzy_animdata(const s_data * sprite) {
-    set_bank(2);
-    set_sprite_data(dizzy_sprites_tileoffset, dizzy_sprite_count, sprite->data);
+void wait_vbl_and_set_dizzy_animdata(const s_data * sprite) {
+    push_bank(2); 
+    wait_inventory_2_4();
+    set_sprite_data(dizzy_sprites_tileoffset, dizzy_sprite_count, sprite->data); 
+    pop_bank();
 }
 WORD dizzy_old_pos_x = -1, dizzy_old_pos_y = -1; 
 void set_dizzy_position() {
@@ -185,7 +174,7 @@ void check_dizzy_collisions() {
                 if (tile_pos_oy > 4) delta_y = 0;
             } else if ((collision_buf[0] == 5) || (collision_buf[1] == 5) || (collision_buf[2] == 5)) {
                 cloud_timer++; cloud_timer &= 3;
-                if (cloud_timer) delta_y = 0;
+                if (cloud_timer) { delta_y = 0; dizzy_falling = 0; dizzy_stun = 0; } // clouds are really soft and fluffy
             } else {
                 is_position_safe = 0;
                 if (!current_dyn) {
@@ -216,7 +205,7 @@ void check_dizzy_collisions() {
         if ((collision_buf[0] == 1) || (collision_buf[0] == 2) || (collision_buf[1] == 1)) {
             delta_x = 0;
         }
-    }
+    }  
 }
 
 void check_dizzy_evil_collisions() {
@@ -233,8 +222,8 @@ void check_dizzy_evil_collisions() {
 }
 
 void FadeDMG(UBYTE fadeout, UBYTE bgp, UBYTE obp0, UBYTE obp1);
-#define FADE_OUT set_bank(1),FadeDMG(0, 0x93U, 0x2CU, 0x2CU)
-#define FADE_IN set_bank(1),FadeDMG(1, 0x93U, 0x2CU, 0x2CU)
+#define FADE_OUT push_bank(1),FadeDMG(0, 0x93U, 0x2CU, 0x2CU),pop_bank()
+#define FADE_IN push_bank(1),FadeDMG(1, 0x93U, 0x2CU, 0x2CU),pop_bank()
 
 void default_draw();
 
@@ -245,11 +234,11 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
+    set_bank(current_room->bank);
     
     // hide all possible evil sprites
     multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);
 
-    push_bank(current_room->bank);
     // unshrink background tiles
     unshrink_tiles(0x00, current_room->room_tiles->count, current_room->room_tiles->data); 
     // init room handler
@@ -258,7 +247,6 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
     // decompress collision map
     rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
-    pop_bank();
     
     set_dizzy_position();
 
@@ -310,7 +298,6 @@ __asm
             ld      A, H
             adc     #0
             ld      H, A                    ; HL = &lyc_table[__lcd_int_state]
-            
             ld      A,(HL)
             ldh     (#_LYC_REG), A          ; setting next interrupt row
             
@@ -356,15 +343,27 @@ $vblint02:  ld      A, #1
             ret
 __endasm;
 } 
-void wait_inventory() NONBANKED __naked
+void wait_inventory_2_4() NONBANKED __naked
 {
 __asm
-$my_vbl00:  ld      A, (#___lcd_int_state)
+$my_vbl200: ld      A, (#___lcd_int_state)
             and     #1
-            jr      Z, $my_vbl00
-$my_vbl01:  ld      A, (#___lcd_int_state)
+            jr      Z, $my_vbl200
+$my_vbl201: ld      A, (#___lcd_int_state)
             and     #1
-            jr      NZ, $my_vbl01
+            jr      NZ, $my_vbl201
+            ret
+__endasm;
+}
+void wait_inventory_4() NONBANKED __naked
+{
+__asm
+$my_vbl400: ld      A, (#___lcd_int_state)
+            or      A
+            jr      Z, $my_vbl400
+$my_vbl401: ld      A, (#___lcd_int_state)
+            or      A
+            jr      NZ, $my_vbl401
             ret
 __endasm;
 }
@@ -372,39 +371,36 @@ __endasm;
 #include "include/inventory.h"
 #include "include/room_defaults.h"
 
-#include "rooms/room_4_0.h"
-#include "rooms/room_5_0.h"
-#include "rooms/room_0_1.h"
-#include "rooms/room_1_1.h"
-#include "rooms/room_2_1.h" 
-#include "rooms/room_34_1.h"
-#include "rooms/room_5_1.h" 
-
 void reset_world() {
     for (UBYTE row = 0; row < WORLD_HEIGHT; row++) {
         for (UBYTE col = 0; col < WORLD_WIDTH; col++) {
             const room_t * cur_room = dizzy_world[row]->rooms[col];
-            if ((cur_room) && (cur_room->room_reset)) cur_room->room_reset();
+            if ((cur_room) && (cur_room->room_reset)) push_bank(cur_room->bank),cur_room->room_reset(),pop_bank();
         }
     }
 }
 
 void init_game() {
     FADE_OUT;
+    // reset world
     reset_world();
+    // initializa game items
     init_game_items();
+    // lives, energy and treasures
     game_over = 0;
     init_dizzy_coins(); show_coins();
     init_dizzy_lives(); show_lives();
     init_dizzy_energy(); show_energy();
+    // set room
     current_room_x = 1, current_room_y = 1; 
-    set_room(current_room_y, current_room_x, 0);
-    wait_vbl_done();
-    set_dizzy_animdata(&m_stand_0);            
+    set_room(current_room_y, current_room_x, 0);    
+    // set dizzy animation data
+    wait_vbl_and_set_dizzy_animdata(&m_stand_0);
+    // set dizzy position
     dizzy_x = 104, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
     set_dizzy_position();
-
+    // wait a moment and fade in
     delay(200);
     FADE_IN;
 }
@@ -469,7 +465,7 @@ void main() {
     init_game();
         
 // --- debugging --------------
-//current_room_x = 5, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x); //dizzy_y = 30; // set any for debugging
+//current_room_x = 4, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x, 1); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
 //coins = 3; show_coins();
 // ----------------------------
@@ -526,9 +522,7 @@ void main() {
                         }
                     }
                     if (!warning_shown) {
-                        push_bank(1);
                         __temp_game_item3 = show_inventory();
-                        pop_bank();
                         if (__temp_game_item3) {
                             current_item_id = __temp_game_item3->id;
                             pop_by_id(&inventory_item_list, current_item_id);
@@ -558,15 +552,13 @@ void main() {
                         }
                     }
                     if (redraw_room) {
-                        push_bank(current_room->bank);
                         wait_vbl_done();
-                        HIDE_BKG;
+                        FADE_OUT;
                         // draw room with items
                         if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
-                        SHOW_BKG;
+                        FADE_IN;
                         // restore collision map
                         rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
-                        pop_bank();
                     }
                 }
             }
@@ -614,8 +606,7 @@ void main() {
         
         if (ani_update) {
             current_animation = animation[ani_type];
-            wait_vbl_done();
-            set_dizzy_animdata(current_animation->steps[ani_phase]);
+            wait_vbl_and_set_dizzy_animdata(current_animation->steps[ani_phase]);
             ani_phase++; 
             if (ani_phase >= current_animation->count) {
                 if ((dizzy_stun) && (ani_type != ANI_DEAD)) {
@@ -641,8 +632,7 @@ void main() {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x, 1);
-                        wait_vbl_done();
-                        set_dizzy_animdata(&m_stand_0);
+                        wait_vbl_and_set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
                     } else {

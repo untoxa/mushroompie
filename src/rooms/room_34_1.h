@@ -59,7 +59,7 @@ void draw_float4() {
 }
 void hcoll_float3(WORD x, WORD y) {
     if (delta_y >= 0) {
-        if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {
+        if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {            
             if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
                 tile_pos_x = x >> 3; tile_pos_ox = (x - float3_pos_x) & 7;
                 tile_pos_y = y >> 3; tile_pos_oy = y & 7;

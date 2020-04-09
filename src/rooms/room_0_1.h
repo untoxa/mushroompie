@@ -1,5 +1,3 @@
-#include "flies.h"
-
 const spr_ofs_t const bat1_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 const spr_ofs_t const bat2_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 #define bat_sprite_count 2

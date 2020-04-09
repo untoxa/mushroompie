@@ -1,8 +1,6 @@
 const spr_ofs_t const dizzy_offsets[dizzy_sprite_count] = {{0x26, 0x04}, {0x2E, 0x04}, {0x26, 0x0C},
                                                            {0x2E, 0x0C}, {0x26, 0x14}, {0x2E, 0x14},
                                                            {0x36, 0x04}, {0x36, 0x0C}, {0x36, 0x14}};
-
-enum  animation_type { ANI_STAND, ANI_UP, ANI_WALK_R, ANI_WALK_L, ANI_ROLL_R, ANI_ROLL_L, ANI_STUN, ANI_DEAD, ANI_JUMP_R, ANI_JUMP_L };
       
 const ani_data const stand_ani  = { 2, 0, 255, ANI_STAND,  ANI_STAND,  {&m_stand_0, &m_stand_1}};
 const ani_data const up_ani     = {16, 0,   0, ANI_STAND,  ANI_UP,     {&m_stand_0, &m_up_0, &m_up_1, &m_up_2, &m_up_3, &m_up_4, &m_up_5, &m_up_6, 

@@ -1,5 +1,11 @@
 #include <gb/gb.h>
 #include "include/dizzy_types.h"
+#include "include/dialogs.h"
+
+#include "rooms/room.h"
+#include "rooms/room_0_1.h"
+#include "rooms/room_1_1.h"
+#include "rooms/room_2_1.h" 
 
 const rle_data_t const room_0_1_map = {337, {
 0x01,0x02,0x03,0x04,0x05,0x06,0x07,0x08,0x09,0x0A,0x0B,0x0C,0x0D,0x0E,0x0F,0x10,

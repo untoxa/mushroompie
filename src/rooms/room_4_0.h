@@ -1,5 +1,3 @@
-#include "flies.h"
-
 #define fly_sprite_offset0 evil_sprite_offset
 
 fly_coord_t flies[3]; // = {{(14 * 8), (5 * 8)}, {(6 * 8), (9 * 8)}, {(22 * 8), (12 * 8)}};

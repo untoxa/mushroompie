@@ -6,16 +6,7 @@ UBYTE window_tiles_hiwater;
 UBYTE inventoty_tiles_start, font_tiles_start;
 
 UBYTE item_tiles_hiwater; // grow down !!!
-
-enum  item_identifiers { ID_ITEM_NONE, ID_PICKAXE, ID_KEY, ID_GRASS, ID_MUSHROOMS, ID_PIE, ID_JAR, ID_LID, ID_FIREFLY,
-                         ID_COIN0, ID_COIN1, ID_COIN2, 
-                         ID_BOULDER0, ID_BOULDER1, ID_BOULDER2, 
-                         __ID_LAST_ITEM };
-#define ID_TREASURE  0x80
-#define ID_ITEM_USED __ID_LAST_ITEM
-
 // all items
-#define GAME_ITEMS_COUNT (__ID_LAST_ITEM - 1)
 struct game_item game_items[GAME_ITEMS_COUNT];
 
 // items in the game
@@ -72,26 +63,19 @@ extern tile_data_t pie_tiles;
 extern tile_data_t jar_tiles;
 extern tile_data_t lid_tiles;
 
-UBYTE __prepare_text_len;
-UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
-    __prepare_text_len = 0;
-    while((*src)) {
-        if ((*src > ' ') && (*src < '[')) {
-            *dest++ = *src - (' ' + 1) + font_tiles_start;
-        } else *dest++ = 0;
-        src++;
-        __prepare_text_len++;
-    }
-    return __prepare_text_len;
-}
-
-game_item * show_inventory();
 void execute_dialog(const UBYTE lines, const dialog_item* item);
-
 void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
     push_bank(1);
     execute_dialog(lines, item);
     pop_bank();
+}
+
+game_item * execute_inventory();
+game_item * show_inventory() NONBANKED {
+    push_bank(1);
+    game_item * res = execute_inventory();
+    pop_bank();
+    return res;
 }
 
 void push_last(items_list * list, game_item * item) {

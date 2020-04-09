@@ -1,16 +1,9 @@
-unsigned char banks[8];
-unsigned char * banks_sp = banks;
+#ifndef __BANKS_STACK_INCLUDE
+#define __BANKS_STACK_INCLUDE
 
-void push_bank(const unsigned char n) NONBANKED {
-    *(++banks_sp) = n;
-    SWITCH_ROM_MBC1(n);
-}
+void push_bank(const unsigned char n);
+void pop_bank();
+void set_bank(const unsigned char n);
+unsigned char get_bank();
 
-void pop_bank() NONBANKED {
-    SWITCH_ROM_MBC1(*(--banks_sp));
-}
-
-void set_bank(const unsigned char n) NONBANKED {
-    *banks_sp = n;
-    SWITCH_ROM_MBC1(n);
-}
+#endif

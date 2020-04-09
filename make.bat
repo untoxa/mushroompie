@@ -15,8 +15,13 @@ if not exist %OBJ% mkdir %OBJ%
 
 echo COMPILING WITH SDCC4...
 
+@rem --- stub ----------------
 call sdcc4\sdcc-assemble.bat %OBJ%\sdcc4_stub.rel sdcc4\sdcc4stub\__sdcc_call_hl.s
 
+@rem --- library -------------
+call sdcc4\sdcc-compile.bat src\00_bank_stack.c -o %OBJ%\00_bank_stack.rel
+
+@rem --- resources -----------
 call sdcc4\sdcc-compile.bat src\00_title_gfx_data.c -bo1 -o %OBJ%\00_title_gfx_data.rel
 call sdcc4\sdcc-compile.bat src\00_dialogs_data.c -bo1 -o %OBJ%\00_dialogs_data.rel
 call sdcc4\sdcc-compile.bat src\00_misc_routines.c -bo1 -o %OBJ%\00_misc_routines.rel
@@ -25,10 +30,11 @@ call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data0.c -bo3 -o %OBJ%\02_rooms_gfx_
 call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_0.c -bo4 -o %OBJ%\02_rooms_gfx_data1_0.rel
 call sdcc4\sdcc-compile.bat src\02_rooms_gfx_data1_1.c -bo5 -o %OBJ%\02_rooms_gfx_data1_1.rel
 
+@rem --- game ----------------
 call sdcc4\sdcc-compile.bat src\%PROJ%.c -o %OBJ%\%PROJ%.rel
 
 echo LINKING WITH GBDK...
 
-%GBDK%\bin\link-gbz80.exe -n -- -z -m -j -yt1 -yo8 -k%GBDKLIB%\gbz80\ -lgbz80.lib -k%GBDKLIB%\gb\ -lgb.lib mushroompie.gb %GBDKLIB%\gb\crt0.o build\sdcc4_stub.rel build\00_title_gfx_data.rel %OBJ%\00_dialogs_data.rel %OBJ%\00_misc_routines.rel build\01_anim_gfx_data.rel build\02_rooms_gfx_data0.rel build\02_rooms_gfx_data1_0.rel build\02_rooms_gfx_data1_1.rel build\mushroompie.rel
+%GBDK%\bin\link-gbz80.exe -n -- -z -m -j -yt1 -yo8 -k%GBDKLIB%\gbz80\ -lgbz80.lib -k%GBDKLIB%\gb\ -lgb.lib mushroompie.gb %GBDKLIB%\gb\crt0.o build\sdcc4_stub.rel %OBJ%\00_bank_stack.rel build\00_title_gfx_data.rel %OBJ%\00_dialogs_data.rel %OBJ%\00_misc_routines.rel build\01_anim_gfx_data.rel build\02_rooms_gfx_data0.rel build\02_rooms_gfx_data1_0.rel build\02_rooms_gfx_data1_1.rel build\mushroompie.rel
 
 echo DONE!

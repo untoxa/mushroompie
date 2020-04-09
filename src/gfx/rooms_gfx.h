@@ -1,26 +1,9 @@
 #define WORLD_WIDTH 6
 #define WORLD_HEIGHT 2
 
-typedef void (*room_actions_t)();
-typedef void (*room_checkcoll_t)(WORD x, WORD y);
-typedef UBYTE (*room_useitem_t)(UBYTE tile_x, UBYTE tile_y, UBYTE id);
-
-typedef struct {
-    UBYTE bank;
-    rle_data_t * room_map;
-    rle_data_t * room_coll_map;
-    tile_data_t * room_tiles;
-    tile_data_t * raw_enemies_tiles;
-    room_actions_t room_init, room_actions, room_animations;
-    room_checkcoll_t room_h_coll, room_v_coll, room_evil_coll;
-    room_useitem_t room_use;
-    room_actions_t room_reset, room_customdraw;
-} room_t;
-
-typedef struct {
-    UBYTE width;
-    room_t * rooms[];
-} world_row;
+// fly coordinates and dynamics
+const spr_ofs_t const fly_offsets[] = {{0x28, 0x08}};
+const WORD const fly_delta[8] = { -4, -3, -2, 0, 0, 2, 3, 4 };
 
 // room default handlers
 UBYTE default_drop(UBYTE id);

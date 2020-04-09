@@ -26,12 +26,23 @@ const unsigned char const dlg_right2[]  = {0xED,0x00};  //{0x98,0x00};
 const unsigned char const dlg_center[]  = {0xFF,0xEA};  //{0xFF,0x95};
 const unsigned char const dlg_vert[]    = {0xFF,0xEC};  //{0xFF,0x97};
 
-void wait_inventory();
+void wait_inventory_2_4();
+void wait_inventory_4();
 
 void rle_decompress_tilemap(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles);
 
-void draw_fancy_frame(UBYTE lines);
-UBYTE prepare_text(const unsigned char * src, unsigned char * dest);
+UBYTE __prepare_text_len;
+UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
+    __prepare_text_len = 0;
+    while((*src)) {
+        if ((*src > ' ') && (*src < '[')) {
+            *dest++ = *src - (' ' + 1) + font_tiles_start;
+        } else *dest++ = 0;
+        src++;
+        __prepare_text_len++;
+    }
+    return __prepare_text_len;
+}
 
 void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
     __temp_i = x + 2; __temp_l = __temp_i + width;
@@ -75,11 +86,11 @@ void execute_dialog(const UBYTE lines, const dialog_item* item) {
     const dialog_item* item_old = 0;
     if (item) {
         draw_fancy_frame(lines);
-        wait_inventory();          // prevent inventory flicking
+        wait_inventory_4();          // prevent inventory flicking
         inventory = 1;
         while (item) {
             if ((item_old != item) && (item)) {
-                wait_vbl_done();
+                wait_inventory_4();
                 if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, __temp_text_buf), 1, __temp_text_buf);
                 item_old = item;
             }
@@ -93,6 +104,7 @@ void execute_dialog(const UBYTE lines, const dialog_item* item) {
         }    
         waitpadup();
     }
+    wait_inventory_4();
     inventory = 0;
 }
 
@@ -107,15 +119,15 @@ extern game_item * __temp_game_item;
 game_item * inventory_items[3];
 UBYTE inventory_selection, old_inventory_selection;
 UBYTE inventory_joy;
-game_item * show_inventory() {
+game_item * execute_inventory() {
     draw_fancy_frame(5);
     
+    wait_inventory_4();
     __temp_i = 0;
     if (inventory_item_list.size > 0) {
         __temp_j = (2 + title_height);
         __temp_game_item = inventory_item_list.first;        
-        while (__temp_game_item) {
-            wait_inventory();
+        while (__temp_game_item) {            
             inventory_items[__temp_i] = __temp_game_item;
             set_win_tiles(3, __temp_j, prepare_text(__temp_game_item->desc->name, __temp_text_buf), 1, __temp_text_buf);
             __temp_i++; __temp_j ++;
@@ -129,15 +141,14 @@ game_item * show_inventory() {
      
     inventory_selection = 0, old_inventory_selection = 1;
      
-    wait_inventory();
+    wait_inventory_4();
     inventory = 1;    
     do {
         if (inventory_selection != old_inventory_selection) {
             __temp_l = selector_offset[old_inventory_selection], __temp_k = selector_offset[inventory_selection];
-            wait_vbl_done();
+            wait_inventory_4();
             set_win_tiles(2, __temp_l, 1, 1, selector_empty);
             set_win_tiles(17, __temp_l, 1, 1, selector_empty);
-            wait_vbl_done();
             set_win_tiles(2, __temp_k, 1, 1, __temp_text_buf);
             set_win_tiles(17, __temp_k, 1, 1, __temp_text_buf + 1);
 
@@ -151,6 +162,7 @@ game_item * show_inventory() {
             inventory_selection++; if (inventory_selection > __temp_i) inventory_selection = 0;
         } else if (inventory_joy & J_B) {
             waitpadup();
+            wait_inventory_4();
             inventory = 0;
             if (inventory_selection) return inventory_items[inventory_selection - 1];
         }
