@@ -158,36 +158,58 @@ game_item * show_inventory() {
     return 0;
 }
 
-// fade in/out
+// fade to black
 
-#define PAL_DEF(C3, C2, C1, C0) ((C0 << 4 << 2) | (C1 << 4) | (C2 << 2) | C3)
+UBYTE FadeStep(UBYTE pal, UBYTE step) __naked {
+    pal; step;
+__asm
+            lda     HL, 3(SP)
+            ld      A, (HL-)
+            ld      E, (HL)
+            or      A
+            jr      Z, $fadeout03
+            ld      D, A
+            push    BC
+$fadeout00: 
+            ld      B, #4
+$fadeout01:
+            ld      A, E
+            and     #3
+            cp      #3
+            jr      Z, $fadeout02
+            inc     A
+           
+$fadeout02: srl     A
+            rr      C
+            srl     A
+            rr      C
+            
+            srl     E
+            srl     E
 
-UINT8 FadeInOp(UINT16 c, UINT16 i) {
-    return ((c) - (i) & 0x8000u) ? 0: (c - i);
+            dec     B
+            jr      NZ, $fadeout01
+
+            ld      E, C
+
+            dec     D
+            jr      NZ, $fadeout00
+            pop     BC                    
+            ret   
+            
+$fadeout03: ld      D, #0
+            ret
+__endasm;
 }
 
-void FadeDMG(UINT8 fadeout) {
-	UINT8 colors[12];
-	UINT8* const pals[] = {(UINT8*)0xFF47, (UINT8*)0xFF48, (UINT8*)0xFF49};
-	UINT8 i, j; 
-	UINT8* c = colors;
-	UINT8 p;
-
-	//Pick current palette colors
-	for(i = 0; i != 3; ++i) {
-		p = (UINT8)*(pals[i]);
-		for(j = 0; j != 8; j += 2, ++c) {
-			*c = (p >> j) & 0x3;
-		}
-	}
-
-	for(i = 0; i != 4; ++i) {
-        p = fadeout ? 3 - i : i;
+void FadeDMG(UBYTE dir, UBYTE bgp, UBYTE obp0, UBYTE obp1) {
+	UBYTE j; 
+    for (UBYTE i = 0; i < 4; i++) {
+        if (dir) j = 3 - i; else j = i;
         wait_vbl_done();
-		for(j = 0; j != 3; ++j) {
-			c = &colors[j << 2];
-			*pals[j] = PAL_DEF(FadeInOp(c[0], p), FadeInOp(c[1], p), FadeInOp(c[2], p), FadeInOp(c[3], p));
-		}
-		delay(50);
-	}
+        BGP_REG  = FadeStep(bgp,  j); 
+        OBP0_REG = FadeStep(obp0, j); 
+        OBP1_REG = FadeStep(obp1, j);
+        delay(50);
+    }
 }

@@ -232,12 +232,15 @@ void check_dizzy_evil_collisions() {
     }
 }
 
-void FadeDMG(UINT8 fadeout);
+void FadeDMG(UBYTE fadeout, UBYTE bgp, UBYTE obp0, UBYTE obp1);
+#define FADE_OUT set_bank(1),FadeDMG(0, 0x93U, 0x2CU, 0x2CU)
+#define FADE_IN set_bank(1),FadeDMG(1, 0x93U, 0x2CU, 0x2CU)
 
 void default_draw();
 
 void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
-    if (fade) { set_bank(1); BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU; FadeDMG(0); DISPLAY_OFF; } else { HIDE_SPRITES; HIDE_BKG; }
+    if (fade) FADE_OUT;
+    HIDE_SPRITES; HIDE_BKG;
 
     wait_vbl_done();
     disable_interrupts();
@@ -263,7 +266,8 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
     enable_interrupts();    
-    if (fade) { set_bank(1); DISPLAY_ON; BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU; FadeDMG(1); } else { SHOW_BKG; SHOW_SPRITES; }
+    SHOW_BKG; SHOW_SPRITES;
+    if (fade) FADE_IN;
 }
 void check_change_room() {
     dizzy_tmp_xy = dizzy_x + delta_x;
@@ -366,9 +370,8 @@ __endasm;
 }
 
 #include "include/inventory.h"
+#include "include/room_defaults.h"
 
-// room specific handlers
-#include "rooms/room_defaults.h"
 #include "rooms/room_4_0.h"
 #include "rooms/room_5_0.h"
 #include "rooms/room_0_1.h"
@@ -387,6 +390,7 @@ void reset_world() {
 }
 
 void init_game() {
+    FADE_OUT;
     reset_world();
     init_game_items();
     game_over = 0;
@@ -400,6 +404,9 @@ void init_game() {
     dizzy_x = 104, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
     set_dizzy_position();
+
+    delay(200);
+    FADE_IN;
 }
 
 void main() {
@@ -416,8 +423,8 @@ void main() {
     
     set_interrupts(VBL_IFLAG | LCD_IFLAG);
     
-    // load palettes
-    BGP_REG = 0x93U; OBP0_REG = OBP1_REG = 0x2CU;
+    // make screen black
+    BGP_REG = OBP0_REG = OBP1_REG = 0xFF;
     
     SPRITES_8x8;
     init_dizzy();
@@ -454,7 +461,11 @@ void main() {
     SHOW_BKG;
     DISPLAY_ON;
     
+    // fade to notmal palette
+    FADE_IN;
+     
     show_dialog_window(6, &start_dialog);
+    
     init_game();
         
 // --- debugging --------------
