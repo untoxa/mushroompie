@@ -48,7 +48,7 @@ void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
     __temp_i = x + 2; __temp_l = __temp_i + width;
     __temp_j = y;
     
-    wait_vbl_done();
+    wait_inventory_4();
     set_win_tiles(x, __temp_j, 2, 1, dlg_left0);
     rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
     set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right0);
@@ -60,7 +60,11 @@ void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
     __temp_j++;
     
     rle_decompress_tilemap(rle_decompress_to_win, x, __temp_j, width + 4, height, empty_compressed_map);
+
+    wait_inventory_4();
     rle_decompress_tilemap(rle_decompress_to_win, x + 1, __temp_j, 1, height, dlg_vert);
+
+    wait_inventory_4();
     rle_decompress_tilemap(rle_decompress_to_win, __temp_l, __temp_j, 1, height, dlg_vert);
 
     __temp_j += height;

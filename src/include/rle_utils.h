@@ -184,7 +184,7 @@ $decomp02:  push    BC          ; Store source
             or      E
             jr      Z, $decomp03
 
-            ld      BC, #0x20   ; One line is 20 tiles
+            ld      BC, #0x20   ; One line is 20h tiles
 $decomp04:  add     HL, BC      ; Y coordinate
             dec     E
             jr      NZ, $decomp04
@@ -250,7 +250,7 @@ $decomp0A:  ldh     A, (#_STAT_REG)
             jr      Z,$decomp06
 
             push    BC          ; Next line
-            ld      BC, #0x20   ; One line is 20 tiles
+            ld      BC, #0x20   ; One line is 20h tiles
             add     HL,BC
             pop     BC
 
