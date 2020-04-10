@@ -62,7 +62,8 @@ typedef struct {
     UBYTE id;
     UBYTE room_row, room_col, x, y;
     unsigned char * name;
-    const tile_data_t * data;    
+    const tile_data_t * data;
+    const tile_data_t * mask;    
 } game_item_desc;
 
 typedef struct game_item {

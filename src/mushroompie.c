@@ -554,8 +554,10 @@ void main() {
                     if (redraw_room) {
                         wait_vbl_done();
                         FADE_OUT;
+                        disable_interrupts();
                         // draw room with items
                         if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
+                        enable_interrupts();
                         FADE_IN;
                         // restore collision map
                         rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
