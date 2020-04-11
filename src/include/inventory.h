@@ -11,6 +11,7 @@ UBYTE window_tiles_hiwater;
 UBYTE inventoty_tiles_start, font_tiles_start;
 
 UBYTE item_tiles_hiwater; // grow down !!!
+
 // all items
 struct game_item game_items[GAME_ITEMS_COUNT];
 
@@ -18,15 +19,13 @@ struct game_item game_items[GAME_ITEMS_COUNT];
 items_list game_item_list;
 
 // temp variables
-game_item * __temp_game_item;
-game_item * __temp_game_item2;
-game_item * __temp_game_item3;
+game_item * __temp_game_item, * __temp_game_item2, * __temp_game_item3;
 const game_item_desc * __temp_game_item_desc;
 const tile_data_t * __temp_tiledata;
 unsigned char __temp_tiles[item_map_size], __temp_bkg_tiles[item_map_size];
 unsigned char __temp_item_tiledata0[item_tiledata_size], __temp_item_tiledata1[item_tiledata_size], __temp_item_tiledata2[item_tiledata_size];
 unsigned char __temp_text_buf[20];
-unsigned char * __temp_text_ptr;
+unsigned char * __temp_text_ptr0, * __temp_text_ptr1, * __temp_text_ptr2;
 
 // inventory
 items_list inventory_item_list;
@@ -156,7 +155,6 @@ void init_game_items() {
 }
 
 void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) NONBANKED {
-//    item_tiles_hiwater = 0;
     item_tiles_hiwater = window_tiles_hiwater;
     __temp_game_item = game_item_list.first;
     while (__temp_game_item) {
@@ -174,17 +172,24 @@ void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf
                 
                 // get tiles under the item
                 get_map_from_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_bkg_tiles, room_buf, room_width, room_height);
-                // merge tiledata with itemdata
                 
-                __temp_text_ptr = __temp_item_tiledata1;
+                // merge tiledata with itemdata                
+                // get background tiles of the copied region of the room map
+                __temp_j = current_room->room_tiles->count;
+                __temp_text_ptr1 = __temp_item_tiledata1;
                 for (__temp_i = 0; __temp_i < item_map_size; __temp_i++) {
-                    __temp_bkg_tiles[__temp_i] = (__temp_bkg_tiles[__temp_i] < current_room->room_tiles->count) ? __temp_bkg_tiles[__temp_i] : 0;
-                    unshrink_tiles_to_buf(1, get_shrinked_tile_offset(__temp_bkg_tiles[__temp_i], current_room->room_tiles->data), __temp_text_ptr);
-                    __temp_text_ptr += 16;
+                    __temp_k = __temp_bkg_tiles[__temp_i];
+                    if (__temp_k >= __temp_j) __temp_k = 0; // merge with bkg tiles only, "modified tile" = empty, can't drop item on item
+                    unshrink_tiles_to_buf(1, get_shrinked_tile_offset(__temp_k, current_room->room_tiles->data), __temp_text_ptr1);
+                    __temp_text_ptr1 += 16;
                 }
+                // bit and bkg tiles with item mask, then bit or with item tile
+                __temp_text_ptr0 = __temp_item_tiledata0; __temp_text_ptr1 = __temp_item_tiledata1; __temp_text_ptr2 = __temp_item_tiledata2;
                 for (__temp_i = 0; __temp_i < item_tiledata_size; __temp_i++) {
-                    __temp_item_tiledata0[__temp_i] = (__temp_item_tiledata1[__temp_i] & __temp_item_tiledata2[__temp_i]) | __temp_item_tiledata0[__temp_i];
+                    *__temp_text_ptr0 = *__temp_text_ptr1 & *__temp_text_ptr2 | *__temp_text_ptr0;
+                    __temp_text_ptr0++; __temp_text_ptr1++; __temp_text_ptr2++;
                 }
+                
                 // upload modified tiledata
                 set_bkg_data(item_tiles_hiwater, item_map_size, __temp_item_tiledata0);
                 

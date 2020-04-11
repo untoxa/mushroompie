@@ -1,11 +1,16 @@
-const spr_ofs_t const bat1_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
-const spr_ofs_t const bat2_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
+const spr_ofs_t const bat_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
+
 #define bat_sprite_count 2
 #define bat1_sprite_offset evil_sprite_offset
 #define bat2_sprite_offset (evil_sprite_offset + bat_sprite_count)
 
 #define fly_sprite_count 1
 #define fly_sprite_offset1 (bat2_sprite_offset + bat_sprite_count)
+
+#define total_room0_1_evil ((bat_sprite_count * 2) + fly_sprite_count)
+
+const unsigned char const bftn[] = {9, 10, 11, 12, 13, 11, 12, 9, 10, 14};
+const unsigned char * const evils[] = {&bftn[0], &bftn[5]};
 
 UBYTE room_dark, bite_timer, warning_shown;
 void reset_room0_1() {
@@ -56,28 +61,21 @@ void move_bats0() {
         else if (firefly_pos_y > (room_height * 8)) firefly_pos_y = ((room_height * 8) - 1);
     }
 }
+
 void draw_bats0() {
     if (room_dark) return;
     if (bat_phase == 0) {
-        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 0);
-        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 1);
-        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 2);
-        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 3);
-        set_sprite_tile(fly_sprite_offset1,     evil_sprites_tileoffset + 4);
+        multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[0]);        
     } else if (bat_phase == 4) {
-        set_sprite_tile(bat2_sprite_offset + 0, evil_sprites_tileoffset + 0);
-        set_sprite_tile(bat2_sprite_offset + 1, evil_sprites_tileoffset + 1);
-        set_sprite_tile(bat1_sprite_offset + 0, evil_sprites_tileoffset + 2);
-        set_sprite_tile(bat1_sprite_offset + 1, evil_sprites_tileoffset + 3);
-        set_sprite_tile(fly_sprite_offset1,     evil_sprites_tileoffset + 5);
+        multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[1]);        
     }
     bat_phase++; bat_phase &= 7;
     multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
                           bat1_pos_x - bkg_scroll_x_target, bat1_pos_y - bkg_scroll_y_target, 
-                          (unsigned char *)bat1_offsets);    
+                          (unsigned char *)bat_offsets);    
     multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
                           bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
-                          (unsigned char *)bat2_offsets);    
+                          (unsigned char *)bat_offsets);    
     multiple_move_sprites(fly_sprite_offset1, fly_sprite_count, 
                           firefly_pos_x - bkg_scroll_x_target, firefly_pos_y - bkg_scroll_y_target,
                           (unsigned char *)fly_offsets);

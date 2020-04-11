@@ -1,4 +1,4 @@
-void multiple_clear_sprite_tiles(UBYTE start, UBYTE count) __naked
+void multiple_clear_sprite_tiledata(UBYTE start, UBYTE count) __naked
 {
     start; count;
 __asm
@@ -67,17 +67,59 @@ __asm
             ld      C, #0x04
 
             ld      A, D        ; Set sprite properties
-$clrspt02:  ld      (HL), A
+$setspp01:  ld      (HL), A
             add     HL, BC
             dec     E
-            jr      NZ, $clrspt02
+            jr      NZ, $setspp01
             
             pop     BC
             ret     
 __endasm;
 }
 
-void multiple_move_sprites(UBYTE start, UBYTE count, UBYTE x, UBYTE y, unsigned char * offsets) __naked
+void multiple_set_sprite_tiles(UBYTE start, UBYTE count, const unsigned char * tiles) __naked
+{
+    start; count; tiles;
+__asm
+            push    BC
+            
+            lda     HL, 4(SP)
+            ld      C, (HL)     ; C = start
+            inc     HL
+            ld      E, (HL)     ; E = count
+            inc     HL
+            
+            ld      A, (HL+)    
+            ld      H, (HL)
+            ld      L, A
+            push    HL          ; HL = tiles
+            
+            ld      B, #0x00
+            sla     C           ; Multiply C by 4
+            sla     C
+
+            ld      HL, #0xC000 + 2
+            add     HL, BC
+            ld      C, #0x04
+
+            ld      A, E        ; E --> A = count
+            pop     DE          ; HL --> DE = tiles
+
+$setspt01:  push    AF
+            ld      A, (DE)
+            inc     DE
+            ld      (HL), A
+            add     HL, BC
+            pop     AF
+            dec     A
+            jr      NZ, $setspt01
+            
+            pop     BC
+            ret     
+__endasm;
+}
+
+void multiple_move_sprites(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets) __naked
 {
     start; count; x; y; offsets;
 __asm
@@ -128,7 +170,7 @@ $mmspr02:   push    AF
 __endasm;
 }
 
-void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, unsigned char * offsets) __naked
+void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets) __naked
 {
     start; count; x; y; offsets;
 __asm

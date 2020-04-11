@@ -1,6 +1,40 @@
+const spr_ofs_t const flames_offsets[] = {{0x28, 0x08}, {0x28, 0x10}, {0x30, 0x08}, {0x30, 0x10}};
+
+#define flame_sprite_count 4
+#define flame1_sprite_offset evil_sprite_offset
+#define flame2_sprite_offset (evil_sprite_offset + flame_sprite_count)
+#define flame1_pos_x (3 * 8)
+#define flame1_pos_y (5 * 8)
+#define flame2_pos_x (12 * 8)
+#define flame2_pos_y (7 * 8)
+
+const unsigned char ftn[] = {  9, 10, 25, 26, 11, 12, 27, 28, 13, 14, 29, 30, 15, 16, 31, 32, 
+                              17, 18, 33, 34, 19, 20, 35, 36, 21, 22, 37, 38, 23, 24, 39, 40 };
+const unsigned char * const flames[] = {&ftn[0], &ftn[4], &ftn[8], &ftn[12], &ftn[16], &ftn[20], &ftn[24], &ftn[28]};
+
+UBYTE flame_timer = 0, flame1_phase = 0, flame2_phase = 3;
+
 UBYTE intro_shown, path_cleaned;
 void reset_room1() {
     intro_shown = 0, path_cleaned = 0;
+}
+void init_room1_1() {
+    set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+}
+void draw_flames1_1() {
+    if (!flame_timer) {
+        flame1_phase++; flame1_phase &= 7;
+        flame2_phase++; flame2_phase &= 7;
+        multiple_set_sprite_tiles(flame1_sprite_offset, flame_sprite_count, flames[flame1_phase]);
+        multiple_set_sprite_tiles(flame2_sprite_offset, flame_sprite_count, flames[flame2_phase]);
+    }
+    flame_timer++; flame_timer &= 7;
+    multiple_move_sprites(flame1_sprite_offset, flame_sprite_count, 
+                          flame1_pos_x - bkg_scroll_x_target, flame1_pos_y - bkg_scroll_y_target, 
+                          (unsigned char *)flames_offsets);    
+    multiple_move_sprites(flame2_sprite_offset, flame_sprite_count, 
+                          flame2_pos_x - bkg_scroll_x_target, flame2_pos_y - bkg_scroll_y_target, 
+                          (unsigned char *)flames_offsets);
 }
 
 void hcoll_blockage(WORD x, WORD y) {
