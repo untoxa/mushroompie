@@ -348,10 +348,10 @@ void wait_inventory_2_4() NONBANKED __naked
 __asm
 $my_vbl200: ld      A, (#___lcd_int_state)
             and     #1
-            jr      Z, $my_vbl200
+            jr      NZ, $my_vbl200
 $my_vbl201: ld      A, (#___lcd_int_state)
             and     #1
-            jr      NZ, $my_vbl201
+            jr      Z, $my_vbl201
             ret
 __endasm;
 }
@@ -412,7 +412,7 @@ void main() {
     LCDC_REG = 0x44U;
 
     // initialize LCD interrupts
-    STAT_REG = 0x45;
+    STAT_REG = 0x50;
     LYC_REG = 0;
     add_LCD(lcd_interrupt);
     add_VBL(vbl_interrupt);

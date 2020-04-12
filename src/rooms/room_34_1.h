@@ -98,7 +98,7 @@ void vcoll_troll(WORD x, WORD y) {
     }
     if ((!troll_satisfied) && (coins >= 3)) {
         if (x >= troll_x_position) {
-        show_dialog_window(4, &troll_toll);
+        show_dialog_window(3, &troll_toll);
         sub_coins(3);
         show_coins();
         troll_satisfied = 1;

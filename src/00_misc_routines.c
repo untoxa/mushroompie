@@ -26,29 +26,61 @@ const unsigned char const dlg_right2[]  = {0xED,0x00};  //{0x98,0x00};
 const unsigned char const dlg_center[]  = {0xFF,0xEA};  //{0xFF,0x95};
 const unsigned char const dlg_vert[]    = {0xFF,0xEC};  //{0xFF,0x97};
 
-void wait_inventory_2_4();
 void wait_inventory_4();
 
 void rle_decompress_tilemap(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles);
 
-UBYTE __prepare_text_len;
-UBYTE prepare_text(const unsigned char * src, unsigned char * dest) {
-    __prepare_text_len = 0;
-    while((*src)) {
-        if ((*src > ' ') && (*src < '[')) {
-            *dest++ = *src - (' ' + 1) + font_tiles_start;
-        } else *dest++ = 0;
-        src++;
-        __prepare_text_len++;
-    }
-    return __prepare_text_len;
+UBYTE prepare_text(const unsigned char * src, unsigned char * dest) __naked
+{
+    src; dest;
+__asm
+            push    BC
+            lda     HL, 4(SP)   
+            ld      C, (HL)     
+            inc     HL
+            ld      B, (HL)     ; BC = source
+            inc     HL
+            ld      A, (HL+)    
+            ld      H, (HL)     
+            ld      L, A        ; HL = dest
+            
+            ld      DE, #0
+$preptxt02: ld      A, (BC)
+            inc     BC
+            or      A
+            jr      Z, $preptxt01
+
+            cp      #32         ; ' '
+            jr      C, $preptxt03
+            sub     #33
+            cp      #58         ; font length in chars
+            jr      NC, $preptxt03
+            
+            ld      D, A
+            ld      A, (#_font_tiles_start)
+            add     D
+            
+            ld      (HL+), A
+            inc     E
+            jr      $preptxt02
+            
+$preptxt03: xor     A
+
+            ld      (HL+), A
+            inc     E
+            jr      $preptxt02
+            
+$preptxt01: ld      D, #0
+            pop     BC
+            ret
+__endasm;           
 }
 
 void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
     __temp_i = x + 2; __temp_l = __temp_i + width;
     __temp_j = y;
     
-    wait_inventory_4();
+    wait_vbl_done();
     set_win_tiles(x, __temp_j, 2, 1, dlg_left0);
     rle_decompress_tilemap(rle_decompress_to_win, __temp_i, __temp_j, width, 1, empty_compressed_map);
     set_win_tiles(__temp_l, __temp_j, 2, 1, dlg_right0);
@@ -60,11 +92,7 @@ void draw_fancy_frame_xy(UBYTE x, UBYTE y, UBYTE width, UBYTE height) {
     __temp_j++;
     
     rle_decompress_tilemap(rle_decompress_to_win, x, __temp_j, width + 4, height, empty_compressed_map);
-
-    wait_inventory_4();
     rle_decompress_tilemap(rle_decompress_to_win, x + 1, __temp_j, 1, height, dlg_vert);
-
-    wait_inventory_4();
     rle_decompress_tilemap(rle_decompress_to_win, __temp_l, __temp_j, 1, height, dlg_vert);
 
     __temp_j += height;
@@ -94,7 +122,7 @@ void execute_dialog(const UBYTE lines, const dialog_item* item) {
         inventory = 1;
         while (item) {
             if ((item_old != item) && (item)) {
-                wait_inventory_4();
+                wait_vbl_done();
                 if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, __temp_text_buf), 1, __temp_text_buf);
                 item_old = item;
             }
@@ -126,18 +154,19 @@ UBYTE inventory_joy;
 game_item * execute_inventory() {
     draw_fancy_frame(5);
     
-    wait_inventory_4();
     __temp_i = 0;
     if (inventory_item_list.size > 0) {
         __temp_j = (2 + title_height);
         __temp_game_item = inventory_item_list.first;        
         while (__temp_game_item) {            
             inventory_items[__temp_i] = __temp_game_item;
+            wait_vbl_done();
             set_win_tiles(3, __temp_j, prepare_text(__temp_game_item->desc->name, __temp_text_buf), 1, __temp_text_buf);
             __temp_i++; __temp_j ++;
             __temp_game_item = __temp_game_item->next;
         }
     } else {
+        wait_vbl_done();
         set_win_tiles(3, 6, prepare_text("N O T H I N G", __temp_text_buf), 1, __temp_text_buf);
     }
     set_win_tiles(5, 9, prepare_text("DON'T DROP", __temp_text_buf), 1, __temp_text_buf);
@@ -150,7 +179,7 @@ game_item * execute_inventory() {
     do {
         if (inventory_selection != old_inventory_selection) {
             __temp_l = selector_offset[old_inventory_selection], __temp_k = selector_offset[inventory_selection];
-            wait_inventory_4();
+            wait_vbl_done();
             set_win_tiles(2, __temp_l, 1, 1, selector_empty);
             set_win_tiles(17, __temp_l, 1, 1, selector_empty);
             set_win_tiles(2, __temp_k, 1, 1, __temp_text_buf);

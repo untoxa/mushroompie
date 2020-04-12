@@ -151,16 +151,22 @@ __asm
 $mmspr02:   push    AF
 
             ld      A, (BC)
+            inc     BC
             add     D
-            ld      (HL+), A
-            inc     BC
+            ld      (HL), A
             ld      A, (BC)
-            add     E
-            ld      (HL+), A
             inc     BC
-            inc     HL
-            inc     HL
-
+            
+            push    BC
+            ld      BC, #1
+            add     HL, BC      ; use add instruction to avoid oam bug
+            
+            add     E
+            ld      (HL), A
+            ld      C, #3
+            add     HL, BC      ; use add instruction to avoid oam bug
+            pop     BC
+            
             pop     AF
             dec     A
             jr      NZ, $mmspr02
@@ -202,9 +208,9 @@ __asm
 $mmsprl02:  push    AF
 
             ld      A, (BC)
+            inc     BC
             add     D
             
-            inc     BC
             push    HL
             ld      H, B
             ld      L, C
@@ -221,12 +227,18 @@ $mmsprl03:  inc     BC
             xor     A
             
 $mmsprl04:  pop     HL
-            ld      (HL+), A
-            inc     BC
-            ld      A, (BC)
-            add     E
+            ld      (HL), A
+            
+            push    BC          
+            ld      BC, #1
+            add     HL, BC      ; use add instruction to avoid oam bug      
+            pop     BC
             
             inc     BC
+            ld      A, (BC)
+            inc     BC
+            add     E
+            
             push    HL
             ld      H, B
             ld      L, C
@@ -243,10 +255,14 @@ $mmsprl05:  inc     BC
             xor     A
             
 $mmsprl06:  pop     HL
-            ld      (HL+), A
+            ld      (HL), A
+
+            push    BC          
+            ld      BC, #3
+            add     HL, BC      ; use add instruction to avoid oam bug
+            pop     BC
+
             inc     BC
-            inc     HL
-            inc     HL
 
             pop     AF
             dec     A
