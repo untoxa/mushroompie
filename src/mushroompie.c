@@ -284,7 +284,7 @@ UBYTE lyc_table[] = {0, 23,  0,  23,
 void lcd_interrupt() NONBANKED __naked 
 {
 __asm
-            ld      A, (#_inventory)        ; if inventory then use lyc_table 0..3 else 4..7
+            ld      A, (#_inventory)        ; if !inventory then use lyc_table 0..3 else 4..7
             and     #1
             sla     A
             sla     A
@@ -343,7 +343,7 @@ $vblint02:  ld      A, #1
             ret
 __endasm;
 } 
-void wait_inventory_2_4() NONBANKED __naked
+void wait_inventory_2_4() __naked
 {
 __asm
 $my_vbl200: ld      A, (#___lcd_int_state)
@@ -355,7 +355,7 @@ $my_vbl201: ld      A, (#___lcd_int_state)
             ret
 __endasm;
 }
-void wait_inventory_4() NONBANKED __naked
+void wait_inventory_4() __naked
 {
 __asm
 $my_vbl400: ld      A, (#___lcd_int_state)
@@ -465,7 +465,7 @@ void main() {
     init_game();
         
 // --- debugging --------------
-//current_room_x = 4, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x, 1); //dizzy_y = 30; // set any for debugging
+//current_room_x = 2, current_room_y = 0, dizzy_x = 80; set_room(current_room_y, current_room_x, 1); //dizzy_y = 30; // set any for debugging
 //elevator_enabled = 1;
 //coins = 3; show_coins();
 // ----------------------------

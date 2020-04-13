@@ -49,13 +49,15 @@ void move_float() {             // two floats in room 3 and 4 move in sync with 
 }
 void draw_float3() {
     multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                 float3_pos_x - bkg_scroll_x_target, float34_pos_y - bkg_scroll_y_target, 
-                                 (unsigned char *)float_offsets_r3);
+                                 float3_pos_x, float34_pos_y, 
+                                 (unsigned char *)float_offsets_r3, 
+                                 -bkg_scroll_x_target, - bkg_scroll_y_target);
 }
 void draw_float4() {
     multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
-                                 float4_pos_x - bkg_scroll_x_target, float34_pos_y - bkg_scroll_y_target, 
-                                 (unsigned char *)float_offsets_r4);
+                                 float4_pos_x, float34_pos_y, 
+                                 (unsigned char *)float_offsets_r4, 
+                                 -bkg_scroll_x_target, -bkg_scroll_y_target);
 }
 void hcoll_float3(WORD x, WORD y) {
     if (delta_y >= 0) {

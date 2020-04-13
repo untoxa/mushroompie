@@ -25,7 +25,6 @@ void draw_room0_1() {
     } else default_draw();
 }
 
-#define bat_length
 #define bat1_pos_y (7 * 8)
 #define bat1_min_x (2 * 8)
 #define bat1_max_x (25 * 8)

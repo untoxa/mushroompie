@@ -176,9 +176,9 @@ $mmspr02:   push    AF
 __endasm;
 }
 
-void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets) __naked
+void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets, UBYTE dx, UBYTE dy) __naked
 {
-    start; count; x; y; offsets;
+    start; count; x; y; offsets, dx, dy;
 __asm
             push    BC
             
@@ -205,9 +205,9 @@ __asm
             ld      E, (HL)     ; E = x
             pop     HL
 
-$mmsprl02:  push    AF
+$mmsprd02:  push    AF
 
-            ld      A, (BC)
+            ld      A, (BC)     ; Y coordinate
             inc     BC
             add     D
             
@@ -215,18 +215,23 @@ $mmsprl02:  push    AF
             ld      H, B
             ld      L, C
             cp      (HL)
-            jr      NC, $mmsprl03
-            inc     BC
+            jr      NC, $mmsprd03
             xor     A
-            jr      $mmsprl04
-$mmsprl03:  inc     BC
-            inc     HL
+            jr      $mmsprd04
+$mmsprd03:  inc     HL
             cp      (HL)
-            jr      C, $mmsprl04
-            jr      Z, $mmsprl04
+            jr      C, $mmsprd04
+            jr      Z, $mmsprd04
             xor     A
-            
-$mmsprl04:  pop     HL
+$mmsprd04:  or      A
+            jr      Z, $mmsprd07
+            lda     HL, 15(SP)
+            add     (HL)
+$mmsprd07:  pop     HL
+
+            inc     BC
+            inc     BC
+                        
             ld      (HL), A
             
             push    BC          
@@ -234,8 +239,8 @@ $mmsprl04:  pop     HL
             add     HL, BC      ; use add instruction to avoid oam bug      
             pop     BC
             
-            inc     BC
-            ld      A, (BC)
+            
+            ld      A, (BC)     ; X coordinate
             inc     BC
             add     E
             
@@ -243,18 +248,23 @@ $mmsprl04:  pop     HL
             ld      H, B
             ld      L, C
             cp      (HL)
-            jr      NC, $mmsprl05
-            inc     BC
+            jr      NC, $mmsprd05
             xor     A
-            jr      $mmsprl06
-$mmsprl05:  inc     BC
-            inc     HL
+            jr      $mmsprd06
+$mmsprd05:  inc     HL
             cp      (HL)
-            jr      C, $mmsprl06
-            jr      Z, $mmsprl06
+            jr      C, $mmsprd06
+            jr      Z, $mmsprd06
             xor     A
+$mmsprd06:  or      A
+            jr      Z, $mmsprd08
+            lda     HL, 14(SP)
+            add     (HL)
+$mmsprd08:  pop     HL
+
+            inc     BC
+            inc     BC
             
-$mmsprl06:  pop     HL
             ld      (HL), A
 
             push    BC          
@@ -262,11 +272,9 @@ $mmsprl06:  pop     HL
             add     HL, BC      ; use add instruction to avoid oam bug
             pop     BC
 
-            inc     BC
-
             pop     AF
             dec     A
-            jr      NZ, $mmsprl02
+            jr      NZ, $mmsprd02
             
             pop     BC
             ret     

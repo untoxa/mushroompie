@@ -65,7 +65,7 @@ UBYTE default_drop(UBYTE id);
 
 // misc routines
 void multiple_move_sprites(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets);
-void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets);
+void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets, UBYTE dx, UBYTE dy);
 void multiple_set_sprite_tiles(UBYTE start, UBYTE count, const unsigned char * tiles);
 
 extern unsigned char empty_compressed_map[];
