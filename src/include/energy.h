@@ -105,7 +105,10 @@ void update_energy() {
     dizzy_energy_old = dizzy_energy;
     if (dec_energy) {
         dec_energy--;
-        if (dizzy_energy) dizzy_energy--;
+        if (dizzy_energy) {
+            dizzy_energy--;
+            SND_HIT;
+        }
         if (!dizzy_energy) dec_energy = 0;
     } else if (inc_energy) {
         dizzy_energy++; 

@@ -1,6 +1,7 @@
 #include <gb/gb.h>
 
 #include "include/bank_stack.h"
+#include "include/sound.h"
 
 #include "include/dizzy_types.h"
 
@@ -15,6 +16,8 @@
 #include "gfx/title_gfx_data.h"
 #include "gfx/anim_gfx_data.h"
 #include "gfx/rooms_gfx.h"
+
+#include "snd/dizzy_sounds.h"
 
 const UBYTE * const ptr_div_reg = (UBYTE *)0xFF04; 
 
@@ -169,9 +172,13 @@ void check_dizzy_collisions() {
             get_h_coll(dizzy_x, dizzy_y + 21 + delta_y);
 //set_win_tiles(1, 2, 3, 1, collision_buf);
             if ((collision_buf[0] == 1) || (collision_buf[1] == 1) || (collision_buf[2] == 1)) {
-                delta_y = 0;
+                delta_y = 0; 
+                if (dizzy_falling) SND_TAP;
             } else if ((collision_buf[0] == 2) || (collision_buf[1] == 2) || (collision_buf[2] == 2)) {
-                if (tile_pos_oy > 4) delta_y = 0;
+                if (tile_pos_oy > 4) { 
+                    delta_y = 0; 
+                    if (dizzy_falling) SND_TAP;
+                }
             } else if ((collision_buf[0] == 5) || (collision_buf[1] == 5) || (collision_buf[2] == 5)) {
                 cloud_timer++; cloud_timer &= 3;
                 if (cloud_timer) { delta_y = 0; dizzy_falling = 0; dizzy_stun = 0; } // clouds are really soft and fluffy
@@ -339,7 +346,7 @@ $vblint01:  and     #1
             jr      Z, $vblint02
             ld      (#_bal_update), A
 $vblint02:  ld      A, #1
-            ld      (#_walk_update), A        
+            ld      (#_walk_update), A
             ret
 __endasm;
 } 
@@ -409,8 +416,15 @@ void main() {
     DISPLAY_OFF;
     disable_interrupts();
     
+    set_bank(1);
+    
+    // init sound
+    NR52_REG = 0x80; // Enables sound, always set this first
+    NR51_REG = 0xFF; // Enables all channels (left and right)
+    NR50_REG = 0x77; // Max volume
+    
     LCDC_REG = 0x44U;
-
+    
     // initialize LCD interrupts
     STAT_REG = 0x50;
     LYC_REG = 0;
@@ -427,9 +441,7 @@ void main() {
     SHOW_SPRITES;
     
     WX_REG = 7; WY_REG = 0;
-        
-    set_bank(1);
-
+    
     window_tiles_hiwater = 0;
     
     window_tiles_hiwater -= title_tiles.count;
@@ -447,7 +459,7 @@ void main() {
     unshrink_tiles(window_tiles_hiwater, font_tiles.count, font_tiles.data);
     
     set_win_tiles(0, 0, 20, 3, title_map);
-        
+    
     current_room_x = 1, current_room_y = 1; 
 
     enable_interrupts();
@@ -482,17 +494,20 @@ void main() {
                 } else if (joy & J_LEFT) {
                     if ((joy & J_UP) || (joy & J_A)) {
                         ani_type = ANI_JUMP_L;
+                        SND_JUMP;
                     } else {
                         ani_type = ANI_WALK_L;
                     }
                 } else if (joy & J_RIGHT) {
                     if ((joy & J_UP) || (joy & J_A)) {
                         ani_type = ANI_JUMP_R;
+                        SND_JUMP;
                     } else {
                         ani_type = ANI_WALK_R; 
                     }
                 } else if ((joy == J_UP) || (joy == J_A)) {
                     ani_type = ANI_UP;
+                    SND_JUMP;
                 }
             }
             if (joy == J_B) {
