@@ -217,8 +217,8 @@ void check_dizzy_collisions() {
 
 void check_dizzy_evil_collisions() {
     if (ani_type != ANI_DEAD) {
-        if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 2);
-        get_coll(dizzy_x, dizzy_y + 2);
+        if (current_room->room_evil_coll) current_room->room_evil_coll(dizzy_x, dizzy_y + 4);
+        get_coll(dizzy_x, dizzy_y + 4);
 //set_win_tiles(2, 0, 2, 1, collision_buf);
         if (collision_buf[0] == 6) {
             if (dec_energy < 64) dec_energy += 2;
@@ -519,6 +519,7 @@ void main() {
                     if (__temp_game_item3) {
                         current_item_id = __temp_game_item3->id;
                         if (current_item_id & ID_TREASURE) {
+                            SND_COIN;
                             pop_by_id(&game_item_list, current_item_id);
                             show_dialog_window(2, &coin_found);
                             add_coins(1); 
