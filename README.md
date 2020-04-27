@@ -1,3 +1,5 @@
+![screenshot](/mushroompie.png)
+
 "Dizzy" game engine for gameboy
 
 "Dizzy", "The Yolkfolk" and all related characters and titles
