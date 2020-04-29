@@ -1,7 +1,5 @@
 #include "sound.h"
 
-#include <stdarg.h>
-
 #ifdef GBT_PLAYER_ENABLED
 #include <gbt_player.h>
 extern UINT8 music_mute_frames;

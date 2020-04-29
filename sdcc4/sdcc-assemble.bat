@@ -1,1 +1,0 @@
-sdasgb -plosgff -I"libc" %*

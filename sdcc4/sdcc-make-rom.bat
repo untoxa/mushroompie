@@ -1,1 +1,0 @@
-makebin -Z %*

@@ -3,6 +3,10 @@
 #include "include/bank_stack.h"
 #include "include/sound.h"
 
+#ifdef GBT_PLAYER_ENABLED
+#include <gbt_player.h>
+#endif
+
 #include "include/dizzy_types.h"
 
 #define rle_decompress_to_bkg 0
@@ -238,7 +242,6 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     if (fade) FADE_OUT;
     HIDE_SPRITES; HIDE_BKG;
 
-    wait_vbl_done();
     disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
     set_bank(current_room->bank);
@@ -284,6 +287,17 @@ void check_change_room() {
     }    
 }
 
+#ifdef GBT_PLAYER_ENABLED
+UBYTE music_mute_frames = 0;
+extern unsigned char * ingame_music_data[];
+
+void music_play(const unsigned char* music[], unsigned char bank, unsigned char loop) {
+	gbt_play(music, bank, 7);
+	gbt_loop(loop);
+	refresh_bank;
+}
+#endif
+
 UBYTE tim_div = 0;    
 UBYTE __lcd_int_state = 0, inventory = 0;
 UBYTE lyc_table[] = {0, 23,  0,  23, 
@@ -308,6 +322,10 @@ __asm
             ld      A,(HL)
             ldh     (#_LYC_REG), A          ; setting next interrupt row
             
+#ifdef GBT_PLAYER_ENABLED            
+            ld      D, A
+#endif
+
             ld      A, E            
             inc     A
             and     #3
@@ -324,6 +342,22 @@ __asm
             and     #0xDD                   ; mask other bits except WIN and OBJ
             or      E
             ldh     (#_LCDC_REG), A         ; manipulate WIN and OBJ visibiliry
+
+#ifdef GBT_PLAYER_ENABLED            
+            ld      A, D
+            or      A
+            ret     NZ
+            
+            call    #_gbt_update
+
+            ld      HL, #___banks_sp        ; refresh_bank;
+            ld      A, (HL+)
+            ld      H, (HL)
+            ld      L, A
+            ld      A, (HL)
+            ld      (#0x2000), A
+#endif
+
             ret
 __endasm;
 }    
@@ -347,6 +381,21 @@ $vblint01:  and     #1
             ld      (#_bal_update), A
 $vblint02:  ld      A, #1
             ld      (#_walk_update), A
+
+#ifdef GBT_PLAYER_ENABLED
+            ld      A, (#_music_mute_frames)
+            or      A
+            ret     Z
+            dec     A
+            ld      (#_music_mute_frames), A
+            ret     NZ
+            ld      A, #0x0F
+            push    AF
+            inc     SP
+            call    #_gbt_enable_channels
+            inc     SP
+#endif
+
             ret
 __endasm;
 } 
@@ -471,6 +520,10 @@ void main() {
     
     // fade to notmal palette
     FADE_IN;
+
+#ifdef GBT_PLAYER_ENABLED
+    music_play(ingame_music_data, 6, 1);
+#endif
      
     show_dialog_window(6, &start_dialog);
     
@@ -568,7 +621,6 @@ void main() {
                         }
                     }
                     if (redraw_room) {
-                        wait_vbl_done();
                         FADE_OUT;
                         disable_interrupts();
                         // draw room with items
