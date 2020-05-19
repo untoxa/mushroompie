@@ -1,5 +1,8 @@
 #include <gb/gb.h>
 
+// uncomment for profiling
+// #include <gb/bgb_emu.h>
+
 #include "include/bank_stack.h"
 #include "include/sound.h"
 
@@ -72,9 +75,6 @@ UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m;
 #define MAX_STUN_HEIGHT 32
 UBYTE dizzy_falling = 0, dizzy_stun = 0;
 
-void wait_inventory_2_4();
-void wait_inventory_4();
-
 UBYTE bkg_scroll_x_target, bkg_scroll_y_target;
 WORD __temp_scroll_value;
 WORD get_x_scroll_value(WORD x) {
@@ -145,9 +145,8 @@ void init_dizzy() {
     for(__temp_i = 0; __temp_i < dizzy_sprite_count; __temp_i++)
         set_sprite_tile(__temp_i, dizzy_sprites_tileoffset + __temp_i);
 }
-void wait_vbl_and_set_dizzy_animdata(const s_data * sprite) {
+void set_dizzy_animdata(const s_data * sprite) {
     push_bank(2); 
-    wait_inventory_2_4();
     set_sprite_data(dizzy_sprites_tileoffset, dizzy_sprite_count, sprite->data); 
     pop_bank();
 }
@@ -242,7 +241,6 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     if (fade) FADE_OUT;
     HIDE_SPRITES; HIDE_BKG;
 
-    disable_interrupts();
     current_room = dizzy_world[row]->rooms[col];
     set_bank(current_room->bank);
     
@@ -263,7 +261,6 @@ void set_room(const UBYTE row, const UBYTE col, const UBYTE fade) {
     SCX_REG = bkg_scroll_x_target = get_x_scroll_value(dizzy_x);
     SCY_REG = bkg_scroll_y_target = get_y_scroll_value(dizzy_y);
 
-    enable_interrupts();    
     SHOW_BKG; SHOW_SPRITES;
     if (fade) FADE_IN;
 }
@@ -373,13 +370,13 @@ __asm
             inc     A
             and     #3
             ld      (#_tim_div), A
-            jr      NZ, $vblint01 
+            jr      NZ, vblint01$
             ld      HL, #_ani_update
             ld      (HL), #1
-$vblint01:  and     #1
-            jr      Z, $vblint02
+vblint01$:  and     #1
+            jr      Z, vblint02$
             ld      (#_bal_update), A
-$vblint02:  ld      A, #1
+vblint02$:  ld      A, #1
             ld      (#_walk_update), A
 
 #ifdef GBT_PLAYER_ENABLED
@@ -399,29 +396,25 @@ $vblint02:  ld      A, #1
             ret
 __endasm;
 } 
-void wait_inventory_2_4() __naked
-{
-__asm
-$my_vbl200: ld      A, (#___lcd_int_state)
-            and     #1
-            jr      NZ, $my_vbl200
-$my_vbl201: ld      A, (#___lcd_int_state)
-            and     #1
-            jr      Z, $my_vbl201
-            ret
-__endasm;
-}
-void wait_inventory_4() __naked
-{
-__asm
-$my_vbl400: ld      A, (#___lcd_int_state)
-            or      A
-            jr      Z, $my_vbl400
-$my_vbl401: ld      A, (#___lcd_int_state)
-            or      A
-            jr      NZ, $my_vbl401
-            ret
-__endasm;
+// interrupt chain terminator
+void wait_for_stat() __naked {
+__asm 
+            add SP, #4
+
+            pop DE 
+            pop BC
+            pop AF
+            pop HL 
+
+            push AF
+wfs01$:
+            ldh a, (#_STAT_REG)
+            and #0x02
+            jr nz, wfs01$
+            pop AF
+
+            reti
+__endasm; 
 }
 
 #include "include/inventory.h"
@@ -451,9 +444,9 @@ void init_game() {
     current_room_x = 1, current_room_y = 1; 
     set_room(current_room_y, current_room_x, 0);    
     // set dizzy animation data
-    wait_vbl_and_set_dizzy_animdata(&m_stand_0);
+    set_dizzy_animdata(&m_stand_0);
     // set dizzy position
-    dizzy_x = 104, dizzy_y = 72;
+    dizzy_x = 116, dizzy_y = 72;
     ani_type = ANI_STAND; ani_phase = 0;
     set_dizzy_position();
     // wait a moment and fade in
@@ -463,8 +456,7 @@ void init_game() {
 
 void main() {
     DISPLAY_OFF;
-    disable_interrupts();
-    
+       
     set_bank(1);
     
     // init sound
@@ -472,15 +464,17 @@ void main() {
     NR51_REG = 0xFF; // Enables all channels (left and right)
     NR50_REG = 0x77; // Max volume
     
-    LCDC_REG = 0x44U;
-    
-    // initialize LCD interrupts
-    STAT_REG = 0x50;
-    LYC_REG = 0;
-    add_LCD(lcd_interrupt);
-    add_VBL(vbl_interrupt);
-    
-    set_interrupts(VBL_IFLAG | LCD_IFLAG);
+    __critical {
+        LCDC_REG = 0x44U;
+        
+        // initialize LCD interrupts
+        STAT_REG = 0x50;
+        LYC_REG = 0;
+        add_LCD(lcd_interrupt); add_LCD(wait_for_stat);
+        add_VBL(vbl_interrupt); add_VBL(wait_for_stat);
+        
+        set_interrupts(VBL_IFLAG | LCD_IFLAG);
+    }
     
     // make screen black
     BGP_REG = OBP0_REG = OBP1_REG = 0xFF;
@@ -510,8 +504,6 @@ void main() {
     set_win_tiles(0, 0, 20, 3, title_map);
     
     current_room_x = 1, current_room_y = 1; 
-
-    enable_interrupts();
 
     set_room(current_room_y, current_room_x, 0);
 
@@ -622,10 +614,8 @@ void main() {
                     }
                     if (redraw_room) {
                         FADE_OUT;
-                        disable_interrupts();
                         // draw room with items
                         if (current_room->room_customdraw) current_room->room_customdraw(); else default_draw();
-                        enable_interrupts();
                         FADE_IN;
                         // restore collision map
                         rle_decompress_data(current_room->room_coll_map->rle_data, (UWORD)current_room->room_coll_map->size, coll_buf);
@@ -676,7 +666,8 @@ void main() {
         
         if (ani_update) {
             current_animation = animation[ani_type];
-            wait_vbl_and_set_dizzy_animdata(current_animation->steps[ani_phase]);
+            wait_vbl_done();
+            set_dizzy_animdata(current_animation->steps[ani_phase]);
             ani_phase++; 
             if (ani_phase >= current_animation->count) {
                 if ((dizzy_stun) && (ani_type != ANI_DEAD)) {
@@ -702,7 +693,8 @@ void main() {
                         dizzy_x = safe_dizzy_x, dizzy_y = safe_dizzy_y;
                         current_room_x = safe_room_x; current_room_y = safe_room_y;
                         set_room(current_room_y, current_room_x, 1);
-                        wait_vbl_and_set_dizzy_animdata(&m_stand_0);
+                        wait_vbl_done();
+                        set_dizzy_animdata(&m_stand_0);
                         init_dizzy_energy(); 
                         ani_type = ANI_STAND; ani_phase = 0;
                     } else {

@@ -34,9 +34,6 @@ const unsigned char const dlg_unpacked[] = {0x00,0xE7,0x00,0x00,0x00,0x00,0x00,0
 const unsigned char * const dlg_idx[]    =  {&dlg_unpacked[220], &dlg_unpacked[200], &dlg_unpacked[180], &dlg_unpacked[160], &dlg_unpacked[140],
                                              &dlg_unpacked[120], &dlg_unpacked[100], &dlg_unpacked[80],  &dlg_unpacked[60],  &dlg_unpacked[40]};                                           
 
-void wait_inventory_2_4();
-void wait_inventory_4();
-
 void rle_decompress_tilemap(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles);
 
 UBYTE prepare_text(const unsigned char * src, unsigned char * dest) __naked
@@ -89,7 +86,6 @@ void draw_fancy_frame(UBYTE lines) {
     if (lines < 11) {
         __temp_j = ((lines + 4) << 3); __temp_k = ((144 - __temp_j) >> 1);
         lyc_table[6] = __temp_k; lyc_table[7] = __temp_k + __temp_j;
-        wait_inventory_2_4();
         set_win_tiles(0, title_height, 20, 2, dlg_unpacked);
         set_win_tiles(0, title_height + 2, 20, lines + 2, (unsigned char *)dlg_idx[lines]);
     } else { 
@@ -103,7 +99,7 @@ void execute_dialog(const UBYTE lines, const dialog_item* item) {
     const dialog_item* item_old = 0;
     if (item) {
         draw_fancy_frame(lines);
-        wait_inventory_4();          // prevent inventory flicking
+        wait_vbl_done();          // prevent inventory flicking
         inventory = 1;
         while (item) {
             if ((item_old != item) && (item)) {
@@ -121,7 +117,7 @@ void execute_dialog(const UBYTE lines, const dialog_item* item) {
         }    
         waitpadup();
     }
-    wait_inventory_4();
+    wait_vbl_done();
     inventory = 0;
 }
 
@@ -159,7 +155,7 @@ game_item * execute_inventory() {
      
     inventory_selection = 0, old_inventory_selection = 1;
      
-    wait_inventory_4();
+    wait_vbl_done();
     inventory = 1;    
     do {
         if (inventory_selection != old_inventory_selection) {
@@ -180,7 +176,7 @@ game_item * execute_inventory() {
             inventory_selection++; if (inventory_selection > __temp_i) inventory_selection = 0;
         } else if (inventory_joy & J_B) {
             waitpadup();
-            wait_inventory_4();
+            wait_vbl_done();
             inventory = 0;
             if (inventory_selection) return inventory_items[inventory_selection - 1];
         }

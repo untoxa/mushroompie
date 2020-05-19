@@ -8,6 +8,8 @@ set SRC=src\
 @rem set GBT_PLAYER_ENABLED=1
 
 set CFLAGS=-mgbz80 --no-std-crt0 -I %GBDK%\include -I %GBDK%\include\asm -I %SRC%include -c
+set CFLAGS=%CFLAGS% --max-allocs-per-node 30000 --opt-code-speed
+@rem set CFLAGS=%CFLAGS% --profile
 
 set LFLAGS=-n -- -z -m -j -yt1 -yo8 -k%GBDKLIB%\gbz80\ -lgbz80.lib -k%GBDKLIB%\gb\ -lgb.lib 
 set LFILES=%GBDKLIB%\gb\crt0.o
