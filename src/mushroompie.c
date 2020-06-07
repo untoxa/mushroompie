@@ -1,5 +1,8 @@
 #include <gb/gb.h>
 
+#ifndef __GBDK_VERSION
+#define __GBDK_VERSION 0
+#endif
 // uncomment for profiling
 // #include <gb/bgb_emu.h>
 
@@ -396,26 +399,28 @@ vblint02$:  ld      A, #1
             ret
 __endasm;
 } 
+#if __GBDK_VERSION < 312
 // interrupt chain terminator
 void wait_for_stat() __naked {
 __asm 
-            add SP, #4
+            add     SP, #4
 
-            pop DE 
-            pop BC
-            pop AF
-            pop HL 
+            pop     DE 
+            pop     BC
+            pop     AF
+            pop     HL 
 
-            push AF
+            push    AF
 wfs01$:
-            ldh a, (#_STAT_REG)
-            and #0x02
-            jr nz, wfs01$
-            pop AF
+            ldh     A, (#_STAT_REG)
+            and     #0x02
+            jr      NZ, wfs01$
+            pop     AF
 
             reti
 __endasm; 
 }
+#endif
 
 #include "include/inventory.h"
 #include "include/room_defaults.h"
@@ -470,8 +475,13 @@ void main() {
         // initialize LCD interrupts
         STAT_REG = 0x50;
         LYC_REG = 0;
-        add_LCD(lcd_interrupt); add_LCD(wait_for_stat);
-        add_VBL(vbl_interrupt); add_VBL(wait_for_stat);
+
+        add_LCD(lcd_interrupt); 
+        add_VBL(vbl_interrupt); 
+#if __GBDK_VERSION < 312 
+        add_LCD(wait_for_stat);
+        add_VBL(wait_for_stat);
+#endif        
         
         set_interrupts(VBL_IFLAG | LCD_IFLAG);
     }

@@ -213,3 +213,9 @@ replace {
  push	%1%2
  inc	sp
 }
+
+replace {
+ call	___sdcc_call_hl
+} by {
+ rst	0x20 ; ___sdcc_call_hl
+}
