@@ -26,14 +26,14 @@ __asm
             ld      C, (HL)     ; BC = 0xFF00 + FX_ADDR_LO[channel]
             
             lda     HL, 6(SP) // varargs
-$plfx01:
+1$:
             ld      A, (HL+)
             inc     HL
             ld      (BC), A
             inc     BC
             dec     E
             
-            jr      NZ, $plfx01
+            jr      NZ, 1$
 
             pop     BC
 __endasm;

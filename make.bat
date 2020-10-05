@@ -5,17 +5,20 @@
 @set OBJ=build\
 @set SRC=src\
 
-@rem @set GBT_PLAYER_ENABLED=1
+@set MUSIC_ENABLED=1
 
-@set CFLAGS=-mgbz80 --no-std-crt0 -I %GBDK%include -I %GBDK%include\asm -I %SRC%include -c
+@set CFLAGS=-mgbz80 --fsigned-char --no-std-crt0 -I %GBDK%include -I %GBDK%include\asm -I %SRC%include -I music\driver -c
 @set CFLAGS=%CFLAGS% --max-allocs-per-node 50000 --opt-code-speed
-@set CFLAGS=%CFLAGS% --peep-file peephole\gbz80.rul
+@rem @set CFLAGS=%CFLAGS% --peep-file peephole\gbz80.rul
 @rem @set CFLAGS=%CFLAGS% --profile
 
-@set LFLAGS=-n -- -z -m -j -yt1 -yo8 -k%GBDKLIB%gbz80\ -lgbz80.lib -k%GBDKLIB%gb\ -lgb.lib
+@set LNAMES=-g _shadow_OAM=0xC000 -g .STACK=0xE000 -g .refresh_OAM=0xFF80 -b _DATA=0xc0a0 -b _CODE=0x0200
+@set LFLAGS=-n -m -j -w -i -k %GBDKLIB%\gbz80\ -l gbz80.lib -k %GBDKLIB%\gb\ -l gb.lib %LNAMES%
 @set LFILES=%GBDKLIB%gb\crt0.o
 
-@set ASMFLAGS=-plosgff -I"libc"
+@set ASMFLAGS=-plosgff -I%GBDKLIB%
+
+@set BINFLAGS=-yt 1 -yo 8
 
 @echo Cleanup
 
@@ -28,13 +31,10 @@
 
 @echo COMPILING WITH SDCC4...
 
-@rem --- gbt player ----------
-@if not defined GBT_PLAYER_ENABLED (goto :1)
-sdasgb %ASMFLAGS% %OBJ%gbt_player.rel %SRC%gbt_player\gbt_player.s
-sdasgb %ASMFLAGS% %OBJ%gbt_player_bank1.rel %SRC%gbt_player\gbt_player_bank1.s
-sdcc %CFLAGS% %SRC%03_music_data.c -bo6 -o %OBJ%03_music_data.rel
-@set CFLAGS=%CFLAGS% -DGBT_PLAYER_ENABLED -I %SRC%gbt_player 
-@set LFILES=%LFILES% %OBJ%gbt_player.rel %OBJ%gbt_player_bank1.rel %OBJ%03_music_data.rel
+@rem --- music ----------
+@if not defined MUSIC_ENABLED (goto :1)
+sdcc %CFLAGS% -bo1 -o %OBJ%song.rel music\song.c
+@set LFILES=%LFILES% music\driver\driver_lite.obj.o %OBJ%song.rel
 :1
 
 @rem --- library -------------
@@ -59,8 +59,10 @@ sdcc %CFLAGS% %SRC%02_rooms_gfx_data1_1.c -bo5 -o %OBJ%02_rooms_gfx_data1_1.rel
 @rem --- game ----------------
 sdcc %CFLAGS% %SRC%%PROJ%.c -o %OBJ%%PROJ%.rel
 
-@echo LINKING WITH GBDK...
+@echo LINKING...
+sdldgb %LFLAGS% %PROJ%.ihx %LFILES% %OBJ%%PROJ%.rel
 
-%GBDK%bin\link-gbz80.exe %LFLAGS% %PROJ%.gb %LFILES% %OBJ%%PROJ%.rel 
+@echo MAKING BIN...
+makebin -Z %BINFLAGS% %PROJ%.ihx %PROJ%.gb
 
 @echo DONE!

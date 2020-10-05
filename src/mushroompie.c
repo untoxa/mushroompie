@@ -1,4 +1,5 @@
 #include <gb/gb.h>
+#include <gb/crash_handler.h>
 
 #ifndef __GBDK_VERSION
 #define __GBDK_VERSION 0
@@ -9,9 +10,7 @@
 #include "include/bank_stack.h"
 #include "include/sound.h"
 
-#ifdef GBT_PLAYER_ENABLED
-#include <gbt_player.h>
-#endif
+#include "hUGEDriver.h"
 
 #include "include/dizzy_types.h"
 
@@ -287,17 +286,6 @@ void check_change_room() {
     }    
 }
 
-#ifdef GBT_PLAYER_ENABLED
-UBYTE music_mute_frames = 0;
-extern unsigned char * ingame_music_data[];
-
-void music_play(const unsigned char* music[], unsigned char bank, unsigned char loop) {
-	gbt_play(music, bank, 7);
-	gbt_loop(loop);
-	refresh_bank;
-}
-#endif
-
 UBYTE tim_div = 0;    
 UBYTE __lcd_int_state = 0, inventory = 0;
 UBYTE lyc_table[] = {0, 23,  0,  23, 
@@ -322,9 +310,7 @@ __asm
             ld      A,(HL)
             ldh     (#_LYC_REG), A          ; setting next interrupt row
             
-#ifdef GBT_PLAYER_ENABLED            
             ld      D, A
-#endif
 
             ld      A, E            
             inc     A
@@ -343,12 +329,14 @@ __asm
             or      E
             ldh     (#_LCDC_REG), A         ; manipulate WIN and OBJ visibiliry
 
-#ifdef GBT_PLAYER_ENABLED            
             ld      A, D
             or      A
             ret     NZ
-            
-            call    #_gbt_update
+
+            ld      A, #1
+            ld      (#0x2000), A
+
+            call    #_hUGE_dosound
 
             ld      HL, #___banks_sp        ; refresh_bank;
             ld      A, (HL+)
@@ -356,7 +344,6 @@ __asm
             ld      L, A
             ld      A, (HL)
             ld      (#0x2000), A
-#endif
 
             ret
 __endasm;
@@ -381,20 +368,6 @@ vblint01$:  and     #1
             ld      (#_bal_update), A
 vblint02$:  ld      A, #1
             ld      (#_walk_update), A
-
-#ifdef GBT_PLAYER_ENABLED
-            ld      A, (#_music_mute_frames)
-            or      A
-            ret     Z
-            dec     A
-            ld      (#_music_mute_frames), A
-            ret     NZ
-            ld      A, #0x0F
-            push    AF
-            inc     SP
-            call    #_gbt_enable_channels
-            inc     SP
-#endif
 
             ret
 __endasm;
@@ -459,6 +432,8 @@ void init_game() {
     FADE_IN;
 }
 
+extern void song[];
+
 void main() {
     DISPLAY_OFF;
        
@@ -468,6 +443,8 @@ void main() {
     NR52_REG = 0x80; // Enables sound, always set this first
     NR51_REG = 0xFF; // Enables all channels (left and right)
     NR50_REG = 0x77; // Max volume
+    
+    hUGE_init(song);
     
     __critical {
         LCDC_REG = 0x44U;
@@ -481,6 +458,9 @@ void main() {
 #if __GBDK_VERSION < 312 
         add_LCD(wait_for_stat);
         add_VBL(wait_for_stat);
+#endif        
+#if __GBDK_VERSION >= 314 
+        add_LCD(wait_int_handler);
 #endif        
         
         set_interrupts(VBL_IFLAG | LCD_IFLAG);
@@ -522,10 +502,6 @@ void main() {
     
     // fade to notmal palette
     FADE_IN;
-
-#ifdef GBT_PLAYER_ENABLED
-    music_play(ingame_music_data, 6, 1);
-#endif
      
     show_dialog_window(6, &start_dialog);
     

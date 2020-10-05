@@ -9,7 +9,8 @@ void push_bank(const unsigned char n) NONBANKED {
 }
 
 void pop_bank() NONBANKED {
-    SWITCH_ROM_MBC1(*(--__banks_sp));
+    unsigned char n = *(--__banks_sp);
+    SWITCH_ROM_MBC1(n);
 }
 
 void set_bank(const unsigned char n) NONBANKED {

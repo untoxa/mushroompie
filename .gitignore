@@ -8,10 +8,10 @@
 *.cfg
 *.map
 *.sym
-/unused.py
-/romusage.py
 /gfx/temp
 *.exe
 /profile
 mushroompie.zip
 /dizzyage
+/*.ihx
+/*.noi
