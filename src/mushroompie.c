@@ -495,6 +495,7 @@ void main() {
     
     current_room_x = 1, current_room_y = 1; 
 
+    init_game_items();
     set_room(current_room_y, current_room_x, 0);
 
     SHOW_BKG;
