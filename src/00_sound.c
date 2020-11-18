@@ -1,14 +1,9 @@
 #include "sound.h"
 
-#ifdef GBT_PLAYER_ENABLED
-#include <gbt_player.h>
-extern UINT8 music_mute_frames;
-#endif
-
 const UINT8 const FX_REG_SIZES[] = {5, 4, 5, 4, 3};
 const UINT8 const FX_ADDR_LO[]   = {0x10, 0x16, 0x1A, 0x20, 0x24};
 
-void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) {
+void PlayFx(SOUND_CHANNEL channel, UINT8 mute_frames, ...) __naked {
     channel; mute_frames;
 __asm
             push    BC
@@ -36,11 +31,6 @@ __asm
             jr      NZ, 1$
 
             pop     BC
+            ret
 __endasm;
-#ifdef GBT_PLAYER_ENABLED	
-	if(channel != CHANNEL_5) {
-		gbt_enable_channels(~(0xF & (1 << channel)));
-	}
-	music_mute_frames = mute_frames;
-#endif
 }
