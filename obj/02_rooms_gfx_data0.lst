@@ -101,12 +101,12 @@
                                     101 ; code
                                     102 ;--------------------------------------------------------
                                     103 	.area _CODE_3
-                                    104 ;src/rooms/room_2_0.h:22: void init_room2_0() {
+                                    104 ;src/rooms/room_2_0.c:22: void init_room2_0() {
                                     105 ;	---------------------------------
                                     106 ; Function init_room2_0
                                     107 ; ---------------------------------
       000000                        108 _init_room2_0::
-                                    109 ;src/rooms/room_2_0.h:23: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+                                    109 ;src/rooms/room_2_0.c:23: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
       000000 21r00r00               110 	ld	hl, #_current_room
       000003 2A                     111 	ld	a, (hl+)
       000004 4F                     112 	ld	c, a
@@ -126,14 +126,14 @@
       000015 E5                     126 	push	hl
       000016 CDr00r00               127 	call	_set_sprite_data
       000019 E8 04                  128 	add	sp, #4
-                                    129 ;src/rooms/room_2_0.h:24: multiple_set_sprite_tiles(spider_net_sprite_offset, spider_net_sprite_count, spidernettn);
+                                    129 ;src/rooms/room_2_0.c:24: multiple_set_sprite_tiles(spider_net_sprite_offset, spider_net_sprite_count, spidernettn);
       00001B 11r51r00               130 	ld	de, #_spidernettn
       00001E D5                     131 	push	de
       00001F 21 0D 06               132 	ld	hl, #0x60d
       000022 E5                     133 	push	hl
       000023 CDr00r00               134 	call	_multiple_set_sprite_tiles
       000026 E8 04                  135 	add	sp, #4
-                                    136 ;src/rooms/room_2_0.h:25: }
+                                    136 ;src/rooms/room_2_0.c:25: }
       000028 C9                     137 	ret
       000029                        138 _spider_net_ofs:
       000029 00                     139 	.db #0x00	; 0
@@ -193,20 +193,20 @@
       00005C                        193 _spider0:
       00005Cr58r00                  194 	.dw (_spidertn + 0)
       00005Er5Ar00                  195 	.dw (_spidertn + 2)
-                                    196 ;src/rooms/room_2_0.h:31: void move_spider() {
+                                    196 ;src/rooms/room_2_0.c:31: void move_spider() {
                                     197 ;	---------------------------------
                                     198 ; Function move_spider
                                     199 ; ---------------------------------
       000060                        200 _move_spider::
-                                    201 ;src/rooms/room_2_0.h:32: if (spider_phase & 1) {
+                                    201 ;src/rooms/room_2_0.c:32: if (spider_phase & 1) {
       000060 FAr00r00               202 	ld	a, (#_spider_phase)
       000063 0F                     203 	rrca
       000064 D0                     204 	ret	NC
-                                    205 ;src/rooms/room_2_0.h:33: if (spider_dir) {
+                                    205 ;src/rooms/room_2_0.c:33: if (spider_dir) {
       000065 FAr01r00               206 	ld	a, (#_spider_dir)
       000068 B7                     207 	or	a, a
       000069 28 2B                  208 	jr	Z, 00106$
-                                    209 ;src/rooms/room_2_0.h:34: spider_pos_y += 2; if (spider_pos_y >= spider_max_y) spider_dir = 0;
+                                    209 ;src/rooms/room_2_0.c:34: spider_pos_y += 2; if (spider_pos_y >= spider_max_y) spider_dir = 0;
       00006B 21r02r00               210 	ld	hl, #_spider_pos_y
       00006E 7E                     211 	ld	a, (hl)
       00006F C6 02                  212 	add	a, #0x02
@@ -236,7 +236,7 @@
       000093 36 00                  236 	ld	(hl), #0x00
       000095 C9                     237 	ret
       000096                        238 00106$:
-                                    239 ;src/rooms/room_2_0.h:36: spider_pos_y--; if (spider_pos_y <= spider_min_y) spider_dir = 1;
+                                    239 ;src/rooms/room_2_0.c:36: spider_pos_y--; if (spider_pos_y <= spider_min_y) spider_dir = 1;
       000096 21r02r00               240 	ld	hl, #_spider_pos_y
       000099 2A                     241 	ld	a, (hl+)
       00009A 5F                     242 	ld	e, a
@@ -268,18 +268,18 @@
       0000BC D8                     268 	ret	C
       0000BD 21r01r00               269 	ld	hl, #_spider_dir
       0000C0 36 01                  270 	ld	(hl), #0x01
-                                    271 ;src/rooms/room_2_0.h:39: }
+                                    271 ;src/rooms/room_2_0.c:39: }
       0000C2 C9                     272 	ret
-                                    273 ;src/rooms/room_2_0.h:41: void draw_spider() {
+                                    273 ;src/rooms/room_2_0.c:41: void draw_spider() {
                                     274 ;	---------------------------------
                                     275 ; Function draw_spider
                                     276 ; ---------------------------------
       0000C3                        277 _draw_spider::
-                                    278 ;src/rooms/room_2_0.h:42: if (spider_phase == 0) {
+                                    278 ;src/rooms/room_2_0.c:42: if (spider_phase == 0) {
       0000C3 FAr00r00               279 	ld	a, (#_spider_phase)
       0000C6 B7                     280 	or	a, a
       0000C7 20 12                  281 	jr	NZ, 00104$
-                                    282 ;src/rooms/room_2_0.h:43: multiple_set_sprite_tiles(evil_sprite_offset, spider_sprite_count, spider0[0]);        
+                                    282 ;src/rooms/room_2_0.c:43: multiple_set_sprite_tiles(evil_sprite_offset, spider_sprite_count, spider0[0]);        
       0000C9 21r5Cr00               283 	ld	hl, #_spider0
       0000CC 2A                     284 	ld	a, (hl+)
       0000CD 4F                     285 	ld	c, a
@@ -291,11 +291,11 @@
       0000D7 E8 04                  291 	add	sp, #4
       0000D9 18 17                  292 	jr	00105$
       0000DB                        293 00104$:
-                                    294 ;src/rooms/room_2_0.h:44: } else if (spider_phase == 4) {
+                                    294 ;src/rooms/room_2_0.c:44: } else if (spider_phase == 4) {
       0000DB FAr00r00               295 	ld	a, (#_spider_phase)
       0000DE D6 04                  296 	sub	a, #0x04
       0000E0 20 10                  297 	jr	NZ, 00105$
-                                    298 ;src/rooms/room_2_0.h:45: multiple_set_sprite_tiles(evil_sprite_offset, spider_sprite_count, spider0[1]);        
+                                    298 ;src/rooms/room_2_0.c:45: multiple_set_sprite_tiles(evil_sprite_offset, spider_sprite_count, spider0[1]);        
       0000E2 21r5Er00               299 	ld	hl, #(_spider0 + 2)
       0000E5 2A                     300 	ld	a, (hl+)
       0000E6 4F                     301 	ld	c, a
@@ -306,13 +306,13 @@
       0000ED CDr00r00               306 	call	_multiple_set_sprite_tiles
       0000F0 E8 04                  307 	add	sp, #4
       0000F2                        308 00105$:
-                                    309 ;src/rooms/room_2_0.h:47: spider_phase++; spider_phase &= 7;
+                                    309 ;src/rooms/room_2_0.c:47: spider_phase++; spider_phase &= 7;
       0000F2 21r00r00               310 	ld	hl, #_spider_phase
       0000F5 34                     311 	inc	(hl)
       0000F6 7E                     312 	ld	a, (hl)
       0000F7 E6 07                  313 	and	a, #0x07
       0000F9 77                     314 	ld	(hl), a
-                                    315 ;src/rooms/room_2_0.h:51: -bkg_scroll_x_target, -bkg_scroll_y_target);    
+                                    315 ;src/rooms/room_2_0.c:51: -bkg_scroll_x_target, -bkg_scroll_y_target);    
       0000FA AF                     316 	xor	a, a
       0000FB 21r00r00               317 	ld	hl, #_bkg_scroll_y_target
       0000FE 96                     318 	sub	a, (hl)
@@ -321,12 +321,12 @@
       000101 21r00r00               321 	ld	hl, #_bkg_scroll_x_target
       000104 96                     322 	sub	a, (hl)
       000105 47                     323 	ld	b, a
-                                    324 ;src/rooms/room_2_0.h:50: (unsigned char *)spider_net_ofs, 
+                                    324 ;src/rooms/room_2_0.c:50: (unsigned char *)spider_net_ofs, 
       000106 11r29r00               325 	ld	de, #_spider_net_ofs
-                                    326 ;src/rooms/room_2_0.h:49: spider_pos_x, (spider_pos_y & 0xFFF8), 
+                                    326 ;src/rooms/room_2_0.c:49: spider_pos_x, (spider_pos_y & 0xFFF8), 
       000109 FAr02r00               327 	ld	a, (#_spider_pos_y)
       00010C E6 F8                  328 	and	a, #0xf8
-                                    329 ;src/rooms/room_2_0.h:48: multiple_move_sprites_limits(spider_net_sprite_offset, spider_net_sprite_count, 
+                                    329 ;src/rooms/room_2_0.c:48: multiple_move_sprites_limits(spider_net_sprite_offset, spider_net_sprite_count, 
       00010E 61                     330 	ld	h, c
                                     331 ;	spillPairReg hl
                                     332 ;	spillPairReg hl
@@ -340,8 +340,8 @@
       000119 E5                     340 	push	hl
       00011A CDr00r00               341 	call	_multiple_move_sprites_limits
       00011D E8 08                  342 	add	sp, #8
-                                    343 ;src/rooms/room_2_0.h:54: (unsigned char *)spider_offsets);    
-                                    344 ;src/rooms/room_2_0.h:53: spider_pos_x - bkg_scroll_x_target, spider_pos_y - bkg_scroll_y_target, 
+                                    343 ;src/rooms/room_2_0.c:54: (unsigned char *)spider_offsets);    
+                                    344 ;src/rooms/room_2_0.c:53: spider_pos_x - bkg_scroll_x_target, spider_pos_y - bkg_scroll_y_target, 
       00011F FAr02r00               345 	ld	a, (#_spider_pos_y)
       000122 21r00r00               346 	ld	hl, #_bkg_scroll_y_target
       000125 4E                     347 	ld	c, (hl)
@@ -350,7 +350,7 @@
       000128 3E 98                  350 	ld	a, #0x98
       00012A 21r00r00               351 	ld	hl, #_bkg_scroll_x_target
       00012D 96                     352 	sub	a, (hl)
-                                    353 ;src/rooms/room_2_0.h:52: multiple_move_sprites(spider_sprite_offset, spider_sprite_count, 
+                                    353 ;src/rooms/room_2_0.c:52: multiple_move_sprites(spider_sprite_offset, spider_sprite_count, 
       00012E 11r4Dr00               354 	ld	de, #_spider_offsets
       000131 D5                     355 	push	de
       000132 C5                     356 	push	bc
@@ -363,14 +363,14 @@
       00013B 33                     363 	inc	sp
       00013C CDr00r00               364 	call	_multiple_move_sprites
       00013F E8 06                  365 	add	sp, #6
-                                    366 ;src/rooms/room_2_0.h:55: }
+                                    366 ;src/rooms/room_2_0.c:55: }
       000141 C9                     367 	ret
-                                    368 ;src/rooms/room_2_0.h:57: void coll_spider(WORD x, WORD y) {
+                                    368 ;src/rooms/room_2_0.c:57: void coll_spider(WORD x, WORD y) {
                                     369 ;	---------------------------------
                                     370 ; Function coll_spider
                                     371 ; ---------------------------------
       000142                        372 _coll_spider::
-                                    373 ;src/rooms/room_2_0.h:58: if (!((spider_pos_x > x + 16) || 
+                                    373 ;src/rooms/room_2_0.c:58: if (!((spider_pos_x > x + 16) || 
       000142 F8 02                  374 	ldhl	sp,#2
       000144 2A                     375 	ld	a, (hl+)
       000145 5F                     376 	ld	e, a
@@ -387,7 +387,7 @@
       000153 1F                     387 	rra
       000154 DE 80                  388 	sbc	a, #0x80
       000156 D8                     389 	ret	C
-                                    390 ;src/rooms/room_2_0.h:59: (spider_pos_x + 16 < x) ||
+                                    390 ;src/rooms/room_2_0.c:59: (spider_pos_x + 16 < x) ||
       000157 F8 02                  391 	ldhl	sp,	#2
       000159 3E A8                  392 	ld	a, #0xa8
       00015B 96                     393 	sub	a, (hl)
@@ -408,7 +408,7 @@
       000172 37                     408 	scf
       000173                        409 00129$:
       000173 D8                     410 	ret	C
-                                    411 ;src/rooms/room_2_0.h:60: (spider_pos_y > y + 20) ||
+                                    411 ;src/rooms/room_2_0.c:60: (spider_pos_y > y + 20) ||
       000174 F8 04                  412 	ldhl	sp,#4
       000176 2A                     413 	ld	a, (hl+)
       000177 5F                     414 	ld	e, a
@@ -437,7 +437,7 @@
       000198 37                     437 	scf
       000199                        438 00131$:
       000199 D8                     439 	ret	C
-                                    440 ;src/rooms/room_2_0.h:61: (spider_pos_y + 8 < y))) {
+                                    440 ;src/rooms/room_2_0.c:61: (spider_pos_y + 8 < y))) {
       00019A 21r02r00               441 	ld	hl, #_spider_pos_y
       00019D 2A                     442 	ld	a, (hl+)
       00019E C6 08                  443 	add	a, #0x08
@@ -465,19 +465,19 @@
       0001BD 37                     465 	scf
       0001BE                        466 00133$:
       0001BE D8                     467 	ret	C
-                                    468 ;src/rooms/room_2_0.h:62: dec_energy += 3;
+                                    468 ;src/rooms/room_2_0.c:62: dec_energy += 3;
       0001BF 21r00r00               469 	ld	hl, #_dec_energy
       0001C2 7E                     470 	ld	a, (hl)
       0001C3 C6 03                  471 	add	a, #0x03
       0001C5 77                     472 	ld	(hl), a
-                                    473 ;src/rooms/room_2_0.h:64: }
+                                    473 ;src/rooms/room_2_0.c:64: }
       0001C6 C9                     474 	ret
-                                    475 ;src/rooms/room_4_0.h:7: void init_room4_0() {
+                                    475 ;src/rooms/room_4_0.c:7: void init_room4_0() {
                                     476 ;	---------------------------------
                                     477 ; Function init_room4_0
                                     478 ; ---------------------------------
       0001C7                        479 _init_room4_0::
-                                    480 ;src/rooms/room_4_0.h:8: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+                                    480 ;src/rooms/room_4_0.c:8: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
       0001C7 21r00r00               481 	ld	hl, #_current_room
       0001CA 2A                     482 	ld	a, (hl+)
       0001CB 4F                     483 	ld	c, a
@@ -497,19 +497,19 @@
       0001DC E5                     497 	push	hl
       0001DD CDr00r00               498 	call	_set_sprite_data
       0001E0 E8 04                  499 	add	sp, #4
-                                    500 ;src/rooms/room_4_0.h:9: }
+                                    500 ;src/rooms/room_4_0.c:9: }
       0001E2 C9                     501 	ret
-                                    502 ;src/rooms/room_4_0.h:11: void move_flies4_0() {
+                                    502 ;src/rooms/room_4_0.c:11: void move_flies4_0() {
                                     503 ;	---------------------------------
                                     504 ; Function move_flies4_0
                                     505 ; ---------------------------------
       0001E3                        506 _move_flies4_0::
       0001E3 E8 FC                  507 	add	sp, #-4
-                                    508 ;src/rooms/room_4_0.h:12: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                    508 ;src/rooms/room_4_0.c:12: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       0001E5 21r00r00               509 	ld	hl, #___temp_i
       0001E8 36 00                  510 	ld	(hl), #0x00
       0001EA                        511 00115$:
-                                    512 ;src/rooms/room_4_0.h:13: fly_ptr = &flies[__temp_i];
+                                    512 ;src/rooms/room_4_0.c:13: fly_ptr = &flies[__temp_i];
       0001EA 21r00r00               513 	ld	hl, #___temp_i
       0001ED 6E                     514 	ld	l, (hl)
                                     515 ;	spillPairReg hl
@@ -527,11 +527,11 @@
       0001FB 7B                     527 	ld	a, e
       0001FC 22                     528 	ld	(hl+), a
       0001FD 72                     529 	ld	(hl), d
-                                    530 ;src/rooms/room_4_0.h:14: if (fly_phase & 1) {
+                                    530 ;src/rooms/room_4_0.c:14: if (fly_phase & 1) {
       0001FE FAr0Er00               531 	ld	a, (#_fly_phase)
       000201 F8 03                  532 	ldhl	sp,	#3
       000203 77                     533 	ld	(hl), a
-                                    534 ;src/rooms/room_4_0.h:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
+                                    534 ;src/rooms/room_4_0.c:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
       000204 FAr0Cr00               535 	ld	a, (#_fly_ptr)
       000207 F8 00                  536 	ldhl	sp,	#0
       000209 77                     537 	ld	(hl), a
@@ -560,13 +560,13 @@
       000223 2A                     560 	ld	a, (hl+)
       000224 4F                     561 	ld	c, a
       000225 46                     562 	ld	b, (hl)
-                                    563 ;src/rooms/room_4_0.h:14: if (fly_phase & 1) {
+                                    563 ;src/rooms/room_4_0.c:14: if (fly_phase & 1) {
       000226 E5                     564 	push	hl
       000227 F8 05                  565 	ldhl	sp,	#5
       000229 CB 46                  566 	bit	0, (hl)
       00022B E1                     567 	pop	hl
       00022C 28 48                  568 	jr	Z, 00112$
-                                    569 ;src/rooms/room_4_0.h:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
+                                    569 ;src/rooms/room_4_0.c:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
       00022E D1                     570 	pop	de
       00022F D5                     571 	push	de
       000230 1A                     572 	ld	a, (de)
@@ -598,7 +598,7 @@
       000247 6F                     598 	ld	l, a
                                     599 ;	spillPairReg hl
                                     600 ;	spillPairReg hl
-                                    601 ;src/rooms/room_4_0.h:16: if (fly_ptr->x < 0) fly_ptr->x = 0; 
+                                    601 ;src/rooms/room_4_0.c:16: if (fly_ptr->x < 0) fly_ptr->x = 0; 
       000248 CB 7C                  602 	bit	7, h
       00024A 28 07                  603 	jr	Z, 00104$
       00024C AF                     604 	xor	a, a
@@ -607,7 +607,7 @@
       00024F 02                     607 	ld	(bc), a
       000250 C3rD1r02               608 	jp	00116$
       000253                        609 00104$:
-                                    610 ;src/rooms/room_4_0.h:17: else if (fly_ptr->x > (room_width * 8)) fly_ptr->x = ((room_width * 8) - 1);
+                                    610 ;src/rooms/room_4_0.c:17: else if (fly_ptr->x > (room_width * 8)) fly_ptr->x = ((room_width * 8) - 1);
       000253 5C                     611 	ld	e, h
       000254 16 00                  612 	ld	d, #0x00
       000256 3E F0                  613 	ld	a, #0xf0
@@ -633,7 +633,7 @@
       000273 02                     633 	ld	(bc), a
       000274 18 5B                  634 	jr	00116$
       000276                        635 00112$:
-                                    636 ;src/rooms/room_4_0.h:19: fly_ptr->y += fly_delta[(*(ptr_div_reg)) & 7];
+                                    636 ;src/rooms/room_4_0.c:19: fly_ptr->y += fly_delta[(*(ptr_div_reg)) & 7];
       000276 D1                     637 	pop	de
       000277 D5                     638 	push	de
       000278 21 02 00               639 	ld	hl, #0x0002
@@ -668,12 +668,12 @@
       000296 79                     668 	ld	a, c
       000297 22                     669 	ld	(hl+), a
       000298 70                     670 	ld	(hl), b
-                                    671 ;src/rooms/room_4_0.h:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
+                                    671 ;src/rooms/room_4_0.c:15: fly_ptr->x += fly_delta[(*(ptr_div_reg)) & 7];
       000299 21r0Cr00               672 	ld	hl, #_fly_ptr
       00029C 2A                     673 	ld	a, (hl+)
       00029D 4F                     674 	ld	c, a
       00029E 46                     675 	ld	b, (hl)
-                                    676 ;src/rooms/room_4_0.h:19: fly_ptr->y += fly_delta[(*(ptr_div_reg)) & 7];
+                                    676 ;src/rooms/room_4_0.c:19: fly_ptr->y += fly_delta[(*(ptr_div_reg)) & 7];
       00029F 03                     677 	inc	bc
       0002A0 03                     678 	inc	bc
       0002A1 69                     679 	ld	l, c
@@ -684,7 +684,7 @@
       0002A5 6F                     684 	ld	l, a
                                     685 ;	spillPairReg hl
                                     686 ;	spillPairReg hl
-                                    687 ;src/rooms/room_4_0.h:20: if (fly_ptr->y < 0) fly_ptr->y = 0; 
+                                    687 ;src/rooms/room_4_0.c:20: if (fly_ptr->y < 0) fly_ptr->y = 0; 
       0002A6 CB 7C                  688 	bit	7, h
       0002A8 28 06                  689 	jr	Z, 00109$
       0002AA AF                     690 	xor	a, a
@@ -693,7 +693,7 @@
       0002AD 02                     693 	ld	(bc), a
       0002AE 18 21                  694 	jr	00116$
       0002B0                        695 00109$:
-                                    696 ;src/rooms/room_4_0.h:21: else if (fly_ptr->y > (room_height * 8)) fly_ptr->y = ((room_height * 8) - 1);
+                                    696 ;src/rooms/room_4_0.c:21: else if (fly_ptr->y > (room_height * 8)) fly_ptr->y = ((room_height * 8) - 1);
       0002B0 5C                     697 	ld	e, h
       0002B1 16 00                  698 	ld	d, #0x00
       0002B3 3E 88                  699 	ld	a, #0x88
@@ -718,21 +718,21 @@
       0002CF AF                     718 	xor	a, a
       0002D0 02                     719 	ld	(bc), a
       0002D1                        720 00116$:
-                                    721 ;src/rooms/room_4_0.h:12: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                    721 ;src/rooms/room_4_0.c:12: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       0002D1 21r00r00               722 	ld	hl, #___temp_i
       0002D4 34                     723 	inc	(hl)
       0002D5 7E                     724 	ld	a, (hl)
       0002D6 D6 03                  725 	sub	a, #0x03
       0002D8 DArEAr01               726 	jp	C, 00115$
-                                    727 ;src/rooms/room_4_0.h:24: }
+                                    727 ;src/rooms/room_4_0.c:24: }
       0002DB E8 04                  728 	add	sp, #4
       0002DD C9                     729 	ret
-                                    730 ;src/rooms/room_4_0.h:26: void draw_flies4_0() {
+                                    730 ;src/rooms/room_4_0.c:26: void draw_flies4_0() {
                                     731 ;	---------------------------------
                                     732 ; Function draw_flies4_0
                                     733 ; ---------------------------------
       0002DE                        734 _draw_flies4_0::
-                                    735 ;src/rooms/room_4_0.h:27: switch (fly_phase) {
+                                    735 ;src/rooms/room_4_0.c:27: switch (fly_phase) {
       0002DE 3E 06                  736 	ld	a, #0x06
       0002E0 21r0Er00               737 	ld	hl, #_fly_phase
       0002E3 96                     738 	sub	a, (hl)
@@ -752,59 +752,59 @@
       0002FC C3r1Ar03               752 	jp	00104$
       0002FF C3r21r03               753 	jp	00105$
       000302 C3r28r03               754 	jp	00106$
-                                    755 ;src/rooms/room_4_0.h:28: case 0 : set_sprite_tile(fly_sprite_offset0,     evil_sprites_tileoffset); break;
+                                    755 ;src/rooms/room_4_0.c:28: case 0 : set_sprite_tile(fly_sprite_offset0,     evil_sprites_tileoffset); break;
       000305                        756 00101$:
                                     757 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       000305 21r26r00               758 	ld	hl, #(_shadow_OAM + 38)
       000308 36 09                  759 	ld	(hl), #0x09
-                                    760 ;src/rooms/room_4_0.h:28: case 0 : set_sprite_tile(fly_sprite_offset0,     evil_sprites_tileoffset); break;
+                                    760 ;src/rooms/room_4_0.c:28: case 0 : set_sprite_tile(fly_sprite_offset0,     evil_sprites_tileoffset); break;
       00030A 18 21                  761 	jr	00107$
-                                    762 ;src/rooms/room_4_0.h:29: case 1 : set_sprite_tile(fly_sprite_offset0 + 1, evil_sprites_tileoffset); break;
+                                    762 ;src/rooms/room_4_0.c:29: case 1 : set_sprite_tile(fly_sprite_offset0 + 1, evil_sprites_tileoffset); break;
       00030C                        763 00102$:
                                     764 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       00030C 21r2Ar00               765 	ld	hl, #(_shadow_OAM + 42)
       00030F 36 09                  766 	ld	(hl), #0x09
-                                    767 ;src/rooms/room_4_0.h:29: case 1 : set_sprite_tile(fly_sprite_offset0 + 1, evil_sprites_tileoffset); break;
+                                    767 ;src/rooms/room_4_0.c:29: case 1 : set_sprite_tile(fly_sprite_offset0 + 1, evil_sprites_tileoffset); break;
       000311 18 1A                  768 	jr	00107$
-                                    769 ;src/rooms/room_4_0.h:30: case 2 : set_sprite_tile(fly_sprite_offset0 + 2, evil_sprites_tileoffset); break;
+                                    769 ;src/rooms/room_4_0.c:30: case 2 : set_sprite_tile(fly_sprite_offset0 + 2, evil_sprites_tileoffset); break;
       000313                        770 00103$:
                                     771 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       000313 21r2Er00               772 	ld	hl, #(_shadow_OAM + 46)
       000316 36 09                  773 	ld	(hl), #0x09
-                                    774 ;src/rooms/room_4_0.h:30: case 2 : set_sprite_tile(fly_sprite_offset0 + 2, evil_sprites_tileoffset); break;
+                                    774 ;src/rooms/room_4_0.c:30: case 2 : set_sprite_tile(fly_sprite_offset0 + 2, evil_sprites_tileoffset); break;
       000318 18 13                  775 	jr	00107$
-                                    776 ;src/rooms/room_4_0.h:32: case 4 : set_sprite_tile(fly_sprite_offset0,     (evil_sprites_tileoffset + 1)); break;
+                                    776 ;src/rooms/room_4_0.c:32: case 4 : set_sprite_tile(fly_sprite_offset0,     (evil_sprites_tileoffset + 1)); break;
       00031A                        777 00104$:
                                     778 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       00031A 21r26r00               779 	ld	hl, #(_shadow_OAM + 38)
       00031D 36 0A                  780 	ld	(hl), #0x0a
-                                    781 ;src/rooms/room_4_0.h:32: case 4 : set_sprite_tile(fly_sprite_offset0,     (evil_sprites_tileoffset + 1)); break;
+                                    781 ;src/rooms/room_4_0.c:32: case 4 : set_sprite_tile(fly_sprite_offset0,     (evil_sprites_tileoffset + 1)); break;
       00031F 18 0C                  782 	jr	00107$
-                                    783 ;src/rooms/room_4_0.h:33: case 5 : set_sprite_tile(fly_sprite_offset0 + 1, (evil_sprites_tileoffset + 1)); break;
+                                    783 ;src/rooms/room_4_0.c:33: case 5 : set_sprite_tile(fly_sprite_offset0 + 1, (evil_sprites_tileoffset + 1)); break;
       000321                        784 00105$:
                                     785 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       000321 21r2Ar00               786 	ld	hl, #(_shadow_OAM + 42)
       000324 36 0A                  787 	ld	(hl), #0x0a
-                                    788 ;src/rooms/room_4_0.h:33: case 5 : set_sprite_tile(fly_sprite_offset0 + 1, (evil_sprites_tileoffset + 1)); break;
+                                    788 ;src/rooms/room_4_0.c:33: case 5 : set_sprite_tile(fly_sprite_offset0 + 1, (evil_sprites_tileoffset + 1)); break;
       000326 18 05                  789 	jr	00107$
-                                    790 ;src/rooms/room_4_0.h:34: case 6 : set_sprite_tile(fly_sprite_offset0 + 2, (evil_sprites_tileoffset + 1)); break;
+                                    790 ;src/rooms/room_4_0.c:34: case 6 : set_sprite_tile(fly_sprite_offset0 + 2, (evil_sprites_tileoffset + 1)); break;
       000328                        791 00106$:
                                     792 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
       000328 21r2Er00               793 	ld	hl, #(_shadow_OAM + 46)
       00032B 36 0A                  794 	ld	(hl), #0x0a
-                                    795 ;src/rooms/room_4_0.h:35: }
+                                    795 ;src/rooms/room_4_0.c:35: }
       00032D                        796 00107$:
-                                    797 ;src/rooms/room_4_0.h:36: fly_phase++; fly_phase &= 7;
+                                    797 ;src/rooms/room_4_0.c:36: fly_phase++; fly_phase &= 7;
       00032D 21r0Er00               798 	ld	hl, #_fly_phase
       000330 34                     799 	inc	(hl)
       000331 7E                     800 	ld	a, (hl)
       000332 E6 07                  801 	and	a, #0x07
       000334 77                     802 	ld	(hl), a
-                                    803 ;src/rooms/room_4_0.h:37: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                    803 ;src/rooms/room_4_0.c:37: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       000335 21r00r00               804 	ld	hl, #___temp_i
       000338 36 00                  805 	ld	(hl), #0x00
       00033A                        806 00115$:
-                                    807 ;src/rooms/room_4_0.h:38: fly_ptr = &flies[__temp_i];
+                                    807 ;src/rooms/room_4_0.c:38: fly_ptr = &flies[__temp_i];
       00033A 21r00r00               808 	ld	hl, #___temp_i
       00033D 6E                     809 	ld	l, (hl)
                                     810 ;	spillPairReg hl
@@ -822,8 +822,8 @@
       00034B 7B                     822 	ld	a, e
       00034C 22                     823 	ld	(hl+), a
       00034D 72                     824 	ld	(hl), d
-                                    825 ;src/rooms/room_4_0.h:41: (unsigned char *)fly_offsets);
-                                    826 ;src/rooms/room_4_0.h:40: fly_ptr->x - bkg_scroll_x_target, fly_ptr->y - bkg_scroll_y_target,
+                                    825 ;src/rooms/room_4_0.c:41: (unsigned char *)fly_offsets);
+                                    826 ;src/rooms/room_4_0.c:40: fly_ptr->x - bkg_scroll_x_target, fly_ptr->y - bkg_scroll_y_target,
       00034E 21r0Cr00               827 	ld	hl, #_fly_ptr
       000351 2A                     828 	ld	a, (hl+)
       000352 5F                     829 	ld	e, a
@@ -842,7 +842,7 @@
       000363 4E                     842 	ld	c, (hl)
       000364 91                     843 	sub	a, c
       000365 4F                     844 	ld	c, a
-                                    845 ;src/rooms/room_4_0.h:39: multiple_move_sprites(fly_sprite_offset0 + __temp_i, 1, 
+                                    845 ;src/rooms/room_4_0.c:39: multiple_move_sprites(fly_sprite_offset0 + __temp_i, 1, 
       000366 21r00r00               846 	ld	hl, #___temp_i
       000369 7E                     847 	ld	a, (hl)
       00036A C6 09                  848 	add	a, #0x09
@@ -864,25 +864,25 @@
       00037A 33                     864 	inc	sp
       00037B CDr00r00               865 	call	_multiple_move_sprites
       00037E E8 06                  866 	add	sp, #6
-                                    867 ;src/rooms/room_4_0.h:37: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                    867 ;src/rooms/room_4_0.c:37: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       000380 21r00r00               868 	ld	hl, #___temp_i
       000383 34                     869 	inc	(hl)
       000384 7E                     870 	ld	a, (hl)
       000385 D6 03                  871 	sub	a, #0x03
       000387 38 B1                  872 	jr	C, 00115$
-                                    873 ;src/rooms/room_4_0.h:43: }
+                                    873 ;src/rooms/room_4_0.c:43: }
       000389 C9                     874 	ret
-                                    875 ;src/rooms/room_4_0.h:45: fly_coord_t * find_firefly(UBYTE tile_x, UBYTE tile_y) {
+                                    875 ;src/rooms/room_4_0.c:45: fly_coord_t * find_firefly(UBYTE tile_x, UBYTE tile_y) {
                                     876 ;	---------------------------------
                                     877 ; Function find_firefly
                                     878 ; ---------------------------------
       00038A                        879 _find_firefly::
       00038A E8 FD                  880 	add	sp, #-3
-                                    881 ;src/rooms/room_4_0.h:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                    881 ;src/rooms/room_4_0.c:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       00038C 21r00r00               882 	ld	hl, #___temp_i
       00038F 36 00                  883 	ld	(hl), #0x00
       000391                        884 00107$:
-                                    885 ;src/rooms/room_4_0.h:48: fly_ptr = &flies[__temp_i];
+                                    885 ;src/rooms/room_4_0.c:48: fly_ptr = &flies[__temp_i];
       000391 21r00r00               886 	ld	hl, #___temp_i
       000394 6E                     887 	ld	l, (hl)
                                     888 ;	spillPairReg hl
@@ -900,7 +900,7 @@
       0003A2 7B                     900 	ld	a, e
       0003A3 22                     901 	ld	(hl+), a
       0003A4 72                     902 	ld	(hl), d
-                                    903 ;src/rooms/room_4_0.h:50: ff_tile_x = fly_ptr->x >> 3, ff_tile_y = fly_ptr->y >> 3;        
+                                    903 ;src/rooms/room_4_0.c:50: ff_tile_x = fly_ptr->x >> 3, ff_tile_y = fly_ptr->y >> 3;        
       0003A5 21r0Cr00               904 	ld	hl, #_fly_ptr
       0003A8 2A                     905 	ld	a, (hl+)
       0003A9 4F                     906 	ld	c, a
@@ -936,7 +936,7 @@
       0003CF CB 28                  936 	sra	b
       0003D1 CB 19                  937 	rr	c
       0003D3 F8 00                  938 	ldhl	sp,	#0
-                                    939 ;src/rooms/room_4_0.h:52: if ((ff_tile_x >= tile_x) && (ff_tile_x <= tile_x + 2) &&
+                                    939 ;src/rooms/room_4_0.c:52: if ((ff_tile_x >= tile_x) && (ff_tile_x <= tile_x + 2) &&
       0003D5 79                     940 	ld	a, c
       0003D6 22                     941 	ld	(hl+), a
       0003D7 23                     942 	inc	hl
@@ -972,7 +972,7 @@
       0003FF 37                     972 	scf
       000400                        973 00142$:
       000400 38 33                  974 	jr	C, 00108$
-                                    975 ;src/rooms/room_4_0.h:53: (ff_tile_y >= tile_y) && (ff_tile_y <= tile_y + 1)) return fly_ptr;
+                                    975 ;src/rooms/room_4_0.c:53: (ff_tile_y >= tile_y) && (ff_tile_y <= tile_y + 1)) return fly_ptr;
       000402 F8 00                  976 	ldhl	sp,	#0
       000404 7E                     977 	ld	a, (hl)
       000405 F8 06                  978 	ldhl	sp,	#6
@@ -1011,29 +1011,29 @@
       000432 56                    1011 	ld	d, (hl)
       000433 18 0D                 1012 	jr	00109$
       000435                       1013 00108$:
-                                   1014 ;src/rooms/room_4_0.h:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+                                   1014 ;src/rooms/room_4_0.c:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
       000435 21r00r00              1015 	ld	hl, #___temp_i
       000438 34                    1016 	inc	(hl)
       000439 7E                    1017 	ld	a, (hl)
       00043A D6 03                 1018 	sub	a, #0x03
       00043C DAr91r03              1019 	jp	C, 00107$
-                                   1020 ;src/rooms/room_4_0.h:55: return 0;
+                                   1020 ;src/rooms/room_4_0.c:55: return 0;
       00043F 11 00 00              1021 	ld	de, #0x0000
       000442                       1022 00109$:
-                                   1023 ;src/rooms/room_4_0.h:56: }
+                                   1023 ;src/rooms/room_4_0.c:56: }
       000442 E8 03                 1024 	add	sp, #3
       000444 C9                    1025 	ret
-                                   1026 ;src/rooms/room_4_0.h:58: UBYTE dizzy_catches_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+                                   1026 ;src/rooms/room_4_0.c:58: UBYTE dizzy_catches_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
                                    1027 ;	---------------------------------
                                    1028 ; Function dizzy_catches_firefly
                                    1029 ; ---------------------------------
       000445                       1030 _dizzy_catches_firefly::
-                                   1031 ;src/rooms/room_4_0.h:61: if (id == ID_LID) {
+                                   1031 ;src/rooms/room_4_0.c:61: if (id == ID_LID) {
       000445 F8 04                 1032 	ldhl	sp,	#4
       000447 7E                    1033 	ld	a, (hl)
       000448 D6 07                 1034 	sub	a, #0x07
       00044A C2rE0r04              1035 	jp	NZ,00112$
-                                   1036 ;src/rooms/room_4_0.h:62: temp_item = find_by_id(&inventory_item_list, ID_JAR);
+                                   1036 ;src/rooms/room_4_0.c:62: temp_item = find_by_id(&inventory_item_list, ID_JAR);
       00044D 3E 06                 1037 	ld	a, #0x06
       00044F F5                    1038 	push	af
       000450 33                    1039 	inc	sp
@@ -1042,10 +1042,10 @@
       000455 CDr00r00              1042 	call	_find_by_id
       000458 E8 03                 1043 	add	sp, #3
       00045A 7B                    1044 	ld	a, e
-                                   1045 ;src/rooms/room_4_0.h:63: if (temp_item) {
+                                   1045 ;src/rooms/room_4_0.c:63: if (temp_item) {
       00045B B2                    1046 	or	a, d
       00045C CArE0r04              1047 	jp	Z, 00112$
-                                   1048 ;src/rooms/room_4_0.h:64: temp_fly = find_firefly(tile_x, tile_y);
+                                   1048 ;src/rooms/room_4_0.c:64: temp_fly = find_firefly(tile_x, tile_y);
       00045F F8 03                 1049 	ldhl	sp,	#3
       000461 3A                    1050 	ld	a, (hl-)
       000462 57                    1051 	ld	d, a
@@ -1055,11 +1055,11 @@
       000468 E1                    1055 	pop	hl
       000469 4B                    1056 	ld	c, e
       00046A 42                    1057 	ld	b, d
-                                   1058 ;src/rooms/room_4_0.h:65: if (temp_fly) {
+                                   1058 ;src/rooms/room_4_0.c:65: if (temp_fly) {
       00046B 78                    1059 	ld	a, b
       00046C B1                    1060 	or	a, c
       00046D 28 71                 1061 	jr	Z, 00112$
-                                   1062 ;src/rooms/room_4_0.h:67: temp_item = pop_by_id(&inventory_item_list, ID_JAR);
+                                   1062 ;src/rooms/room_4_0.c:67: temp_item = pop_by_id(&inventory_item_list, ID_JAR);
       00046F C5                    1063 	push	bc
       000470 3E 06                 1064 	ld	a, #0x06
       000472 F5                    1065 	push	af
@@ -1069,7 +1069,7 @@
       000478 CDr00r00              1069 	call	_pop_by_id
       00047B E8 03                 1070 	add	sp, #3
       00047D C1                    1071 	pop	bc
-                                   1072 ;src/rooms/room_4_0.h:68: if (temp_item) push_last(&item_stack, temp_item);
+                                   1072 ;src/rooms/room_4_0.c:68: if (temp_item) push_last(&item_stack, temp_item);
       00047E 7A                    1073 	ld	a, d
       00047F B3                    1074 	or	a, e
       000480 28 0C                 1075 	jr	Z, 00102$
@@ -1081,7 +1081,7 @@
       00048B E8 04                 1081 	add	sp, #4
       00048D C1                    1082 	pop	bc
       00048E                       1083 00102$:
-                                   1084 ;src/rooms/room_4_0.h:70: temp_item = pop_by_id(&game_item_list, ID_FIREFLY);
+                                   1084 ;src/rooms/room_4_0.c:70: temp_item = pop_by_id(&game_item_list, ID_FIREFLY);
       00048E C5                    1085 	push	bc
       00048F 3E 08                 1086 	ld	a, #0x08
       000491 F5                    1087 	push	af
@@ -1091,7 +1091,7 @@
       000497 CDr00r00              1091 	call	_pop_by_id
       00049A E8 03                 1092 	add	sp, #3
       00049C C1                    1093 	pop	bc
-                                   1094 ;src/rooms/room_4_0.h:71: if (!temp_item) temp_item = pop_by_id(&item_stack, ID_FIREFLY);
+                                   1094 ;src/rooms/room_4_0.c:71: if (!temp_item) temp_item = pop_by_id(&item_stack, ID_FIREFLY);
       00049D 7A                    1095 	ld	a, d
       00049E B3                    1096 	or	a, e
       00049F 20 0F                 1097 	jr	NZ, 00104$
@@ -1105,7 +1105,7 @@
       0004AD E8 03                 1105 	add	sp, #3
       0004AF C1                    1106 	pop	bc
       0004B0                       1107 00104$:
-                                   1108 ;src/rooms/room_4_0.h:72: if (temp_item) push_last(&inventory_item_list, temp_item);                
+                                   1108 ;src/rooms/room_4_0.c:72: if (temp_item) push_last(&inventory_item_list, temp_item);                
       0004B0 7A                    1109 	ld	a, d
       0004B1 B3                    1110 	or	a, e
       0004B2 28 0C                 1111 	jr	Z, 00106$
@@ -1117,7 +1117,7 @@
       0004BD E8 04                 1117 	add	sp, #4
       0004BF C1                    1118 	pop	bc
       0004C0                       1119 00106$:
-                                   1120 ;src/rooms/room_4_0.h:74: temp_fly->x = 8, temp_fly->y = 8;
+                                   1120 ;src/rooms/room_4_0.c:74: temp_fly->x = 8, temp_fly->y = 8;
       0004C0 69                    1121 	ld	l, c
       0004C1 60                    1122 	ld	h, b
       0004C2 3E 08                 1123 	ld	a, #0x08
@@ -1130,7 +1130,7 @@
       0004CC 03                    1130 	inc	bc
       0004CD 3E 00                 1131 	ld	a, #0x00
       0004CF 02                    1132 	ld	(bc), a
-                                   1133 ;src/rooms/room_4_0.h:76: show_dialog_window(2, &firefly_caught);
+                                   1133 ;src/rooms/room_4_0.c:76: show_dialog_window(2, &firefly_caught);
       0004D0 11r00r00              1134 	ld	de, #_firefly_caught
       0004D3 D5                    1135 	push	de
       0004D4 3E 02                 1136 	ld	a, #0x02
@@ -1138,30 +1138,30 @@
       0004D7 33                    1138 	inc	sp
       0004D8 CDr00r00              1139 	call	_show_dialog_window
       0004DB E8 03                 1140 	add	sp, #3
-                                   1141 ;src/rooms/room_4_0.h:78: return ID_ITEM_USED;
+                                   1141 ;src/rooms/room_4_0.c:78: return ID_ITEM_USED;
       0004DD 1E 0F                 1142 	ld	e, #0x0f
       0004DF C9                    1143 	ret
       0004E0                       1144 00112$:
-                                   1145 ;src/rooms/room_4_0.h:82: return default_drop(id);
+                                   1145 ;src/rooms/room_4_0.c:82: return default_drop(id);
       0004E0 F8 04                 1146 	ldhl	sp,	#4
       0004E2 7E                    1147 	ld	a, (hl)
       0004E3 F5                    1148 	push	af
       0004E4 33                    1149 	inc	sp
       0004E5 CDr00r00              1150 	call	_default_drop
       0004E8 33                    1151 	inc	sp
-                                   1152 ;src/rooms/room_4_0.h:83: }
+                                   1152 ;src/rooms/room_4_0.c:83: }
       0004E9 C9                    1153 	ret
-                                   1154 ;src/rooms/room_5_0.h:1: UBYTE grand_gets_pie(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+                                   1154 ;src/rooms/room_5_0.c:1: UBYTE grand_gets_pie(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
                                    1155 ;	---------------------------------
                                    1156 ; Function grand_gets_pie
                                    1157 ; ---------------------------------
       0004EA                       1158 _grand_gets_pie::
-                                   1159 ;src/rooms/room_5_0.h:2: if (id == ID_PIE) {
+                                   1159 ;src/rooms/room_5_0.c:2: if (id == ID_PIE) {
       0004EA F8 04                 1160 	ldhl	sp,	#4
       0004EC 7E                    1161 	ld	a, (hl)
       0004ED D6 05                 1162 	sub	a, #0x05
       0004EF 20 23                 1163 	jr	NZ, 00106$
-                                   1164 ;src/rooms/room_5_0.h:3: if ((tile_y == 7) && (tile_x > 18) && (tile_x < 22)) {
+                                   1164 ;src/rooms/room_5_0.c:3: if ((tile_y == 7) && (tile_x > 18) && (tile_x < 22)) {
       0004F1 F8 03                 1165 	ldhl	sp,	#3
       0004F3 7E                    1166 	ld	a, (hl)
       0004F4 D6 07                 1167 	sub	a, #0x07
@@ -1173,7 +1173,7 @@
       0004FF 7E                    1173 	ld	a, (hl)
       000500 D6 16                 1174 	sub	a, #0x16
       000502 30 10                 1175 	jr	NC, 00106$
-                                   1176 ;src/rooms/room_5_0.h:4: show_dialog_window(6, &grandpa_thanks);
+                                   1176 ;src/rooms/room_5_0.c:4: show_dialog_window(6, &grandpa_thanks);
       000504 11r00r00              1177 	ld	de, #_grandpa_thanks
       000507 D5                    1178 	push	de
       000508 3E 06                 1179 	ld	a, #0x06
@@ -1181,18 +1181,18 @@
       00050B 33                    1181 	inc	sp
       00050C CDr00r00              1182 	call	_show_dialog_window
       00050F E8 03                 1183 	add	sp, #3
-                                   1184 ;src/rooms/room_5_0.h:5: return ID_ITEM_USED;
+                                   1184 ;src/rooms/room_5_0.c:5: return ID_ITEM_USED;
       000511 1E 0F                 1185 	ld	e, #0x0f
       000513 C9                    1186 	ret
       000514                       1187 00106$:
-                                   1188 ;src/rooms/room_5_0.h:8: return default_drop(id);
+                                   1188 ;src/rooms/room_5_0.c:8: return default_drop(id);
       000514 F8 04                 1189 	ldhl	sp,	#4
       000516 7E                    1190 	ld	a, (hl)
       000517 F5                    1191 	push	af
       000518 33                    1192 	inc	sp
       000519 CDr00r00              1193 	call	_default_drop
       00051C 33                    1194 	inc	sp
-                                   1195 ;src/rooms/room_5_0.h:9: }
+                                   1195 ;src/rooms/room_5_0.c:9: }
       00051D C9                    1196 	ret
                                    1197 	.area _CODE_3
       00051E                       1198 _room_0_0_map:

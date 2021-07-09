@@ -1,13 +1,14 @@
 #pragma bank 3
 
 #include <gb/gb.h>
-#include "include/dizzy_types.h"
-#include "include/dialogs.h"
 
-#include "rooms/room.h"
-#include "rooms/room_2_0.h"
-#include "rooms/room_4_0.h"
-#include "rooms/room_5_0.h"
+#include "dizzy_types.h"
+#include "dialogs.h"
+#include "room.h"
+
+#include "rooms/room_2_0.c"
+#include "rooms/room_4_0.c"
+#include "rooms/room_5_0.c"
 
 const rle_data_t const room_0_0_map = {252, {
 0xE1,0x00,0x01,0x02,0x00,0x03,0x04,0x05,0xD8,0x00,0x06,0x07,0x06,0x08,0x06,0x08,

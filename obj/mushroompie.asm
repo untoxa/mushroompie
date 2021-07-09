@@ -47,15 +47,10 @@
 	.globl _init_dizzy_lives
 	.globl _init_dizzy_coins
 	.globl _unshrink_and_mask
-	.globl _multiple_move_sprites_limits
 	.globl _multiple_move_sprites
-	.globl _multiple_set_sprite_tiles
-	.globl _multiple_set_sprite_prop
-	.globl _multiple_clear_sprite_tiledata
 	.globl _get_map_from_buf
 	.globl _put_map_to_buf
 	.globl _rle_decompress_data
-	.globl _rle_decompress_tilemap
 	.globl _get_shrinked_tile_offset
 	.globl _unshrink_tiles_to_buf
 	.globl _unshrink_tiles
@@ -509,18 +504,18 @@ _vbl_interrupt::
 	ld	(#_walk_update), A
 	ret
 ;src/mushroompie.c:374: } 
-;src/include/inventory.h:74: void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
+;src/misc/inventory.c:74: void show_dialog_window(const UBYTE lines, const dialog_item* item) NONBANKED {
 ;	---------------------------------
 ; Function show_dialog_window
 ; ---------------------------------
 _show_dialog_window::
-;src/include/inventory.h:75: push_bank(1);
+;src/misc/inventory.c:75: push_bank(1);
 	ld	a, #0x01
 	push	af
 	inc	sp
 	call	_push_bank
 	inc	sp
-;src/include/inventory.h:76: execute_dialog(lines, item);
+;src/misc/inventory.c:76: execute_dialog(lines, item);
 	ldhl	sp,	#3
 	ld	a, (hl+)
 	ld	e, a
@@ -533,8 +528,8 @@ _show_dialog_window::
 	inc	sp
 	call	_execute_dialog
 	add	sp, #3
-;src/include/inventory.h:77: pop_bank();
-;src/include/inventory.h:78: }
+;src/misc/inventory.c:77: pop_bank();
+;src/misc/inventory.c:78: }
 	jp	_pop_bank
 _itmdesc_pickaxe:
 	.db #0x01	; 1
@@ -707,37 +702,37 @@ __str_8:
 __str_9:
 	.ascii "COIN"
 	.db 0x00
-;src/include/inventory.h:81: game_item * show_inventory() NONBANKED {
+;src/misc/inventory.c:81: game_item * show_inventory() NONBANKED {
 ;	---------------------------------
 ; Function show_inventory
 ; ---------------------------------
 _show_inventory::
-;src/include/inventory.h:82: push_bank(1);
+;src/misc/inventory.c:82: push_bank(1);
 	ld	a, #0x01
 	push	af
 	inc	sp
 	call	_push_bank
 	inc	sp
-;src/include/inventory.h:83: game_item * res = execute_inventory();
+;src/misc/inventory.c:83: game_item * res = execute_inventory();
 	call	_execute_inventory
-;src/include/inventory.h:84: pop_bank();
+;src/misc/inventory.c:84: pop_bank();
 	push	de
 	call	_pop_bank
 	pop	de
-;src/include/inventory.h:85: return res;
-;src/include/inventory.h:86: }
+;src/misc/inventory.c:85: return res;
+;src/misc/inventory.c:86: }
 	ret
-;src/include/inventory.h:157: void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) NONBANKED {
+;src/misc/inventory.c:157: void place_room_items(const UBYTE row, const UBYTE col, unsigned char * room_buf) NONBANKED {
 ;	---------------------------------
 ; Function place_room_items
 ; ---------------------------------
 _place_room_items::
 	dec	sp
 	dec	sp
-;src/include/inventory.h:158: item_tiles_hiwater = window_tiles_hiwater;
+;src/misc/inventory.c:158: item_tiles_hiwater = window_tiles_hiwater;
 	ld	a, (#_window_tiles_hiwater)
 	ld	(#_item_tiles_hiwater),a
-;src/include/inventory.h:159: __temp_game_item = game_item_list.first;
+;src/misc/inventory.c:159: __temp_game_item = game_item_list.first;
 	ld	de, #(_game_item_list + 1)
 	ld	a, (de)
 	ld	hl, #___temp_game_item
@@ -745,13 +740,13 @@ _place_room_items::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:160: while (__temp_game_item) {
+;src/misc/inventory.c:160: while (__temp_game_item) {
 00110$:
 	ld	hl, #___temp_game_item + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jp	Z, 00117$
-;src/include/inventory.h:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
+;src/misc/inventory.c:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
 	ld	a, (hl)
 	ldhl	sp,	#0
 	ld	(hl), a
@@ -777,7 +772,7 @@ _place_room_items::
 	ld	a, (hl)
 	sub	a, c
 	jp	NZ,00108$
-;src/include/inventory.h:162: __temp_tiledata = __temp_game_item->desc->data;
+;src/misc/inventory.c:162: __temp_tiledata = __temp_game_item->desc->data;
 	pop	de
 	push	de
 	ld	hl, #0x0005
@@ -795,23 +790,23 @@ _place_room_items::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:163: if (__temp_tiledata) {
+;src/misc/inventory.c:163: if (__temp_tiledata) {
 	ld	hl, #___temp_tiledata + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jp	Z, 00108$
-;src/include/inventory.h:164: item_tiles_hiwater -= item_map_size;
+;src/misc/inventory.c:164: item_tiles_hiwater -= item_map_size;
 	ld	hl, #_item_tiles_hiwater
 	ld	a, (hl)
 	add	a, #0xfc
 	ld	(hl), a
-;src/include/inventory.h:167: push_bank(1); 
+;src/misc/inventory.c:167: push_bank(1); 
 	ld	a, #0x01
 	push	af
 	inc	sp
 	call	_push_bank
 	inc	sp
-;src/include/inventory.h:168: unshrink_tiles_to_buf(item_map_size, __temp_tiledata->data, __temp_item_tiledata0); 
+;src/misc/inventory.c:168: unshrink_tiles_to_buf(item_map_size, __temp_tiledata->data, __temp_item_tiledata0); 
 	ld	hl, #___temp_tiledata
 	ld	a, (hl+)
 	ld	c, a
@@ -825,15 +820,15 @@ _place_room_items::
 	inc	sp
 	call	_unshrink_tiles_to_buf
 	add	sp, #5
-;src/include/inventory.h:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
+;src/misc/inventory.c:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-;src/include/inventory.h:162: __temp_tiledata = __temp_game_item->desc->data;
+;src/misc/inventory.c:162: __temp_tiledata = __temp_game_item->desc->data;
 	ld	hl, #0x0005
 	add	hl, bc
-;src/include/inventory.h:169: __temp_tiledata = (__temp_game_item->desc->mask) ? __temp_game_item->desc->mask : &null_mask;
+;src/misc/inventory.c:169: __temp_tiledata = (__temp_game_item->desc->mask) ? __temp_game_item->desc->mask : &null_mask;
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
@@ -850,7 +845,7 @@ _place_room_items::
 	ld	hl, #___temp_tiledata
 	ld	a, c
 	ld	(hl+), a
-;src/include/inventory.h:170: unshrink_tiles_to_buf(item_map_size, __temp_tiledata->data, __temp_item_tiledata2); 
+;src/misc/inventory.c:170: unshrink_tiles_to_buf(item_map_size, __temp_tiledata->data, __temp_item_tiledata2); 
 	ld	a, b
 	ld	(hl-), a
 	ld	a, (hl+)
@@ -865,15 +860,15 @@ _place_room_items::
 	inc	sp
 	call	_unshrink_tiles_to_buf
 	add	sp, #5
-;src/include/inventory.h:171: pop_bank();
+;src/misc/inventory.c:171: pop_bank();
 	call	_pop_bank
-;src/include/inventory.h:174: get_map_from_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_bkg_tiles, room_buf, room_width, room_height);
-;src/include/inventory.h:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
+;src/misc/inventory.c:174: get_map_from_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_bkg_tiles, room_buf, room_width, room_height);
+;src/misc/inventory.c:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-;src/include/inventory.h:174: get_map_from_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_bkg_tiles, room_buf, room_width, room_height);
+;src/misc/inventory.c:174: get_map_from_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_bkg_tiles, room_buf, room_width, room_height);
 	ld	hl, #0x0004
 	add	hl, bc
 	ld	d, (hl)
@@ -912,7 +907,7 @@ _place_room_items::
 	inc	sp
 	call	_get_map_from_buf
 	add	sp, #10
-;src/include/inventory.h:178: __temp_j = current_room->room_tiles->count;
+;src/misc/inventory.c:178: __temp_j = current_room->room_tiles->count;
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -924,16 +919,16 @@ _place_room_items::
 	ld	b, (hl)
 	ld	a, (bc)
 	ld	(#___temp_j),a
-;src/include/inventory.h:179: __temp_text_ptr1 = __temp_item_tiledata1;
+;src/misc/inventory.c:179: __temp_text_ptr1 = __temp_item_tiledata1;
 	ld	hl, #___temp_text_ptr1
 	ld	(hl), #<(___temp_item_tiledata1)
 	inc	hl
 	ld	(hl), #>(___temp_item_tiledata1)
-;src/include/inventory.h:180: for (__temp_i = 0; __temp_i < item_map_size; __temp_i++) {
+;src/misc/inventory.c:180: for (__temp_i = 0; __temp_i < item_map_size; __temp_i++) {
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00113$:
-;src/include/inventory.h:181: __temp_k = __temp_bkg_tiles[__temp_i];
+;src/misc/inventory.c:181: __temp_k = __temp_bkg_tiles[__temp_i];
 	ld	a, #<(___temp_bkg_tiles)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -942,7 +937,7 @@ _place_room_items::
 	adc	a, #0x00
 	ld	b, a
 	ld	a, (bc)
-;src/include/inventory.h:182: if (__temp_k >= __temp_j) __temp_k = 0; // merge with bkg tiles only, "modified tile" = empty, can't drop item on item
+;src/misc/inventory.c:182: if (__temp_k >= __temp_j) __temp_k = 0; // merge with bkg tiles only, "modified tile" = empty, can't drop item on item
 	ld	(#___temp_k),a
 	ld	hl, #___temp_j
 	sub	a, (hl)
@@ -950,7 +945,7 @@ _place_room_items::
 	ld	hl, #___temp_k
 	ld	(hl), #0x00
 00102$:
-;src/include/inventory.h:183: unshrink_tiles_to_buf(1, get_shrinked_tile_offset(__temp_k, current_room->room_tiles->data), __temp_text_ptr1);
+;src/misc/inventory.c:183: unshrink_tiles_to_buf(1, get_shrinked_tile_offset(__temp_k, current_room->room_tiles->data), __temp_text_ptr1);
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -978,7 +973,7 @@ _place_room_items::
 	inc	sp
 	call	_unshrink_tiles_to_buf
 	add	sp, #5
-;src/include/inventory.h:184: __temp_text_ptr1 += 16;
+;src/misc/inventory.c:184: __temp_text_ptr1 += 16;
 	ld	hl, #___temp_text_ptr1
 	ld	a, (hl)
 	add	a, #0x10
@@ -986,13 +981,13 @@ _place_room_items::
 	ld	a, (hl)
 	adc	a, #0x00
 	ld	(hl), a
-;src/include/inventory.h:180: for (__temp_i = 0; __temp_i < item_map_size; __temp_i++) {
+;src/misc/inventory.c:180: for (__temp_i = 0; __temp_i < item_map_size; __temp_i++) {
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x04
 	jr	C, 00113$
-;src/include/inventory.h:187: __temp_text_ptr0 = __temp_item_tiledata0; __temp_text_ptr1 = __temp_item_tiledata1; __temp_text_ptr2 = __temp_item_tiledata2;
+;src/misc/inventory.c:187: __temp_text_ptr0 = __temp_item_tiledata0; __temp_text_ptr1 = __temp_item_tiledata1; __temp_text_ptr2 = __temp_item_tiledata2;
 	ld	hl, #___temp_text_ptr0
 	ld	(hl), #<(___temp_item_tiledata0)
 	inc	hl
@@ -1005,11 +1000,11 @@ _place_room_items::
 	ld	(hl), #<(___temp_item_tiledata2)
 	inc	hl
 	ld	(hl), #>(___temp_item_tiledata2)
-;src/include/inventory.h:188: for (__temp_i = 0; __temp_i < item_tiledata_size; __temp_i++) {
+;src/misc/inventory.c:188: for (__temp_i = 0; __temp_i < item_tiledata_size; __temp_i++) {
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00115$:
-;src/include/inventory.h:189: *__temp_text_ptr0 = *__temp_text_ptr1 & *__temp_text_ptr2 | *__temp_text_ptr0;
+;src/misc/inventory.c:189: *__temp_text_ptr0 = *__temp_text_ptr1 & *__temp_text_ptr2 | *__temp_text_ptr0;
 	ld	hl, #___temp_text_ptr0
 	ld	a, (hl+)
 	ld	c, a
@@ -1037,7 +1032,7 @@ _place_room_items::
 	ld	a, (bc)
 	or	a, e
 	ld	(bc), a
-;src/include/inventory.h:190: __temp_text_ptr0++; __temp_text_ptr1++; __temp_text_ptr2++;
+;src/misc/inventory.c:190: __temp_text_ptr0++; __temp_text_ptr1++; __temp_text_ptr2++;
 	ld	hl, #___temp_text_ptr0
 	inc	(hl)
 	jr	NZ, 00180$
@@ -1056,13 +1051,13 @@ _place_room_items::
 	inc	hl
 	inc	(hl)
 00182$:
-;src/include/inventory.h:188: for (__temp_i = 0; __temp_i < item_tiledata_size; __temp_i++) {
+;src/misc/inventory.c:188: for (__temp_i = 0; __temp_i < item_tiledata_size; __temp_i++) {
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x40
 	jr	C, 00115$
-;src/include/inventory.h:194: set_bkg_data(item_tiles_hiwater, item_map_size, __temp_item_tiledata0);
+;src/misc/inventory.c:194: set_bkg_data(item_tiles_hiwater, item_map_size, __temp_item_tiledata0);
 	ld	de, #___temp_item_tiledata0
 	push	de
 	ld	a, #0x04
@@ -1073,7 +1068,7 @@ _place_room_items::
 	inc	sp
 	call	_set_bkg_data
 	add	sp, #4
-;src/include/inventory.h:197: set_inc_tiles(item_tiles_hiwater, item_map_size, __temp_tiles);
+;src/misc/inventory.c:197: set_inc_tiles(item_tiles_hiwater, item_map_size, __temp_tiles);
 	ld	de, #___temp_tiles
 	push	de
 	ld	a, #0x04
@@ -1084,13 +1079,13 @@ _place_room_items::
 	inc	sp
 	call	_set_inc_tiles
 	add	sp, #4
-;src/include/inventory.h:198: put_map_to_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_tiles, room_buf, room_width, room_height);
-;src/include/inventory.h:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
+;src/misc/inventory.c:198: put_map_to_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_tiles, room_buf, room_width, room_height);
+;src/misc/inventory.c:161: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
-;src/include/inventory.h:198: put_map_to_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_tiles, room_buf, room_width, room_height);
+;src/misc/inventory.c:198: put_map_to_buf(__temp_game_item->x, __temp_game_item->y, item_width, item_height, __temp_tiles, room_buf, room_width, room_height);
 	ld	hl, #0x0004
 	add	hl, bc
 	ld	d, (hl)
@@ -1130,7 +1125,7 @@ _place_room_items::
 	call	_put_map_to_buf
 	add	sp, #10
 00108$:
-;src/include/inventory.h:201: __temp_game_item = __temp_game_item->next;
+;src/misc/inventory.c:201: __temp_game_item = __temp_game_item->next;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -1147,7 +1142,7 @@ _place_room_items::
 	ld	(hl), a
 	jp	00110$
 00117$:
-;src/include/inventory.h:203: }
+;src/misc/inventory.c:203: }
 	inc	sp
 	inc	sp
 	ret
@@ -1156,941 +1151,14 @@ _place_room_items::
 ; code
 ;--------------------------------------------------------
 	.area _CODE
-;src/include/rle_utils.h:2: void set_inc_tiles(UBYTE from, UBYTE count, unsigned char * buf) __naked
-;	---------------------------------
-; Function set_inc_tiles
-; ---------------------------------
-_set_inc_tiles::
-;src/include/rle_utils.h:22: __endasm;           
-	lda	HL, 2(SP) ; Skip return address and registers
-	ld	E, (HL) ; E = from
-	inc	HL
-	ld	D, (HL) ; D = count
-	inc	HL
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A ; HL = buf
-	ld	A, E
-	$tileset01:
-	ld (HL+), A
-	inc	A
-	dec	D
-	jr	NZ, $tileset01
-	ret
-;src/include/rle_utils.h:23: }
-;src/include/rle_utils.h:26: void unshrink_tiles(UBYTE from, UBYTE count, unsigned char * shrinked_tiles) __naked
-;	---------------------------------
-; Function unshrink_tiles
-; ---------------------------------
-_unshrink_tiles::
-;src/include/rle_utils.h:142: __endasm;           
-;	TODO: switching to copy_vram
-;	ldh A,(.LCDC)
-;	bit 4,A
-;	jp NZ,_set_sprite_data
-	push	BC
-	lda	HL,7(SP) ; Skip return address and registers
-	ld	B,(HL) ; BC = data
-	dec	HL
-	ld	C,(HL)
-	dec	HL
-	ld	E,(HL) ; E = nb_tiles
-	dec	HL
-	ld	L,(HL) ; L = first_tile
-	ld	A,L
-	rlca	; Sign extend (patterns have signed numbers)
-	sbc	A
-	ld	H,A
-	add	HL,HL ; HL *= 16
-	add	HL,HL
-	add	HL,HL
-	add	HL,HL
-	push	BC
-	ld	BC,#0x9000
-	add	HL,BC
-	pop	BC
-	$unshr02:
-	push DE
-	ld	A, (BC)
-	inc	BC
-	ld	E, A ; E = shrink_type
-	ld	D, #8
-	$unshr03:
-; Special version of '.copy_vram'
-	bit	3, H ; Bigger than 0x9800
-	jr	Z, $unshr04
-	bit	4, H
-	jr	Z, $unshr04
-	res	4, H ; Switch to 0x8800
-	$unshr04:
-	ld A, E
-	cp	#1
-	jr	Z, $unshr20
-	cp	#2
-	jr	Z, $unshr30
-	cp	#3
-	jr	Z, $unshr40
-	cp	#4
-	jr	Z, $unshr50
-	$unshr10:
-	ldh A,(#_STAT_REG)
-	and	#0x02
-	jr	NZ, $unshr10
-	xor	A
-	ld	(HL+), A
-	ld	(HL+), A
-	jr	$unshr0A
-	$unshr20:
-	ldh A,(#_STAT_REG)
-	and	#0x02
-	jr	NZ, $unshr20
-	ld	A, (BC)
-	ld	(HL+), A
-	xor	A
-	ld	(HL+), A
-	inc	BC
-	jr	$unshr0A
-	$unshr30:
-	ldh A,(#_STAT_REG)
-	and	#0x02
-	jr	NZ, $unshr30
-	xor	A
-	ld	(HL+), A
-	ld	A, (BC)
-	ld	(HL+), A
-	inc	BC
-	jr	$unshr0A
-	$unshr40:
-	ldh A,(#_STAT_REG)
-	and	#0x02
-	jr	NZ, $unshr40
-	ld	A, (BC)
-	ld	(HL+), A
-	ld	(HL+), A
-	inc	BC
-	jr	$unshr0A
-	$unshr50:
-	ldh A,(#_STAT_REG)
-	and	#0x02
-	jr	NZ, $unshr50
-	ld	A, (BC)
-	inc	BC
-	ld	(HL+), A
-	ld	A, (BC)
-	ld	(HL+), A
-	inc	BC
-	jr	$unshr0A
-	$unshr0A:
-	dec D
-	jr	NZ, $unshr03
-	pop	DE
-	dec	E
-	jr	NZ, $unshr02
-	pop	BC
-	ret
-;src/include/rle_utils.h:143: }
-;src/include/rle_utils.h:146: void unshrink_tiles_to_buf(UBYTE count, const unsigned char * shrinked_tiles, unsigned char * dest) __naked
-;	---------------------------------
-; Function unshrink_tiles_to_buf
-; ---------------------------------
-_unshrink_tiles_to_buf::
-;src/include/rle_utils.h:227: __endasm;           
-	push	BC
-	lda	HL, 4(SP)
-	ld	E, (HL) ; E = count
-	inc	HL
-	ld	C, (HL)
-	inc	HL
-	ld	B, (HL) ; BC = source
-	inc	HL
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A ; HL = dest
-	$unshb02:
-	ld D, #8
-	ld	A, (BC)
-	inc	BC
-	or	A
-	jr	Z, $unshb10
-	cp	#1
-	jr	Z, $unshb20
-	cp	#2
-	jr	Z, $unshb30
-	cp	#3
-	jr	Z, $unshb40
-	cp	#4
-	jr	Z, $unshb50
-	jr	$unshb04
-	$unshb03:
-	dec E
-	jr	NZ, $unshb02
-	$unshb04:
-	pop BC
-	ret
-	$unshb10:
-	xor A
-	$unshb11:
-	ld (HL+), A
-	ld	(HL+), A
-	dec	D
-	jr	NZ, $unshb11
-	jr	$unshb03
-	$unshb20:
-	ld A, (BC)
-	ld	(HL+), A
-	xor	A
-	ld	(HL+), A
-	inc	BC
-	dec	D
-	jr	NZ, $unshb20
-	jr	$unshb03
-	$unshb30:
-	xor A
-	ld	(HL+), A
-	ld	A, (BC)
-	ld	(HL+), A
-	inc	BC
-	dec	D
-	jr	NZ, $unshb30
-	jr	$unshb03
-	$unshb40:
-	ld A, (BC)
-	ld	(HL+), A
-	ld	(HL+), A
-	inc	BC
-	dec	D
-	jr	NZ, $unshb40
-	jr	$unshb03
-	$unshb50:
-	ld A, (BC)
-	inc	BC
-	ld	(HL+), A
-	ld	A, (BC)
-	ld	(HL+), A
-	inc	BC
-	dec	D
-	jr	NZ, $unshb50
-	jr	$unshb03
-;src/include/rle_utils.h:228: }
-;src/include/rle_utils.h:231: unsigned char * get_shrinked_tile_offset(UBYTE tilenum, const unsigned char * shrinked_tiles) __naked
-;	---------------------------------
-; Function get_shrinked_tile_offset
-; ---------------------------------
-_get_shrinked_tile_offset::
-;src/include/rle_utils.h:270: __endasm;           
-	lda	HL, 4(SP)
-	ld	D, (HL)
-	dec	HL
-	ld	E, (HL) ; DE = shrinked_tiles
-	dec	HL
-	ld	A, (HL)
-	or	A
-	ret	Z
-	ld	L, A ; L = tilenum
-	$unshc02:
-	ld A, (DE)
-	inc	DE
-	cp	#5
-	ret	NC
-	or	A
-	jr	Z, $unshc03
-	cp	#4
-	ld	A, #16
-	jr	Z, $unshc04
-	ld	A, #8
-	$unshc04:
-	add E
-	ld	E, A
-	ld	A, D
-	adc	#0
-	ld	D, A
-	$unshc03:
-	dec L
-	jr	NZ, $unshc02
-	ret
-;src/include/rle_utils.h:271: }
-;src/include/rle_utils.h:275: void rle_decompress_tilemap(UBYTE bkg, UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * tiles) __naked
-;	---------------------------------
-; Function rle_decompress_tilemap
-; ---------------------------------
-_rle_decompress_tilemap::
-;src/include/rle_utils.h:396: __endasm;
-	push	BC
-	ld	BC, #0x0000 ; local variables: count, ch
-	push	BC
-	lda	HL, 7(SP)
-	ld	D, (HL) ; D = x
-	inc	HL
-	ld	E, (HL) ; E = y
-	lda	HL, 12(SP)
-	ld	B, (HL) ; BC = tiles
-	dec	HL
-	ld	C, (HL)
-	dec	HL
-	ld	A, (HL-) ; A = h
-	ld	H, (HL) ; H = w
-	ld	L,A ; L = h
-	push	HL ; Store WH
-	lda	HL, 8(SP)
-	ld	A, (HL) ; A = bkg/win destination
-	or	A
-	jr	NZ, $decomp0B
-	ldh	A, (#_LCDC_REG)
-	bit	3, A
-	jr	NZ, $decomp01
-	ld	HL, #0x9800 ; HL = origin
-	jr	$decomp02
-	$decomp01:
-	ld HL, #0x9C00 ; HL = origin
-	jr	$decomp02
-	$decomp0B:
-	ldh A, (#_LCDC_REG)
-	bit	6, A
-	jr	NZ, $decomp01
-	ld	HL, #0x9800 ; HL = origin
-	$decomp02:
-	push BC ; Store source
-	xor	A
-	or	E
-	jr	Z, $decomp03
-	ld	BC, #0x20 ; One line is 20h tiles
-	$decomp04:
-	add HL, BC ; Y coordinate
-	dec	E
-	jr	NZ, $decomp04
-	$decomp03:
-	ld B, #0x00 ; X coordinate
-	ld	C, D
-	add	HL, BC
-	pop	BC ; BC = source
-	pop	DE ; DE = WH
-	push	HL ; Store origin
-	push	DE ; Store WH
-	$decomp05:
-	push HL
-	lda	HL, 6(SP)
-	ld	A, (HL+)
-	or	A
-	jr	Z, $decomp07
-	ld	A, (HL-)
-	dec	(HL)
-	jr	$decomp08
-	$decomp07:
-	dec HL
-	ld	A, (BC) ; Copy tile
-	cp	#0xc0
-	jr	Z, $decomp09
-	and	#0xc0
-	cp	#0xc0
-	jr	NZ, $decomp09
-	ld	A, (BC)
-	and	#0x3f
-	dec	A
-	ld	(HL+), A
-	inc	BC
-	ld	A, (BC)
-	ld	(HL), A
-	inc	BC
-	jr	$decomp08
-	$decomp09:
-	ld A, (BC) ; just single tile
-	inc	BC
-	$decomp08:
-	pop HL
-	push	DE
-	ld	D, A
-	$decomp0A:
-	ldh A, (#_STAT_REG)
-	and	#0x02
-	jr	NZ, $decomp0A
-	ld	(HL), D
-	inc	HL
-	pop	DE
-	dec	D
-	jr	NZ,$decomp05
-	pop	HL ; HL = WH
-	ld	D,H ; Restore D = W
-	pop	HL ; HL = origin
-	dec	E
-	jr	Z,$decomp06
-	push	BC ; Next line
-	ld	BC, #0x20 ; One line is 20h tiles
-	add	HL,BC
-	pop	BC
-	push	HL ; Store current origin
-	push	DE ; Store WH
-	jr	$decomp05
-	$decomp06:
-	pop BC ; local variables
-	pop	BC
-	ret
-;src/include/rle_utils.h:397: }
-;src/include/rle_utils.h:400: void rle_decompress_data(const unsigned char * data, UWORD size, unsigned char * dest) __naked
-;	---------------------------------
-; Function rle_decompress_data
-; ---------------------------------
-_rle_decompress_data::
-;src/include/rle_utils.h:476: __endasm;
-	push	BC ; 0 bc, 2 ret, 4 data, 6 size, 8 dest, 10 -
-	lda	HL, 4(SP)
-	ld	E, (HL)
-	inc	HL
-	ld	D, (HL)
-	inc	HL
-	ld	C, (HL)
-	inc	HL
-	ld	B, (HL)
-	inc	HL
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A
-	$rle03:
-	ld A, (DE)
-	and	#0xc0
-	cp	#0xc0
-	jr	Z, $rle04
-	ld	A, (DE)
-	ld	(HL+), A
-	inc	DE
-	dec	BC
-	ld	A, C
-	or	B
-	jr	NZ, $rle03
-	pop	BC
-	ret
-	$rle04:
-	push BC
-	ld	A, (DE)
-	and	#0x3f
-	jr	Z, $rle06
-	ld	C, A
-	inc	DE
-	ld	A, (DE)
-	$rle07:
-	ld (HL+), A
-	dec	C
-	jr	NZ, $rle07
-	inc	DE
-	pop	BC
-	dec	BC
-	ld	A, C
-	or	B
-	jr	Z, $rle08
-	dec	BC
-	ld	A, C
-	or	B
-	jr	NZ, $rle03
-	$rle08:
-	pop BC
-	ret
-	$rle06:
-	pop BC
-	ld	A, (DE)
-	ld	(HL+), A
-	inc	DE
-	dec	BC
-	ld	A, C
-	or	B
-	jr	NZ, $rle03
-	pop	BC
-	ret
-;src/include/rle_utils.h:477: }
-;src/include/rle_utils.h:480: void put_map_to_buf(UBYTE x, UBYTE y, UBYTE w, UBYTE h, const unsigned char * source, unsigned char * buf, UBYTE buf_w, UBYTE buf_h) __naked
-;	---------------------------------
-; Function put_map_to_buf
-; ---------------------------------
-_put_map_to_buf::
-;src/include/rle_utils.h:611: __endasm;
-	push	BC ; ret, bc, x, y, w, h, source, buf, buf_w, buf_h
-	lda	HL, 4(SP)
-	ld	D, (HL) ; D = x
-	inc	HL
-	ld	E, (HL) ; E = y
-	lda	HL, 9(SP)
-	ld	B, (HL) ; BC = source
-	dec	HL
-	ld	C, (HL)
-	dec	HL
-	ld	A, (HL-) ; A = h
-	ld	H, (HL) ; H = w
-	ld	L, A ; L = h
-	ld	A, H ; check x bound
-	add	D
-	push	HL
-	lda	HL, 14(SP) ; &buf_w
-	cp	(HL) ; buf_w
-	jr	C, $putitm08
-	ld	A, D
-	cp	(HL) ; buf_w
-	jp	NC, $putitm09
-	ld	A, (HL) ; buf_w
-	sub	D
-	pop	HL
-	ld	H, A
-	jr	$putitm01
-	$putitm08:
-	pop HL
-	$putitm01:
-	ld A, L ; check y bound
-	add	E
-	push	HL
-	lda	HL, 15(SP) ; &buf_h
-	cp	(HL) ; buf_h
-	jr	C, $putitm0A
-	ld	A, E
-	cp	(HL) ; buf_h
-	jp	NC, $putitm09
-	ld	A, (HL) ; buf_h
-	sub	E
-	pop	HL
-	ld	L, A
-	jr	$putitm07
-	$putitm0A:
-	pop HL
-	$putitm07:
-	push HL ; Store WH
-	lda	HL, 12(SP) ; HL = origin
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A
-	$putitm02:
-	push BC ; Store source
-	xor	A
-	or	E
-	jr	Z, $putitm03
-	push	HL
-	lda	HL, 18(SP) ; &buf_w
-	ld	B, #0
-	ld	C, (HL) ; buf_w
-	pop	HL
-	$putitm04:
-	add HL, BC ; Y coordinate
-	dec	E
-	jr	NZ, $putitm04
-	$putitm03:
-	ld B, #0x00 ; X coordinate
-	ld	C, D
-	add	HL, BC
-	pop	BC ; BC = source
-	pop	DE ; DE = WH
-	push	HL ; Store origin
-	push	DE ; Store WH
-	push	BC
-	$putitm05:
-	ld A, (BC) ; just single tile
-	ld	(HL+), A
-	inc	BC
-	dec	D
-	jr	NZ,$putitm05
-	pop	BC
-	pop	HL ; HL = WH
-	ld	D,H ; Restore D = W
-	pop	HL ; HL = origin
-	dec	E
-	jr	Z,$putitm06
-	push	HL ; Next line
-	lda	HL, 14(SP)
-	ld	A, (HL) ; buf_w
-	pop	HL
-	add	L
-	ld	L, A
-	ld	A, H
-	adc	#0
-	ld	H, A
-	push	HL
-	lda	HL, 8(SP)
-	ld	L, (HL)
-	ld	H, #0
-	add	HL, BC
-	ld	B, H
-	ld	C, L
-	pop	HL
-	push	HL ; Store current origin
-	push	DE ; Store WH
-	push	BC
-	jr	$putitm05
-	$putitm09:
-	pop HL
-	$putitm06:
-	pop BC
-	ret
-;src/include/rle_utils.h:612: }
-;src/include/rle_utils.h:615: void get_map_from_buf(UBYTE x, UBYTE y, UBYTE w, UBYTE h, unsigned char * dest, unsigned char * buf, UBYTE buf_w, UBYTE buf_h) __naked
-;	---------------------------------
-; Function get_map_from_buf
-; ---------------------------------
-_get_map_from_buf::
-;src/include/rle_utils.h:746: __endasm;
-	push	BC ; ret, bc, x, y, w, h, dest, buf, buf_w, buf_h
-	lda	HL, 4(SP)
-	ld	D, (HL) ; D = x
-	inc	HL
-	ld	E, (HL) ; E = y
-	lda	HL, 9(SP)
-	ld	B, (HL) ; BC = dest
-	dec	HL
-	ld	C, (HL)
-	dec	HL
-	ld	A, (HL-) ; A = h
-	ld	H, (HL) ; H = w
-	ld	L, A ; L = h
-	ld	A, H ; check x bound
-	add	D
-	push	HL
-	lda	HL, 14(SP) ; &buf_w
-	cp	(HL) ; buf_w
-	jr	C, $getitm08
-	ld	A, D
-	cp	(HL) ; buf_w
-	jp	NC, $getitm09
-	ld	A, (HL) ; buf_w
-	sub	D
-	pop	HL
-	ld	H, A
-	jr	$getitm01
-	$getitm08:
-	pop HL
-	$getitm01:
-	ld A, L ; check y bound
-	add	E
-	push	HL
-	lda	HL, 15(SP) ; &buf_h
-	cp	(HL) ; buf_h
-	jr	C, $getitm0A
-	ld	A, E
-	cp	(HL) ; buf_h
-	jp	NC, $getitm09
-	ld	A, (HL) ; buf_h
-	sub	E
-	pop	HL
-	ld	L, A
-	jr	$getitm07
-	$getitm0A:
-	pop HL
-	$getitm07:
-	push HL ; Store WH
-	lda	HL, 12(SP) ; HL = origin
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A
-	$getitm02:
-	push BC ; Store dest
-	xor	A
-	or	E
-	jr	Z, $getitm03
-	push	HL
-	lda	HL, 18(SP) ; &buf_w
-	ld	B, #0
-	ld	C, (HL) ; buf_w
-	pop	HL
-	$getitm04:
-	add HL, BC ; Y coordinate
-	dec	E
-	jr	NZ, $getitm04
-	$getitm03:
-	ld B, #0x00 ; X coordinate
-	ld	C, D
-	add	HL, BC
-	pop	BC ; BC = dest
-	pop	DE ; DE = WH
-	push	HL ; Store origin
-	push	DE ; Store WH
-	push	BC
-	$getitm05:
-	ld A, (HL+)
-	ld	(BC), A ; just single tile
-	inc	BC
-	dec	D
-	jr	NZ,$getitm05
-	pop	BC
-	pop	HL ; HL = WH
-	ld	D,H ; Restore D = W
-	pop	HL ; HL = origin
-	dec	E
-	jr	Z,$getitm06
-	push	HL ; Next line
-	lda	HL, 14(SP)
-	ld	A, (HL) ; buf_w
-	pop	HL
-	add	L
-	ld	L, A
-	ld	A, H
-	adc	#0
-	ld	H, A
-	push	HL
-	lda	HL, 8(SP)
-	ld	L, (HL)
-	ld	H, #0
-	add	HL, BC
-	ld	B, H
-	ld	C, L
-	pop	HL
-	push	HL ; Store current origin
-	push	DE ; Store WH
-	push	BC
-	jr	$getitm05
-	$getitm09:
-	pop HL
-	$getitm06:
-	pop BC
-	ret
-;src/include/rle_utils.h:747: }
-;src/include/sprite_utils.h:1: void multiple_clear_sprite_tiledata(UBYTE start, UBYTE count) __naked
-;	---------------------------------
-; Function multiple_clear_sprite_tiledata
-; ---------------------------------
-_multiple_clear_sprite_tiledata::
-;src/include/sprite_utils.h:45: __endasm;
-	lda	HL, 2(SP)
-	ld	E, (HL) ; E = start
-	inc	HL
-	ld	D, (HL) ; D = count
-	ld	H, #0x00 ; HL = nb_tiles
-	ld	L, E
-	add	HL, HL ; HL *= 16
-	add	HL, HL
-	add	HL, HL
-	add	HL, HL
-	push	BC
-	ld	BC, #0x8000
-	add	HL, BC
-	pop	BC
-	push	HL
-	ld	L, D
-	ld	H, #0
-	add	HL, HL ; HL *= 16
-	add	HL, HL
-	add	HL, HL
-	add	HL, HL
-	ld	D, H
-	ld	E, L ; DE = D * 16
-	pop	HL
-	$clrspt01:
-	ldh A, (#_STAT_REG)
-	and	#0x02
-	jr	NZ, $clrspt01
-	xor	A
-	ld	(HL+), A
-	dec	DE
-	ld	A, D
-	or	E
-	jr	NZ, $clrspt01
-	ret
-;src/include/sprite_utils.h:46: }
-;src/include/sprite_utils.h:48: void multiple_set_sprite_prop(UBYTE start, UBYTE count, UBYTE prop) __naked
-;	---------------------------------
-; Function multiple_set_sprite_prop
-; ---------------------------------
-_multiple_set_sprite_prop::
-;src/include/sprite_utils.h:77: __endasm;
-	push	BC
-	lda	HL, 4(SP)
-	ld	C, (HL) ; C = start
-	inc	HL
-	ld	E, (HL) ; E = count
-	inc	HL
-	ld	D, (HL) ; D = prop
-	ld	B, #0x00
-	sla	C ; Multiply C by 4
-	sla	C
-	ld	HL, #0xC000 + 3
-	add	HL, BC
-	ld	C, #0x04
-	ld	A, D ; Set sprite properties
-	$setspp01:
-	ld (HL), A
-	add	HL, BC
-	dec	E
-	jr	NZ, $setspp01
-	pop	BC
-	ret
-;src/include/sprite_utils.h:78: }
-;src/include/sprite_utils.h:80: void multiple_set_sprite_tiles(UBYTE start, UBYTE count, const unsigned char * tiles) __naked
-;	---------------------------------
-; Function multiple_set_sprite_tiles
-; ---------------------------------
-_multiple_set_sprite_tiles::
-;src/include/sprite_utils.h:119: __endasm;
-	push	BC
-	lda	HL, 4(SP)
-	ld	C, (HL) ; C = start
-	inc	HL
-	ld	E, (HL) ; E = count
-	inc	HL
-	ld	A, (HL+)
-	ld	H, (HL)
-	ld	L, A
-	push	HL ; HL = tiles
-	ld	B, #0x00
-	sla	C ; Multiply C by 4
-	sla	C
-	ld	HL, #0xC000 + 2
-	add	HL, BC
-	ld	C, #0x04
-	ld	A, E ; E --> A = count
-	pop	DE ; HL --> DE = tiles
-	$setspt01:
-	push AF
-	ld	A, (DE)
-	inc	DE
-	ld	(HL), A
-	add	HL, BC
-	pop	AF
-	dec	A
-	jr	NZ, $setspt01
-	pop	BC
-	ret
-;src/include/sprite_utils.h:120: }
-;src/include/sprite_utils.h:122: void multiple_move_sprites(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets) __naked
-;	---------------------------------
-; Function multiple_move_sprites
-; ---------------------------------
-_multiple_move_sprites::
-;src/include/sprite_utils.h:176: __endasm;
-	push	BC
-	lda	HL, 4(SP)
-	ld	C, (HL) ; C = start
-	inc	HL
-	ld	A, (HL) ; A = count
-	ld	B, #0x00
-	sla	C ; Multiply C by 4
-	sla	C
-	ld	HL, #0xC000
-	add	HL, BC
-	push	HL
-	lda	HL, 11(SP)
-	ld	B, (HL)
-	dec	HL
-	ld	C, (HL) ; BC = offsets
-	dec	HL
-	ld	D, (HL) ; D = y
-	dec	HL
-	ld	E, (HL) ; E = x
-	pop	HL
-	$mmspr02:
-	push AF
-	ld	A, (BC)
-	inc	BC
-	add	D
-	ld	(HL), A
-	ld	A, (BC)
-	inc	BC
-	push	BC
-	ld	BC, #1
-	add	HL, BC ; use add instruction to avoid oam bug
-	add	E
-	ld	(HL), A
-	ld	C, #3
-	add	HL, BC ; use add instruction to avoid oam bug
-	pop	BC
-	pop	AF
-	dec	A
-	jr	NZ, $mmspr02
-	pop	BC
-	ret
-;src/include/sprite_utils.h:177: }
-;src/include/sprite_utils.h:179: void multiple_move_sprites_limits(UBYTE start, UBYTE count, UBYTE x, UBYTE y, const unsigned char * offsets, UBYTE dx, UBYTE dy) __naked
-;	---------------------------------
-; Function multiple_move_sprites_limits
-; ---------------------------------
-_multiple_move_sprites_limits::
-;src/include/sprite_utils.h:281: __endasm;
-	push	BC
-	lda	HL, 4(SP)
-	ld	C, (HL) ; C = start
-	inc	HL
-	ld	A, (HL) ; A = count
-	ld	B, #0x00
-	sla	C ; Multiply C by 4
-	sla	C
-	ld	HL, #0xC000
-	add	HL, BC
-	push	HL
-	lda	HL, 11(SP)
-	ld	B, (HL)
-	dec	HL
-	ld	C, (HL) ; BC = offsets
-	dec	HL
-	ld	D, (HL) ; D = y
-	dec	HL
-	ld	E, (HL) ; E = x
-	pop	HL
-	$mmsprd02:
-	push AF
-	ld	A, (BC) ; Y coordinate
-	inc	BC
-	add	D
-	push	HL
-	ld	H, B
-	ld	L, C
-	cp	(HL)
-	jr	NC, $mmsprd03
-	xor	A
-	jr	$mmsprd04
-	$mmsprd03:
-	inc HL
-	cp	(HL)
-	jr	C, $mmsprd04
-	jr	Z, $mmsprd04
-	xor	A
-	$mmsprd04:
-	or A
-	jr	Z, $mmsprd07
-	lda	HL, 15(SP)
-	add	(HL)
-	$mmsprd07:
-	pop HL
-	inc	BC
-	inc	BC
-	ld	(HL), A
-	push	BC
-	ld	BC, #1
-	add	HL, BC ; use add instruction to avoid oam bug
-	pop	BC
-	ld	A, (BC) ; X coordinate
-	inc	BC
-	add	E
-	push	HL
-	ld	H, B
-	ld	L, C
-	cp	(HL)
-	jr	NC, $mmsprd05
-	xor	A
-	jr	$mmsprd06
-	$mmsprd05:
-	inc HL
-	cp	(HL)
-	jr	C, $mmsprd06
-	jr	Z, $mmsprd06
-	xor	A
-	$mmsprd06:
-	or A
-	jr	Z, $mmsprd08
-	lda	HL, 14(SP)
-	add	(HL)
-	$mmsprd08:
-	pop HL
-	inc	BC
-	inc	BC
-	ld	(HL), A
-	push	BC
-	ld	BC, #3
-	add	HL, BC ; use add instruction to avoid oam bug
-	pop	BC
-	pop	AF
-	dec	A
-	jr	NZ, $mmsprd02
-	pop	BC
-	ret
-;src/include/sprite_utils.h:282: }
-;src/include/energy.h:26: void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char * dest) {
+;src/misc/energy.c:26: void unshrink_and_mask(UBYTE npix, const unsigned char * source, unsigned char * dest) {
 ;	---------------------------------
 ; Function unshrink_and_mask
 ; ---------------------------------
 _unshrink_and_mask::
 	dec	sp
 	dec	sp
-;src/include/energy.h:27: UBYTE mask = (0xFF << (8 - npix));
+;src/misc/energy.c:27: UBYTE mask = (0xFF << (8 - npix));
 	ldhl	sp,	#4
 	ld	c, (hl)
 	ld	a, #0x08
@@ -2106,14 +1174,14 @@ _unshrink_and_mask::
 00119$:
 	dec	c
 	jr	NZ,00118$
-;src/include/energy.h:28: source++;
+;src/misc/energy.c:28: source++;
 	ldhl	sp,	#5
 	inc	(hl)
 	jr	NZ, 00120$
 	inc	hl
 	inc	(hl)
 00120$:
-;src/include/energy.h:29: for (UBYTE i = 0; i < 8; i++) {
+;src/misc/energy.c:29: for (UBYTE i = 0; i < 8; i++) {
 	ldhl	sp,	#5
 	ld	a, (hl+)
 	ld	c, a
@@ -2125,7 +1193,7 @@ _unshrink_and_mask::
 	ld	a, (hl)
 	sub	a, #0x08
 	jr	NC, 00105$
-;src/include/energy.h:30: *dest = ((*source) & mask); dest++;
+;src/misc/energy.c:30: *dest = ((*source) & mask); dest++;
 	ldhl	sp,	#7
 	ld	a, (hl+)
 	ld	e, a
@@ -2138,7 +1206,7 @@ _unshrink_and_mask::
 	ldhl	sp,	#7
 	ld	a, e
 	ld	(hl+), a
-;src/include/energy.h:31: *dest = 0x00; dest++;
+;src/misc/energy.c:31: *dest = 0x00; dest++;
 	ld	a, d
 	ld	(hl-), a
 	ld	a, (hl+)
@@ -2151,14 +1219,14 @@ _unshrink_and_mask::
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;src/include/energy.h:32: source++;  
+;src/misc/energy.c:32: source++;  
 	inc	bc
-;src/include/energy.h:29: for (UBYTE i = 0; i < 8; i++) {
+;src/misc/energy.c:29: for (UBYTE i = 0; i < 8; i++) {
 	ldhl	sp,	#1
 	inc	(hl)
 	jr	00103$
 00105$:
-;src/include/energy.h:34: }
+;src/misc/energy.c:34: }
 	inc	sp
 	inc	sp
 	ret
@@ -2741,7 +1809,7 @@ _ethalon_tiles_offsets:
 	.db #0x00	; 0
 	.db #0x09	; 9
 	.db #0x12	; 18
-;src/include/energy.h:36: void init_dizzy_coins() { coins = 0; }
+;src/misc/energy.c:36: void init_dizzy_coins() { coins = 0; }
 ;	---------------------------------
 ; Function init_dizzy_coins
 ; ---------------------------------
@@ -2749,7 +1817,7 @@ _init_dizzy_coins::
 	ld	hl, #_coins
 	ld	(hl), #0x00
 	ret
-;src/include/energy.h:37: void init_dizzy_lives() { dizzy_lives = 3; }
+;src/misc/energy.c:37: void init_dizzy_lives() { dizzy_lives = 3; }
 ;	---------------------------------
 ; Function init_dizzy_lives
 ; ---------------------------------
@@ -2757,7 +1825,7 @@ _init_dizzy_lives::
 	ld	hl, #_dizzy_lives
 	ld	(hl), #0x03
 	ret
-;src/include/energy.h:38: void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; dec_energy = 0; }
+;src/misc/energy.c:38: void init_dizzy_energy() { dizzy_energy = 16; inc_energy = 48; dec_energy = 0; }
 ;	---------------------------------
 ; Function init_dizzy_energy
 ; ---------------------------------
@@ -2769,39 +1837,39 @@ _init_dizzy_energy::
 	ld	hl, #_dec_energy
 	ld	(hl), #0x00
 	ret
-;src/include/energy.h:40: void on_dizzy_die() {
+;src/misc/energy.c:40: void on_dizzy_die() {
 ;	---------------------------------
 ; Function on_dizzy_die
 ; ---------------------------------
 _on_dizzy_die::
-;src/include/energy.h:41: ani_type = ANI_DEAD;
+;src/misc/energy.c:41: ani_type = ANI_DEAD;
 	ld	hl, #_ani_type
 	ld	(hl), #0x07
-;src/include/energy.h:42: ani_phase = 0; 
+;src/misc/energy.c:42: ani_phase = 0; 
 	ld	hl, #_ani_phase
 	ld	(hl), #0x00
-;src/include/energy.h:43: current_dyn = 0; current_dyn_phase = 0;
+;src/misc/energy.c:43: current_dyn = 0; current_dyn_phase = 0;
 	xor	a, a
 	ld	hl, #_current_dyn
 	ld	(hl+), a
 	ld	(hl), a
 	ld	hl, #_current_dyn_phase
 	ld	(hl), #0x00
-;src/include/energy.h:44: death_pause = 32;
+;src/misc/energy.c:44: death_pause = 32;
 	ld	hl, #_death_pause
 	ld	(hl), #0x20
-;src/include/energy.h:45: }
+;src/misc/energy.c:45: }
 	ret
-;src/include/energy.h:46: void show_lives() {
+;src/misc/energy.c:46: void show_lives() {
 ;	---------------------------------
 ; Function show_lives
 ; ---------------------------------
 _show_lives::
-;src/include/energy.h:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+;src/misc/energy.c:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00105$:
-;src/include/energy.h:48: if (__temp_i < dizzy_lives) dizzy_lives_indicator[__temp_i] = dizzy_live_symbol; else dizzy_lives_indicator[__temp_i] = 0x00;
+;src/misc/energy.c:48: if (__temp_i < dizzy_lives) dizzy_lives_indicator[__temp_i] = dizzy_live_symbol; else dizzy_lives_indicator[__temp_i] = 0x00;
 	ld	a, #<(_dizzy_lives_indicator)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -2820,13 +1888,13 @@ _show_lives::
 	xor	a, a
 	ld	(bc), a
 00106$:
-;src/include/energy.h:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
+;src/misc/energy.c:47: for (__temp_i = 0; __temp_i < 3; __temp_i++) {
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x03
 	jr	C, 00105$
-;src/include/energy.h:50: set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);    
+;src/misc/energy.c:50: set_win_tiles(15, 1, sizeof(dizzy_lives_indicator), 1, dizzy_lives_indicator);    
 	ld	de, #_dizzy_lives_indicator
 	push	de
 	ld	hl, #0x103
@@ -2835,40 +1903,40 @@ _show_lives::
 	push	hl
 	call	_set_win_tiles
 	add	sp, #6
-;src/include/energy.h:51: }
+;src/misc/energy.c:51: }
 	ret
-;src/include/energy.h:53: void add_coins(UBYTE n) __naked 
+;src/misc/energy.c:53: void add_coins(UBYTE n) __naked 
 ;	---------------------------------
 ; Function add_coins
 ; ---------------------------------
 _add_coins::
-;src/include/energy.h:63: __endasm;
+;src/misc/energy.c:63: __endasm;
 	ld	A, (#_coins)
 	lda	HL, 2(SP)
 	add	(HL)
 	daa
 	ld	(#_coins), A
 	ret
-;src/include/energy.h:64: }
-;src/include/energy.h:65: void sub_coins(UBYTE n) __naked 
+;src/misc/energy.c:64: }
+;src/misc/energy.c:65: void sub_coins(UBYTE n) __naked 
 ;	---------------------------------
 ; Function sub_coins
 ; ---------------------------------
 _sub_coins::
-;src/include/energy.h:75: __endasm;
+;src/misc/energy.c:75: __endasm;
 	ld	A, (#_coins)
 	lda	HL, 2(SP)
 	sub	(HL)
 	daa
 	ld	(#_coins), A
 	ret
-;src/include/energy.h:76: }
-;src/include/energy.h:77: void show_coins() {
+;src/misc/energy.c:76: }
+;src/misc/energy.c:77: void show_coins() {
 ;	---------------------------------
 ; Function show_coins
 ; ---------------------------------
 _show_coins::
-;src/include/energy.h:78: coins_indicator[0] = (coins >> 4) + digits_start;
+;src/misc/energy.c:78: coins_indicator[0] = (coins >> 4) + digits_start;
 	ld	bc, #_coins_indicator+0
 	ld	a, (#_coins)
 	swap	a
@@ -2876,7 +1944,7 @@ _show_coins::
 	ld	hl, #_digits_start
 	add	a, (hl)
 	ld	(bc), a
-;src/include/energy.h:79: coins_indicator[1] = (coins & 0x0F) + digits_start;
+;src/misc/energy.c:79: coins_indicator[1] = (coins & 0x0F) + digits_start;
 	ld	e, c
 	ld	d, b
 	inc	de
@@ -2888,34 +1956,34 @@ _show_coins::
 ;	spillPairReg hl
 	add	a, l
 	ld	(de), a
-;src/include/energy.h:80: set_win_tiles(2, 1, sizeof(coins_indicator), 1, coins_indicator);
+;src/misc/energy.c:80: set_win_tiles(2, 1, sizeof(coins_indicator), 1, coins_indicator);
 	push	bc
 	ld	hl, #0x102
 	push	hl
 	push	hl
 	call	_set_win_tiles
 	add	sp, #6
-;src/include/energy.h:81: }
+;src/misc/energy.c:81: }
 	ret
-;src/include/energy.h:83: void show_energy() {
+;src/misc/energy.c:83: void show_energy() {
 ;	---------------------------------
 ; Function show_energy
 ; ---------------------------------
 _show_energy::
-;src/include/energy.h:84: push_bank(1);
+;src/misc/energy.c:84: push_bank(1);
 	ld	a, #0x01
 	push	af
 	inc	sp
 	call	_push_bank
 	inc	sp
-;src/include/energy.h:85: __temp_k = dizzy_energy;
+;src/misc/energy.c:85: __temp_k = dizzy_energy;
 	ld	a, (#_dizzy_energy)
 	ld	(#___temp_k),a
-;src/include/energy.h:86: for (__temp_i = 0; __temp_i < 8; __temp_i++) {
+;src/misc/energy.c:86: for (__temp_i = 0; __temp_i < 8; __temp_i++) {
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00108$:
-;src/include/energy.h:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
+;src/misc/energy.c:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
 	ld	a, #<(_dizzy_energy_indicator)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -2923,11 +1991,11 @@ _show_energy::
 	ld	a, #>(_dizzy_energy_indicator)
 	adc	a, #0x00
 	ld	b, a
-;src/include/energy.h:87: if (__temp_k) {
+;src/misc/energy.c:87: if (__temp_k) {
 	ld	a, (#___temp_k)
 	or	a, a
 	jr	Z, 00105$
-;src/include/energy.h:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
+;src/misc/energy.c:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
 	ld	a, #<(_ethalon_indicator)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -2937,23 +2005,23 @@ _show_energy::
 	ld	d, a
 	ld	a, (de)
 	ld	e, a
-;src/include/energy.h:88: if (__temp_k >= 8) {
+;src/misc/energy.c:88: if (__temp_k >= 8) {
 	ld	a, (#___temp_k)
 	sub	a, #0x08
 	jr	C, 00102$
-;src/include/energy.h:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
+;src/misc/energy.c:89: dizzy_energy_indicator[__temp_i] = (dizzy_energy_start + ethalon_indicator[__temp_i]);
 	ld	a, e
 	ld	hl, #_dizzy_energy_start
 	add	a, (hl)
 	ld	(bc), a
-;src/include/energy.h:90: __temp_k -= 8;
+;src/misc/energy.c:90: __temp_k -= 8;
 	ld	hl, #___temp_k
 	ld	a, (hl)
 	add	a, #0xf8
 	ld	(hl), a
 	jr	00109$
 00102$:
-;src/include/energy.h:92: unshrink_and_mask(__temp_k, ((unsigned char *)energy_tiles) + 1 + ethalon_tiles_offsets[ethalon_indicator[__temp_i]], temp_tile_buffer);
+;src/misc/energy.c:92: unshrink_and_mask(__temp_k, ((unsigned char *)energy_tiles) + 1 + ethalon_tiles_offsets[ethalon_indicator[__temp_i]], temp_tile_buffer);
 	ld	bc, #_energy_tiles
 	inc	bc
 	ld	hl, #_ethalon_tiles_offsets
@@ -2971,7 +2039,7 @@ _show_energy::
 	inc	sp
 	call	_unshrink_and_mask
 	add	sp, #5
-;src/include/energy.h:93: set_win_data(dizzy_energy_start + 3, 1, temp_tile_buffer);
+;src/misc/energy.c:93: set_win_data(dizzy_energy_start + 3, 1, temp_tile_buffer);
 	ld	hl, #_dizzy_energy_start
 	ld	a, (hl)
 	add	a, #0x03
@@ -2986,7 +2054,7 @@ _show_energy::
 	inc	sp
 	call	_set_win_data
 	add	sp, #4
-;src/include/energy.h:94: dizzy_energy_indicator[__temp_i] = dizzy_energy_start + 3;
+;src/misc/energy.c:94: dizzy_energy_indicator[__temp_i] = dizzy_energy_start + 3;
 	ld	a, #<(_dizzy_energy_indicator)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -2997,22 +2065,22 @@ _show_energy::
 	ld	a, (#_dizzy_energy_start)
 	add	a, #0x03
 	ld	(bc), a
-;src/include/energy.h:95: __temp_k = 0;
+;src/misc/energy.c:95: __temp_k = 0;
 	ld	hl, #___temp_k
 	ld	(hl), #0x00
 	jr	00109$
 00105$:
-;src/include/energy.h:98: dizzy_energy_indicator[__temp_i] = 0x00;
+;src/misc/energy.c:98: dizzy_energy_indicator[__temp_i] = 0x00;
 	xor	a, a
 	ld	(bc), a
 00109$:
-;src/include/energy.h:86: for (__temp_i = 0; __temp_i < 8; __temp_i++) {
+;src/misc/energy.c:86: for (__temp_i = 0; __temp_i < 8; __temp_i++) {
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x08
 	jp	C, 00108$
-;src/include/energy.h:101: set_win_tiles(6, 1, sizeof(dizzy_energy_indicator), 1, dizzy_energy_indicator);
+;src/misc/energy.c:101: set_win_tiles(6, 1, sizeof(dizzy_energy_indicator), 1, dizzy_energy_indicator);
 	ld	de, #_dizzy_energy_indicator
 	push	de
 	ld	hl, #0x108
@@ -3025,32 +2093,32 @@ _show_energy::
 	inc	sp
 	call	_set_win_tiles
 	add	sp, #6
-;src/include/energy.h:102: pop_bank();
-;src/include/energy.h:103: }
+;src/misc/energy.c:102: pop_bank();
+;src/misc/energy.c:103: }
 	jp	_pop_bank
-;src/include/energy.h:104: void update_energy() {
+;src/misc/energy.c:104: void update_energy() {
 ;	---------------------------------
 ; Function update_energy
 ; ---------------------------------
 _update_energy::
-;src/include/energy.h:105: dizzy_energy_old = dizzy_energy;
+;src/misc/energy.c:105: dizzy_energy_old = dizzy_energy;
 	ld	a, (#_dizzy_energy)
 	ld	(#_dizzy_energy_old),a
-;src/include/energy.h:106: if (dec_energy) {
+;src/misc/energy.c:106: if (dec_energy) {
 	ld	hl, #_dec_energy
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00111$
-;src/include/energy.h:107: dec_energy--;
+;src/misc/energy.c:107: dec_energy--;
 	dec	(hl)
-;src/include/energy.h:108: if (dizzy_energy) {
+;src/misc/energy.c:108: if (dizzy_energy) {
 	ld	hl, #_dizzy_energy
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00102$
-;src/include/energy.h:109: dizzy_energy--;
+;src/misc/energy.c:109: dizzy_energy--;
 	dec	(hl)
-;src/include/energy.h:110: SND_HIT;
+;src/misc/energy.c:110: SND_HIT;
 	ld	de, #0x0086
 	push	de
 	ld	de, #0x0010
@@ -3066,7 +2134,7 @@ _update_energy::
 	call	_PlayFx
 	add	sp, #12
 00102$:
-;src/include/energy.h:112: if (!dizzy_energy) dec_energy = 0;
+;src/misc/energy.c:112: if (!dizzy_energy) dec_energy = 0;
 	ld	a, (#_dizzy_energy)
 	or	a, a
 	jr	NZ, 00112$
@@ -3074,63 +2142,63 @@ _update_energy::
 	ld	(hl), #0x00
 	jr	00112$
 00111$:
-;src/include/energy.h:113: } else if (inc_energy) {
+;src/misc/energy.c:113: } else if (inc_energy) {
 	ld	a, (#_inc_energy)
 	or	a, a
 	jr	Z, 00112$
-;src/include/energy.h:114: dizzy_energy++; 
+;src/misc/energy.c:114: dizzy_energy++; 
 	ld	hl, #_dizzy_energy
 	inc	(hl)
-;src/include/energy.h:115: if (dizzy_energy > 64) { 
+;src/misc/energy.c:115: if (dizzy_energy > 64) { 
 	ld	a, #0x40
 	sub	a, (hl)
 	jr	NC, 00106$
-;src/include/energy.h:116: dizzy_energy = 64;
+;src/misc/energy.c:116: dizzy_energy = 64;
 	ld	(hl), #0x40
-;src/include/energy.h:117: inc_energy = 0;
+;src/misc/energy.c:117: inc_energy = 0;
 	ld	hl, #_inc_energy
 	ld	(hl), #0x00
 	jr	00112$
 00106$:
-;src/include/energy.h:118: } else inc_energy--;
+;src/misc/energy.c:118: } else inc_energy--;
 	ld	hl, #_inc_energy
 	dec	(hl)
 00112$:
-;src/include/energy.h:120: if (dizzy_energy != dizzy_energy_old) {
+;src/misc/energy.c:120: if (dizzy_energy != dizzy_energy_old) {
 	ld	a, (#_dizzy_energy)
 	ld	hl, #_dizzy_energy_old
 	sub	a, (hl)
 	ret	Z
-;src/include/energy.h:121: if (!dizzy_energy) { 
+;src/misc/energy.c:121: if (!dizzy_energy) { 
 	ld	hl, #_dizzy_energy
 	ld	a, (hl)
 	or	a, a
 	jp	NZ,_show_energy
-;src/include/energy.h:122: if (!death_pause) {
+;src/misc/energy.c:122: if (!death_pause) {
 	ld	hl, #_death_pause
 	ld	a, (hl)
 	or	a, a
 	jp	NZ,_show_energy
-;src/include/energy.h:123: if (dizzy_lives) dizzy_lives--;
+;src/misc/energy.c:123: if (dizzy_lives) dizzy_lives--;
 	ld	hl, #_dizzy_lives
 	ld	a, (hl)
 	or	a, a
 	jr	Z, 00114$
 	dec	(hl)
 00114$:
-;src/include/energy.h:124: show_lives();
+;src/misc/energy.c:124: show_lives();
 	call	_show_lives
-;src/include/energy.h:125: on_dizzy_die();
+;src/misc/energy.c:125: on_dizzy_die();
 	call	_on_dizzy_die
-;src/include/energy.h:126: if (!dizzy_lives) game_over = 1;
+;src/misc/energy.c:126: if (!dizzy_lives) game_over = 1;
 	ld	hl, #_dizzy_lives
 	ld	a, (hl)
 	or	a, a
 	jp	NZ,_show_energy
 	ld	hl, #_game_over
 	ld	(hl), #0x01
-;src/include/energy.h:129: show_energy();
-;src/include/energy.h:131: }
+;src/misc/energy.c:129: show_energy();
+;src/misc/energy.c:131: }
 	jp	_show_energy
 ;src/mushroompie.c:82: WORD get_x_scroll_value(WORD x) {
 ;	---------------------------------
@@ -4872,13 +3940,13 @@ _check_change_room::
 	ld	(hl), #0x01
 ;src/mushroompie.c:287: }
 	ret
-;src/include/inventory.h:88: void push_last(items_list * list, game_item * item) {
+;src/misc/inventory.c:88: void push_last(items_list * list, game_item * item) {
 ;	---------------------------------
 ; Function push_last
 ; ---------------------------------
 _push_last::
 	add	sp, #-6
-;src/include/inventory.h:89: if ((!item) || (!list)) return;
+;src/misc/inventory.c:89: if ((!item) || (!list)) return;
 	ldhl	sp,	#11
 	ld	a, (hl-)
 	or	a, (hl)
@@ -4887,7 +3955,7 @@ _push_last::
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00107$
-;src/include/inventory.h:90: list->size++;
+;src/misc/inventory.c:90: list->size++;
 	ldhl	sp,	#8
 	ld	a, (hl)
 	ldhl	sp,	#0
@@ -4904,7 +3972,7 @@ _push_last::
 	pop	hl
 	push	hl
 	ld	(hl), c
-;src/include/inventory.h:91: item->next = 0;
+;src/misc/inventory.c:91: item->next = 0;
 	ldhl	sp,	#10
 	ld	a, (hl+)
 	ld	c, a
@@ -4914,7 +3982,7 @@ _push_last::
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:92: if (list->last) list->last->next = item; else list->first = item;
+;src/misc/inventory.c:92: if (list->last) list->last->next = item; else list->first = item;
 	pop	de
 	push	de
 	ld	hl, #0x0003
@@ -4960,7 +4028,7 @@ _push_last::
 	ld	(hl+), a
 	ld	(hl), b
 00106$:
-;src/include/inventory.h:93: list->last = item;
+;src/misc/inventory.c:93: list->last = item;
 	ldhl	sp,	#2
 	ld	a,	(hl+)
 	ld	h, (hl)
@@ -4969,16 +4037,16 @@ _push_last::
 	ld	(hl+), a
 	ld	(hl), b
 00107$:
-;src/include/inventory.h:94: }
+;src/misc/inventory.c:94: }
 	add	sp, #6
 	ret
-;src/include/inventory.h:95: game_item * pop_by_id(items_list * list, const UBYTE id) {
+;src/misc/inventory.c:95: game_item * pop_by_id(items_list * list, const UBYTE id) {
 ;	---------------------------------
 ; Function pop_by_id
 ; ---------------------------------
 _pop_by_id::
 	add	sp, #-5
-;src/include/inventory.h:96: if (!list) return 0;
+;src/misc/inventory.c:96: if (!list) return 0;
 	ldhl	sp,	#8
 	ld	a, (hl-)
 	or	a, (hl)
@@ -4986,12 +4054,12 @@ _pop_by_id::
 	ld	de, #0x0000
 	jp	00113$
 00102$:
-;src/include/inventory.h:97: __temp_game_item2 = 0;
+;src/misc/inventory.c:97: __temp_game_item2 = 0;
 	xor	a, a
 	ld	hl, #___temp_game_item2
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:98: __temp_game_item = list->first;
+;src/misc/inventory.c:98: __temp_game_item = list->first;
 	ldhl	sp,	#7
 	ld	a, (hl+)
 	ld	c, a
@@ -5016,20 +4084,20 @@ _pop_by_id::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:99: while (__temp_game_item) {
+;src/misc/inventory.c:99: while (__temp_game_item) {
 00110$:
 	ld	hl, #___temp_game_item + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jp	Z, 00112$
-;src/include/inventory.h:100: if (__temp_game_item->id == id) {
+;src/misc/inventory.c:100: if (__temp_game_item->id == id) {
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	ld	a, (de)
 	ldhl	sp,	#0
 	ld	(hl), a
-;src/include/inventory.h:101: if (__temp_game_item2) __temp_game_item2->next = __temp_game_item->next; else list->first = __temp_game_item->next;
+;src/misc/inventory.c:101: if (__temp_game_item2) __temp_game_item2->next = __temp_game_item->next; else list->first = __temp_game_item->next;
 	push	de
 	ld	hl, #0x0007
 	add	hl, de
@@ -5042,13 +4110,13 @@ _pop_by_id::
 	ld	a, h
 	ldhl	sp,	#4
 	ld	(hl), a
-;src/include/inventory.h:100: if (__temp_game_item->id == id) {
+;src/misc/inventory.c:100: if (__temp_game_item->id == id) {
 	ldhl	sp,	#9
 	ld	a, (hl)
 	ldhl	sp,	#0
 	sub	a, (hl)
 	jr	NZ, 00109$
-;src/include/inventory.h:101: if (__temp_game_item2) __temp_game_item2->next = __temp_game_item->next; else list->first = __temp_game_item->next;
+;src/misc/inventory.c:101: if (__temp_game_item2) __temp_game_item2->next = __temp_game_item->next; else list->first = __temp_game_item->next;
 	ldhl	sp,#3
 	ld	a, (hl+)
 	ld	e, a
@@ -5089,7 +4157,7 @@ _pop_by_id::
 	ld	a, (hl)
 	ld	(de), a
 00105$:
-;src/include/inventory.h:102: if (!__temp_game_item->next) list->last = __temp_game_item2;
+;src/misc/inventory.c:102: if (!__temp_game_item->next) list->last = __temp_game_item2;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	e, a
@@ -5113,23 +4181,23 @@ _pop_by_id::
 	ld	a, (hl)
 	ld	(de), a
 00107$:
-;src/include/inventory.h:103: list->size--;
+;src/misc/inventory.c:103: list->size--;
 	ld	a, (bc)
 	dec	a
 	ld	(bc), a
-;src/include/inventory.h:104: return __temp_game_item;
+;src/misc/inventory.c:104: return __temp_game_item;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 	jr	00113$
 00109$:
-;src/include/inventory.h:106: __temp_game_item2 = __temp_game_item;
+;src/misc/inventory.c:106: __temp_game_item2 = __temp_game_item;
 	ld	hl, #___temp_game_item2
 	ld	a, e
 	ld	(hl+), a
 	ld	(hl), d
-;src/include/inventory.h:107: __temp_game_item = __temp_game_item->next;
+;src/misc/inventory.c:107: __temp_game_item = __temp_game_item->next;
 	ldhl	sp,#3
 	ld	a, (hl+)
 	ld	e, a
@@ -5142,18 +4210,18 @@ _pop_by_id::
 	ld	(hl), a
 	jp	00110$
 00112$:
-;src/include/inventory.h:109: return 0;
+;src/misc/inventory.c:109: return 0;
 	ld	de, #0x0000
 00113$:
-;src/include/inventory.h:110: }
+;src/misc/inventory.c:110: }
 	add	sp, #5
 	ret
-;src/include/inventory.h:111: game_item * find_by_id(items_list * list, const UBYTE id) {
+;src/misc/inventory.c:111: game_item * find_by_id(items_list * list, const UBYTE id) {
 ;	---------------------------------
 ; Function find_by_id
 ; ---------------------------------
 _find_by_id::
-;src/include/inventory.h:112: if (!list) return 0;
+;src/misc/inventory.c:112: if (!list) return 0;
 	ldhl	sp,	#3
 	ld	a, (hl-)
 	or	a, (hl)
@@ -5161,7 +4229,7 @@ _find_by_id::
 	ld	de, #0x0000
 	ret
 00102$:
-;src/include/inventory.h:113: __temp_game_item = list->first;
+;src/misc/inventory.c:113: __temp_game_item = list->first;
 	ldhl	sp,	#2
 	ld	a, (hl+)
 	ld	c, a
@@ -5175,13 +4243,13 @@ _find_by_id::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:114: while (__temp_game_item) {
+;src/misc/inventory.c:114: while (__temp_game_item) {
 00105$:
 	ld	hl, #___temp_game_item + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00107$
-;src/include/inventory.h:115: if (__temp_game_item->id == id) return __temp_game_item;
+;src/misc/inventory.c:115: if (__temp_game_item->id == id) return __temp_game_item;
 	ld	a, (hl+)
 	ld	c, a
 	ld	b, (hl)
@@ -5197,7 +4265,7 @@ _find_by_id::
 	ld	d, (hl)
 	ret
 00104$:
-;src/include/inventory.h:116: __temp_game_item = __temp_game_item->next;
+;src/misc/inventory.c:116: __temp_game_item = __temp_game_item->next;
 	ld	hl, #0x0007
 	add	hl, bc
 	ld	e, l
@@ -5210,17 +4278,17 @@ _find_by_id::
 	ld	(hl), a
 	jr	00105$
 00107$:
-;src/include/inventory.h:118: return 0;
+;src/misc/inventory.c:118: return 0;
 	ld	de, #0x0000
-;src/include/inventory.h:119: }
+;src/misc/inventory.c:119: }
 	ret
-;src/include/inventory.h:120: game_item * find_by_room_xy(items_list * list, const UBYTE row, const UBYTE col, const UBYTE x, const UBYTE y) {
+;src/misc/inventory.c:120: game_item * find_by_room_xy(items_list * list, const UBYTE row, const UBYTE col, const UBYTE x, const UBYTE y) {
 ;	---------------------------------
 ; Function find_by_room_xy
 ; ---------------------------------
 _find_by_room_xy::
 	add	sp, #-4
-;src/include/inventory.h:121: if (!list) return 0;
+;src/misc/inventory.c:121: if (!list) return 0;
 	ldhl	sp,	#7
 	ld	a, (hl-)
 	or	a, (hl)
@@ -5228,12 +4296,12 @@ _find_by_room_xy::
 	ld	de, #0x0000
 	jp	00114$
 00102$:
-;src/include/inventory.h:122: __temp_game_item2 = 0;
+;src/misc/inventory.c:122: __temp_game_item2 = 0;
 	xor	a, a
 	ld	hl, #___temp_game_item2
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:123: __temp_game_item = list->first;
+;src/misc/inventory.c:123: __temp_game_item = list->first;
 	ldhl	sp,	#6
 	ld	a, (hl+)
 	ld	c, a
@@ -5247,13 +4315,13 @@ _find_by_room_xy::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:124: while (__temp_game_item) {
+;src/misc/inventory.c:124: while (__temp_game_item) {
 00111$:
 	ld	hl, #___temp_game_item + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jp	Z, 00113$
-;src/include/inventory.h:125: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
+;src/misc/inventory.c:125: if ((__temp_game_item->room_row == row) && (__temp_game_item->room_col == col)) {
 	ld	a, (hl)
 	ldhl	sp,	#0
 	ld	(hl), a
@@ -5279,7 +4347,7 @@ _find_by_room_xy::
 	ld	a, (hl)
 	sub	a, c
 	jp	NZ,00109$
-;src/include/inventory.h:126: if ((__temp_game_item->x <= (x + 2)) && ((__temp_game_item->x + 1) >= x) &&
+;src/misc/inventory.c:126: if ((__temp_game_item->x <= (x + 2)) && ((__temp_game_item->x + 1) >= x) &&
 	pop	bc
 	push	bc
 	inc	bc
@@ -5342,7 +4410,7 @@ _find_by_room_xy::
 	scf
 00168$:
 	jr	C, 00109$
-;src/include/inventory.h:127: (__temp_game_item->y <= (y + 2)) && ((__temp_game_item->y + 1) >= y)) {
+;src/misc/inventory.c:127: (__temp_game_item->y <= (y + 2)) && ((__temp_game_item->y + 1) >= y)) {
 	pop	de
 	push	de
 	ld	hl, #0x0004
@@ -5406,7 +4474,7 @@ _find_by_room_xy::
 	scf
 00172$:
 	jr	C, 00109$
-;src/include/inventory.h:128: __temp_game_item2 = __temp_game_item;
+;src/misc/inventory.c:128: __temp_game_item2 = __temp_game_item;
 	ldhl	sp,	#0
 	ld	a, (hl)
 	ld	(#___temp_game_item2),a
@@ -5414,7 +4482,7 @@ _find_by_room_xy::
 	ld	a, (hl)
 	ld	(#___temp_game_item2 + 1),a
 00109$:
-;src/include/inventory.h:131: __temp_game_item = __temp_game_item->next;
+;src/misc/inventory.c:131: __temp_game_item = __temp_game_item->next;
 	pop	de
 	push	de
 	ld	hl, #0x0007
@@ -5431,21 +4499,21 @@ _find_by_room_xy::
 	ld	(hl), a
 	jp	00111$
 00113$:
-;src/include/inventory.h:133: return __temp_game_item2;
+;src/misc/inventory.c:133: return __temp_game_item2;
 	ld	hl, #___temp_game_item2
 	ld	a, (hl+)
 	ld	e, a
 	ld	d, (hl)
 00114$:
-;src/include/inventory.h:134: }
+;src/misc/inventory.c:134: }
 	add	sp, #4
 	ret
-;src/include/inventory.h:137: void init_game_items() {
+;src/misc/inventory.c:137: void init_game_items() {
 ;	---------------------------------
 ; Function init_game_items
 ; ---------------------------------
 _init_game_items::
-;src/include/inventory.h:138: game_item_list.first = game_item_list.last = game_item_list.size = 0;
+;src/misc/inventory.c:138: game_item_list.first = game_item_list.last = game_item_list.size = 0;
 	ld	hl, #_game_item_list
 	ld	(hl), #0x00
 	ld	hl, #(_game_item_list + 3)
@@ -5456,11 +4524,11 @@ _init_game_items::
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:139: for (__temp_i = 0; __temp_i < GAME_ITEMS_COUNT; __temp_i++) {
+;src/misc/inventory.c:139: for (__temp_i = 0; __temp_i < GAME_ITEMS_COUNT; __temp_i++) {
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00102$:
-;src/include/inventory.h:140: __temp_game_item = &game_items[__temp_i];
+;src/misc/inventory.c:140: __temp_game_item = &game_items[__temp_i];
 	ld	hl, #___temp_i
 	ld	c, (hl)
 	ld	b, #0x00
@@ -5478,7 +4546,7 @@ _init_game_items::
 	ld	(hl), c
 	inc	hl
 	ld	(hl), a
-;src/include/inventory.h:141: __temp_game_item_desc = all_items_desc[__temp_i];
+;src/misc/inventory.c:141: __temp_game_item_desc = all_items_desc[__temp_i];
 	ld	hl, #___temp_i
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5497,7 +4565,7 @@ _init_game_items::
 	inc	de
 	ld	a, (de)
 	ld	(hl), a
-;src/include/inventory.h:143: __temp_game_item->id = __temp_game_item_desc->id;
+;src/misc/inventory.c:143: __temp_game_item->id = __temp_game_item_desc->id;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5508,7 +4576,7 @@ _init_game_items::
 	ld	d, (hl)
 	ld	a, (de)
 	ld	(bc), a
-;src/include/inventory.h:145: __temp_game_item->room_row = __temp_game_item_desc->room_row; 
+;src/misc/inventory.c:145: __temp_game_item->room_row = __temp_game_item_desc->room_row; 
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5521,7 +4589,7 @@ _init_game_items::
 	inc	de
 	ld	a, (de)
 	ld	(bc), a
-;src/include/inventory.h:146: __temp_game_item->room_col = __temp_game_item_desc->room_col; 
+;src/misc/inventory.c:146: __temp_game_item->room_col = __temp_game_item_desc->room_col; 
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5536,7 +4604,7 @@ _init_game_items::
 	inc	de
 	ld	a, (de)
 	ld	(bc), a
-;src/include/inventory.h:147: __temp_game_item->x = __temp_game_item_desc->x;
+;src/misc/inventory.c:147: __temp_game_item->x = __temp_game_item_desc->x;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5553,7 +4621,7 @@ _init_game_items::
 	inc	de
 	ld	a, (de)
 	ld	(bc), a
-;src/include/inventory.h:148: __temp_game_item->y = __temp_game_item_desc->y;
+;src/misc/inventory.c:148: __temp_game_item->y = __temp_game_item_desc->y;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5572,7 +4640,7 @@ _init_game_items::
 	inc	de
 	ld	a, (de)
 	ld	(bc), a
-;src/include/inventory.h:149: __temp_game_item->desc = __temp_game_item_desc;
+;src/misc/inventory.c:149: __temp_game_item->desc = __temp_game_item_desc;
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	c, a
@@ -5588,7 +4656,7 @@ _init_game_items::
 	inc	bc
 	ld	a, (hl)
 	ld	(bc), a
-;src/include/inventory.h:151: push_last((items_list *)&game_item_list, __temp_game_item);
+;src/misc/inventory.c:151: push_last((items_list *)&game_item_list, __temp_game_item);
 	ld	hl, #___temp_game_item
 	ld	a, (hl+)
 	ld	e, a
@@ -5598,13 +4666,13 @@ _init_game_items::
 	push	de
 	call	_push_last
 	add	sp, #4
-;src/include/inventory.h:139: for (__temp_i = 0; __temp_i < GAME_ITEMS_COUNT; __temp_i++) {
+;src/misc/inventory.c:139: for (__temp_i = 0; __temp_i < GAME_ITEMS_COUNT; __temp_i++) {
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x0e
 	jp	C, 00102$
-;src/include/inventory.h:153: inventory_item_list.first = inventory_item_list.last = inventory_item_list.size = 0;
+;src/misc/inventory.c:153: inventory_item_list.first = inventory_item_list.last = inventory_item_list.size = 0;
 	ld	hl, #_inventory_item_list
 	ld	(hl), #0x00
 	ld	hl, #(_inventory_item_list + 3)
@@ -5615,7 +4683,7 @@ _init_game_items::
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:154: item_stack.first = item_stack.last = item_stack.size = 0;
+;src/misc/inventory.c:154: item_stack.first = item_stack.last = item_stack.size = 0;
 	ld	hl, #_item_stack
 	ld	(hl), #0x00
 	ld	hl, #(_item_stack + 3)
@@ -5626,14 +4694,14 @@ _init_game_items::
 	xor	a, a
 	ld	(hl+), a
 	ld	(hl), a
-;src/include/inventory.h:155: }
+;src/misc/inventory.c:155: }
 	ret
-;src/include/room_defaults.h:1: void default_draw() {
+;src/misc/room_defaults.c:3: void default_draw() {
 ;	---------------------------------
 ; Function default_draw
 ; ---------------------------------
 _default_draw::
-;src/include/room_defaults.h:3: rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
+;src/misc/room_defaults.c:5: rle_decompress_data(current_room->room_map->rle_data, (UWORD)current_room->room_map->size, coll_buf);
 	ld	hl, #_current_room
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -5662,7 +4730,7 @@ _default_draw::
 	push	bc
 	call	_rle_decompress_data
 	add	sp, #6
-;src/include/room_defaults.h:4: place_room_items(current_room_y, current_room_x, coll_buf);
+;src/misc/room_defaults.c:6: place_room_items(current_room_y, current_room_x, coll_buf);
 	ld	de, #_coll_buf
 	push	de
 	ld	a, (#_current_room_x)
@@ -5672,7 +4740,7 @@ _default_draw::
 	push	hl
 	call	_place_room_items
 	add	sp, #4
-;src/include/room_defaults.h:6: set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
+;src/misc/room_defaults.c:8: set_bkg_tiles(0, 3, room_width, room_height, coll_buf);
 	ld	de, #_coll_buf
 	push	de
 	ld	hl, #0x111e
@@ -5681,19 +4749,19 @@ _default_draw::
 	push	hl
 	call	_set_bkg_tiles
 	add	sp, #6
-;src/include/room_defaults.h:7: }
+;src/misc/room_defaults.c:9: }
 	ret
-;src/include/room_defaults.h:9: UBYTE default_drop(UBYTE id) {
+;src/misc/room_defaults.c:11: UBYTE default_drop(UBYTE id) {
 ;	---------------------------------
 ; Function default_drop
 ; ---------------------------------
 _default_drop::
-;src/include/room_defaults.h:11: if (id == ID_FIREFLY) {
+;src/misc/room_defaults.c:13: if (id == ID_FIREFLY) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x08
 	jr	NZ, 00104$
-;src/include/room_defaults.h:12: show_dialog_window(4, &firefly_out);
+;src/misc/room_defaults.c:14: show_dialog_window(4, &firefly_out);
 	ld	de, #_firefly_out
 	push	de
 	ld	a, #0x04
@@ -5701,7 +4769,7 @@ _default_drop::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/include/room_defaults.h:14: temp_item = pop_by_id(&item_stack, ID_JAR);
+;src/misc/room_defaults.c:16: temp_item = pop_by_id(&item_stack, ID_JAR);
 	ld	a, #0x06
 	push	af
 	inc	sp
@@ -5710,7 +4778,7 @@ _default_drop::
 	call	_pop_by_id
 	add	sp, #3
 	ld	c, e
-;src/include/room_defaults.h:15: if (temp_item) push_last(&inventory_item_list, temp_item);
+;src/misc/room_defaults.c:17: if (temp_item) push_last(&inventory_item_list, temp_item);
 	ld	a,d
 	ld	b,a
 	or	a, e
@@ -5721,13 +4789,13 @@ _default_drop::
 	call	_push_last
 	add	sp, #4
 00102$:
-;src/include/room_defaults.h:17: return ID_LID;
+;src/misc/room_defaults.c:19: return ID_LID;
 	ld	e, #0x07
 	ret
 00104$:
-;src/include/room_defaults.h:19: return ID_ITEM_NONE;
+;src/misc/room_defaults.c:21: return ID_ITEM_NONE;
 	ld	e, #0x00
-;src/include/room_defaults.h:20: }
+;src/misc/room_defaults.c:22: }
 	ret
 ;src/mushroompie.c:401: void reset_world() {
 ;	---------------------------------

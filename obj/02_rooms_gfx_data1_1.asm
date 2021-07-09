@@ -101,17 +101,17 @@ _float4_dir::
 ; code
 ;--------------------------------------------------------
 	.area _CODE_5
-;src/rooms/room_34_1.h:7: void reset_room4() {
+;src/rooms/room_34_1.c:7: void reset_room4() {
 ;	---------------------------------
 ; Function reset_room4
 ; ---------------------------------
 _reset_room4::
-;src/rooms/room_34_1.h:8: troll_satisfied = 0, troll_negotiated = 0;
+;src/rooms/room_34_1.c:8: troll_satisfied = 0, troll_negotiated = 0;
 	ld	hl, #_troll_satisfied
 	ld	(hl), #0x00
 	ld	hl, #_troll_negotiated
 	ld	(hl), #0x00
-;src/rooms/room_34_1.h:9: }
+;src/rooms/room_34_1.c:9: }
 	ret
 _float_offsets_r3:
 	.db #0x28	; 40
@@ -163,12 +163,12 @@ _float_offsets_r4:
 	.db #0x20	; 32
 	.db #0x00	; 0
 	.db #0x40	; 64
-;src/rooms/room_34_1.h:10: void init_room34() {
+;src/rooms/room_34_1.c:10: void init_room34() {
 ;	---------------------------------
 ; Function init_room34
 ; ---------------------------------
 _init_room34::
-;src/rooms/room_34_1.h:11: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+;src/rooms/room_34_1.c:11: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -188,11 +188,11 @@ _init_room34::
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/rooms/room_34_1.h:12: for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
+;src/rooms/room_34_1.c:12: for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
 	ld	hl, #___temp_i
 	ld	(hl), #0x09
 00103$:
-;src/rooms/room_34_1.h:13: set_sprite_tile(__temp_i, evil_sprites_tileoffset);
+;src/rooms/room_34_1.c:13: set_sprite_tile(__temp_i, evil_sprites_tileoffset);
 	ld	hl, #___temp_i
 ;c:/gb/gbdk/include/gb/gb.h:1185: shadow_OAM[nb].tile=tile;
 	ld	l, (hl)
@@ -208,43 +208,43 @@ _init_room34::
 	inc	hl
 	inc	hl
 	ld	(hl), #0x09
-;src/rooms/room_34_1.h:12: for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
+;src/rooms/room_34_1.c:12: for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x0d
 	jr	C, 00103$
-;src/rooms/room_34_1.h:14: }
+;src/rooms/room_34_1.c:14: }
 	ret
-;src/rooms/room_34_1.h:26: void move_float() {             // two floats in room 3 and 4 move in sync with each other
+;src/rooms/room_34_1.c:26: void move_float() {             // two floats in room 3 and 4 move in sync with each other
 ;	---------------------------------
 ; Function move_float
 ; ---------------------------------
 _move_float::
-;src/rooms/room_34_1.h:27: float_move_timer++;
+;src/rooms/room_34_1.c:27: float_move_timer++;
 	ld	hl, #_float_move_timer
 	inc	(hl)
-;src/rooms/room_34_1.h:28: if (float_move_timer & 1) return;
+;src/rooms/room_34_1.c:28: if (float_move_timer & 1) return;
 	ld	a, (hl)
 	rrca
 	ret	C
-;src/rooms/room_34_1.h:29: if (float3_move) {
+;src/rooms/room_34_1.c:29: if (float3_move) {
 	ld	a, (#_float3_move)
 	or	a, a
 	jr	Z, 00113$
-;src/rooms/room_34_1.h:30: if (float3_dir) {
+;src/rooms/room_34_1.c:30: if (float3_dir) {
 	ld	hl, #_float3_dir + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00110$
-;src/rooms/room_34_1.h:31: float3_pos_x++;
+;src/rooms/room_34_1.c:31: float3_pos_x++;
 	ld	hl, #_float3_pos_x
 	inc	(hl)
 	jr	NZ, 00183$
 	inc	hl
 	inc	(hl)
 00183$:
-;src/rooms/room_34_1.h:32: if (float3_pos_x >= float3_max_x) { float3_dir = 0; float3_move = 0; }
+;src/rooms/room_34_1.c:32: if (float3_pos_x >= float3_max_x) { float3_dir = 0; float3_move = 0; }
 	ld	hl, #_float3_pos_x
 	ld	a, (hl+)
 	sub	a, #0xf0
@@ -271,7 +271,7 @@ _move_float::
 	ld	hl, #_float3_move
 	ld	(hl), #0x00
 00104$:
-;src/rooms/room_34_1.h:33: if (float3_pos_x == float3_max_x - (float_length + 14)) float4_move = 1;
+;src/rooms/room_34_1.c:33: if (float3_pos_x == float3_max_x - (float_length + 14)) float4_move = 1;
 	ld	hl, #_float3_pos_x
 	ld	a, (hl+)
 	sub	a, #0xc2
@@ -281,7 +281,7 @@ _move_float::
 	ld	(hl), #0x01
 	jr	00113$
 00110$:
-;src/rooms/room_34_1.h:35: float3_pos_x--;
+;src/rooms/room_34_1.c:35: float3_pos_x--;
 	ld	hl, #_float3_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -290,7 +290,7 @@ _move_float::
 	dec	de
 	ld	a, e
 	ld	(hl+), a
-;src/rooms/room_34_1.h:36: if (float3_pos_x <= float3_min_x) float3_dir = 1;
+;src/rooms/room_34_1.c:36: if (float3_pos_x <= float3_min_x) float3_dir = 1;
 	ld	a, d
 	ld	(hl-), a
 	ld	a, #0x68
@@ -318,23 +318,23 @@ _move_float::
 	xor	a, a
 	ld	(hl), a
 00113$:
-;src/rooms/room_34_1.h:39: if (float4_move) {
+;src/rooms/room_34_1.c:39: if (float4_move) {
 	ld	a, (#_float4_move)
 	or	a, a
 	ret	Z
-;src/rooms/room_34_1.h:40: if (float4_dir) {
+;src/rooms/room_34_1.c:40: if (float4_dir) {
 	ld	hl, #_float4_dir + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00121$
-;src/rooms/room_34_1.h:41: float4_pos_x++;
+;src/rooms/room_34_1.c:41: float4_pos_x++;
 	ld	hl, #_float4_pos_x
 	inc	(hl)
 	jr	NZ, 00190$
 	inc	hl
 	inc	(hl)
 00190$:
-;src/rooms/room_34_1.h:42: if (float4_pos_x >= float4_max_x) float4_dir = 0;
+;src/rooms/room_34_1.c:42: if (float4_pos_x >= float4_max_x) float4_dir = 0;
 	ld	hl, #_float4_pos_x
 	ld	a, (hl+)
 	sub	a, #0x20
@@ -360,7 +360,7 @@ _move_float::
 	ld	(hl), a
 	ret
 00121$:
-;src/rooms/room_34_1.h:44: float4_pos_x--;
+;src/rooms/room_34_1.c:44: float4_pos_x--;
 	ld	hl, #_float4_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -369,7 +369,7 @@ _move_float::
 	dec	de
 	ld	a, e
 	ld	(hl+), a
-;src/rooms/room_34_1.h:45: if (float4_pos_x <= float4_min_x) { float4_dir = 1; float4_move = 0; }
+;src/rooms/room_34_1.c:45: if (float4_pos_x <= float4_min_x) { float4_dir = 1; float4_move = 0; }
 	ld	a, d
 	ld	(hl-), a
 	ld	a, #0xe0
@@ -399,7 +399,7 @@ _move_float::
 	ld	hl, #_float4_move
 	ld	(hl), #0x00
 00117$:
-;src/rooms/room_34_1.h:46: if (float4_pos_x == float4_min_x + (float_length + 15)) float3_move = 1;
+;src/rooms/room_34_1.c:46: if (float4_pos_x == float4_min_x + (float_length + 15)) float3_move = 1;
 	ld	hl, #_float4_pos_x
 	ld	a, (hl+)
 	sub	a, #0x0f
@@ -407,14 +407,14 @@ _move_float::
 	ret	NZ
 	ld	hl, #_float3_move
 	ld	(hl), #0x01
-;src/rooms/room_34_1.h:49: }
+;src/rooms/room_34_1.c:49: }
 	ret
-;src/rooms/room_34_1.h:50: void draw_float3() {
+;src/rooms/room_34_1.c:50: void draw_float3() {
 ;	---------------------------------
 ; Function draw_float3
 ; ---------------------------------
 _draw_float3::
-;src/rooms/room_34_1.h:54: -bkg_scroll_x_target, - bkg_scroll_y_target);
+;src/rooms/room_34_1.c:54: -bkg_scroll_x_target, - bkg_scroll_y_target);
 	xor	a, a
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -423,11 +423,11 @@ _draw_float3::
 	ld	hl, #_bkg_scroll_x_target
 	sub	a, (hl)
 	ld	b, a
-;src/rooms/room_34_1.h:53: (unsigned char *)float_offsets_r3, 
-;src/rooms/room_34_1.h:52: float3_pos_x, float34_pos_y, 
+;src/rooms/room_34_1.c:53: (unsigned char *)float_offsets_r3, 
+;src/rooms/room_34_1.c:52: float3_pos_x, float34_pos_y, 
 	ld	hl, #_float3_pos_x
 	ld	a, (hl)
-;src/rooms/room_34_1.h:51: multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+;src/rooms/room_34_1.c:51: multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
 	ld	e, b
 	push	de
 	ld	de, #_float_offsets_r3
@@ -445,14 +445,14 @@ _draw_float3::
 	inc	sp
 	call	_multiple_move_sprites_limits
 	add	sp, #8
-;src/rooms/room_34_1.h:55: }
+;src/rooms/room_34_1.c:55: }
 	ret
-;src/rooms/room_34_1.h:56: void draw_float4() {
+;src/rooms/room_34_1.c:56: void draw_float4() {
 ;	---------------------------------
 ; Function draw_float4
 ; ---------------------------------
 _draw_float4::
-;src/rooms/room_34_1.h:60: -bkg_scroll_x_target, -bkg_scroll_y_target);
+;src/rooms/room_34_1.c:60: -bkg_scroll_x_target, -bkg_scroll_y_target);
 	xor	a, a
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -461,11 +461,11 @@ _draw_float4::
 	ld	hl, #_bkg_scroll_x_target
 	sub	a, (hl)
 	ld	b, a
-;src/rooms/room_34_1.h:59: (unsigned char *)float_offsets_r4, 
-;src/rooms/room_34_1.h:58: float4_pos_x, float34_pos_y, 
+;src/rooms/room_34_1.c:59: (unsigned char *)float_offsets_r4, 
+;src/rooms/room_34_1.c:58: float4_pos_x, float34_pos_y, 
 	ld	hl, #_float4_pos_x
 	ld	a, (hl)
-;src/rooms/room_34_1.h:57: multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
+;src/rooms/room_34_1.c:57: multiple_move_sprites_limits(float_sprite_offset, float_sprite_count, 
 	ld	e, b
 	push	de
 	ld	de, #_float_offsets_r4
@@ -483,18 +483,18 @@ _draw_float4::
 	inc	sp
 	call	_multiple_move_sprites_limits
 	add	sp, #8
-;src/rooms/room_34_1.h:61: }
+;src/rooms/room_34_1.c:61: }
 	ret
-;src/rooms/room_34_1.h:62: void hcoll_float3(WORD x, WORD y) {
+;src/rooms/room_34_1.c:62: void hcoll_float3(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_float3
 ; ---------------------------------
 _hcoll_float3::
-;src/rooms/room_34_1.h:63: if (delta_y >= 0) {
+;src/rooms/room_34_1.c:63: if (delta_y >= 0) {
 	ld	a, (#_delta_y + 1)
 	bit	7, a
 	jp	NZ, 00108$
-;src/rooms/room_34_1.h:64: if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {            
+;src/rooms/room_34_1.c:64: if ((x >= float3_pos_x - 8) && (x <= float3_pos_x + (3 * 8))) {            
 	ld	hl, #_float3_pos_x
 	ld	a, (hl+)
 	add	a, #0xf8
@@ -548,7 +548,7 @@ _hcoll_float3::
 	scf
 00139$:
 	jp	C, 00108$
-;src/rooms/room_34_1.h:65: if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
+;src/rooms/room_34_1.c:65: if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	sub	a, #0x77
@@ -567,7 +567,7 @@ _hcoll_float3::
 	jr	Z, 00141$
 	scf
 00141$:
-	jp	C, 00108$
+	jr	C, 00108$
 	ldhl	sp,	#4
 	ld	a, #0x7c
 	sub	a, (hl)
@@ -588,7 +588,7 @@ _hcoll_float3::
 	scf
 00143$:
 	jr	C, 00108$
-;src/rooms/room_34_1.h:66: tile_pos_x = x >> 3; tile_pos_ox = (x - float3_pos_x) & 7;
+;src/rooms/room_34_1.c:66: tile_pos_x = x >> 3; tile_pos_ox = (x - float3_pos_x) & 7;
 	ldhl	sp,#2
 	ld	a, (hl+)
 	ld	c, a
@@ -608,7 +608,7 @@ _hcoll_float3::
 	sub	a, c
 	and	a, #0x07
 	ld	(#_tile_pos_ox),a
-;src/rooms/room_34_1.h:67: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
+;src/rooms/room_34_1.c:67: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
 	ldhl	sp,#4
 	ld	a, (hl+)
 	ld	c, a
@@ -625,31 +625,25 @@ _hcoll_float3::
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(#_tile_pos_oy),a
-;src/rooms/room_34_1.h:68: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
+;src/rooms/room_34_1.c:68: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
 	ld	hl, #_collision_buf
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
+	ld	(hl), #0x01
+	ld	hl, #(_collision_buf + 1)
+	ld	(hl), #0x01
 	ld	hl, #(_collision_buf + 2)
-	ld	a, #0x01
-	ld	(hl+), a
 	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 4)
-	xor	a, a
-	ld	(hl+), a
-	ld	(hl), a
-;src/rooms/room_34_1.h:69: delta_y = 0;
+;src/rooms/room_34_1.c:69: delta_y = 0;
 	xor	a, a
 	ld	hl, #_delta_y
 	ld	(hl+), a
 	ld	(hl), a
-;src/rooms/room_34_1.h:70: is_position_safe = 0;
+;src/rooms/room_34_1.c:70: is_position_safe = 0;
 	ld	hl, #_is_position_safe
 	ld	(hl), #0x00
-;src/rooms/room_34_1.h:71: return;
+;src/rooms/room_34_1.c:71: return;
 	ret
 00108$:
-;src/rooms/room_34_1.h:75: get_h_coll(x, y);
+;src/rooms/room_34_1.c:75: get_h_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -662,18 +656,18 @@ _hcoll_float3::
 	push	de
 	call	_get_h_coll
 	add	sp, #4
-;src/rooms/room_34_1.h:76: }
+;src/rooms/room_34_1.c:76: }
 	ret
-;src/rooms/room_34_1.h:77: void hcoll_float4(WORD x, WORD y) {
+;src/rooms/room_34_1.c:77: void hcoll_float4(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_float4
 ; ---------------------------------
 _hcoll_float4::
-;src/rooms/room_34_1.h:78: if (delta_y >= 0) {
+;src/rooms/room_34_1.c:78: if (delta_y >= 0) {
 	ld	a, (#_delta_y + 1)
 	bit	7, a
 	jp	NZ, 00108$
-;src/rooms/room_34_1.h:79: if ((x >= float4_pos_x - 8) && (x <= float4_pos_x + (3 * 8))) {
+;src/rooms/room_34_1.c:79: if ((x >= float4_pos_x - 8) && (x <= float4_pos_x + (3 * 8))) {
 	ld	hl, #_float4_pos_x
 	ld	a, (hl+)
 	add	a, #0xf8
@@ -727,7 +721,7 @@ _hcoll_float4::
 	scf
 00139$:
 	jp	C, 00108$
-;src/rooms/room_34_1.h:80: if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
+;src/rooms/room_34_1.c:80: if ((y >= float34_pos_y - 1) && (y <= float34_pos_y + 4)) {
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	sub	a, #0x77
@@ -746,7 +740,7 @@ _hcoll_float4::
 	jr	Z, 00141$
 	scf
 00141$:
-	jp	C, 00108$
+	jr	C, 00108$
 	ldhl	sp,	#4
 	ld	a, #0x7c
 	sub	a, (hl)
@@ -767,7 +761,7 @@ _hcoll_float4::
 	scf
 00143$:
 	jr	C, 00108$
-;src/rooms/room_34_1.h:81: tile_pos_x = x >> 3; tile_pos_ox = (x - float4_pos_x) & 7;
+;src/rooms/room_34_1.c:81: tile_pos_x = x >> 3; tile_pos_ox = (x - float4_pos_x) & 7;
 	ldhl	sp,#2
 	ld	a, (hl+)
 	ld	c, a
@@ -787,7 +781,7 @@ _hcoll_float4::
 	sub	a, c
 	and	a, #0x07
 	ld	(#_tile_pos_ox),a
-;src/rooms/room_34_1.h:82: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
+;src/rooms/room_34_1.c:82: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
 	ldhl	sp,#4
 	ld	a, (hl+)
 	ld	c, a
@@ -804,31 +798,25 @@ _hcoll_float4::
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(#_tile_pos_oy),a
-;src/rooms/room_34_1.h:83: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
+;src/rooms/room_34_1.c:83: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
 	ld	hl, #_collision_buf
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
+	ld	(hl), #0x01
+	ld	hl, #(_collision_buf + 1)
+	ld	(hl), #0x01
 	ld	hl, #(_collision_buf + 2)
-	ld	a, #0x01
-	ld	(hl+), a
 	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 4)
-	xor	a, a
-	ld	(hl+), a
-	ld	(hl), a
-;src/rooms/room_34_1.h:84: delta_y = 0;
+;src/rooms/room_34_1.c:84: delta_y = 0;
 	xor	a, a
 	ld	hl, #_delta_y
 	ld	(hl+), a
 	ld	(hl), a
-;src/rooms/room_34_1.h:85: is_position_safe = 0;
+;src/rooms/room_34_1.c:85: is_position_safe = 0;
 	ld	hl, #_is_position_safe
 	ld	(hl), #0x00
-;src/rooms/room_34_1.h:86: return;
+;src/rooms/room_34_1.c:86: return;
 	ret
 00108$:
-;src/rooms/room_34_1.h:90: get_h_coll(x, y);
+;src/rooms/room_34_1.c:90: get_h_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -841,15 +829,15 @@ _hcoll_float4::
 	push	de
 	call	_get_h_coll
 	add	sp, #4
-;src/rooms/room_34_1.h:91: }
+;src/rooms/room_34_1.c:91: }
 	ret
-;src/rooms/room_34_1.h:94: void vcoll_troll(WORD x, WORD y) {
+;src/rooms/room_34_1.c:94: void vcoll_troll(WORD x, WORD y) {
 ;	---------------------------------
 ; Function vcoll_troll
 ; ---------------------------------
 _vcoll_troll::
 	dec	sp
-;src/rooms/room_34_1.h:96: if (x >= troll_x_position) {
+;src/rooms/room_34_1.c:96: if (x >= troll_x_position) {
 	ldhl	sp,	#3
 	ld	a, (hl+)
 	sub	a, #0xb0
@@ -873,15 +861,15 @@ _vcoll_troll::
 	rla
 	ldhl	sp,	#0
 	ld	(hl), a
-;src/rooms/room_34_1.h:95: if (!troll_negotiated) {
+;src/rooms/room_34_1.c:95: if (!troll_negotiated) {
 	ld	a, (#_troll_negotiated)
 	or	a, a
 	jr	NZ, 00104$
-;src/rooms/room_34_1.h:96: if (x >= troll_x_position) {
+;src/rooms/room_34_1.c:96: if (x >= troll_x_position) {
 	ldhl	sp,	#0
 	bit	0, (hl)
 	jr	NZ, 00104$
-;src/rooms/room_34_1.h:97: show_dialog_window(4, &troll_dialog);
+;src/rooms/room_34_1.c:97: show_dialog_window(4, &troll_dialog);
 	ld	de, #_troll_dialog
 	push	de
 	ld	a, #0x04
@@ -889,22 +877,22 @@ _vcoll_troll::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_34_1.h:98: troll_negotiated = 1;
+;src/rooms/room_34_1.c:98: troll_negotiated = 1;
 	ld	hl, #_troll_negotiated
 	ld	(hl), #0x01
 00104$:
-;src/rooms/room_34_1.h:101: if ((!troll_satisfied) && (coins >= 3)) {
+;src/rooms/room_34_1.c:101: if ((!troll_satisfied) && (coins >= 3)) {
 	ld	a, (#_troll_satisfied)
 	or	a, a
 	jr	NZ, 00108$
 	ld	a, (#_coins)
 	sub	a, #0x03
 	jr	C, 00108$
-;src/rooms/room_34_1.h:102: if (x >= troll_x_position) {
+;src/rooms/room_34_1.c:102: if (x >= troll_x_position) {
 	ldhl	sp,	#0
 	bit	0, (hl)
 	jr	NZ, 00108$
-;src/rooms/room_34_1.h:103: show_dialog_window(3, &troll_toll);
+;src/rooms/room_34_1.c:103: show_dialog_window(3, &troll_toll);
 	ld	de, #_troll_toll
 	push	de
 	ld	a, #0x03
@@ -912,30 +900,30 @@ _vcoll_troll::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_34_1.h:104: sub_coins(3);
+;src/rooms/room_34_1.c:104: sub_coins(3);
 	ld	a, #0x03
 	push	af
 	inc	sp
 	call	_sub_coins
 	inc	sp
-;src/rooms/room_34_1.h:105: show_coins();
+;src/rooms/room_34_1.c:105: show_coins();
 	call	_show_coins
-;src/rooms/room_34_1.h:106: troll_satisfied = 1;
+;src/rooms/room_34_1.c:106: troll_satisfied = 1;
 	ld	hl, #_troll_satisfied
 	ld	(hl), #0x01
 00108$:
-;src/rooms/room_34_1.h:109: if ((!troll_satisfied) && (delta_x >= 0)) {
+;src/rooms/room_34_1.c:109: if ((!troll_satisfied) && (delta_x >= 0)) {
 	ld	a, (#_troll_satisfied)
 	or	a, a
 	jr	NZ, 00113$
 	ld	a, (#_delta_x + 1)
 	bit	7, a
 	jr	NZ, 00113$
-;src/rooms/room_34_1.h:110: if (x >= troll_x_position) {
+;src/rooms/room_34_1.c:110: if (x >= troll_x_position) {
 	ldhl	sp,	#0
 	bit	0, (hl)
 	jr	NZ, 00113$
-;src/rooms/room_34_1.h:111: tile_pos_x = x >> 3; 
+;src/rooms/room_34_1.c:111: tile_pos_x = x >> 3; 
 	ldhl	sp,#3
 	ld	c, (hl)
 	inc	hl
@@ -948,29 +936,25 @@ _vcoll_troll::
 	rr	c
 	ld	hl, #_tile_pos_x
 	ld	(hl), c
-;src/rooms/room_34_1.h:112: collision_buf[0] = 1; collision_buf[1] = 1;
+;src/rooms/room_34_1.c:112: collision_buf[0] = 1; collision_buf[1] = 1;
 	ld	hl, #_collision_buf
 	ld	(hl), #0x01
-	inc	hl
-	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 2)
+	ld	hl, #(_collision_buf + 1)
 	ld	(hl), #0x01
-	inc	hl
-	ld	(hl), #0x00
-;src/rooms/room_34_1.h:113: delta_x = -1;
+;src/rooms/room_34_1.c:113: delta_x = -1;
 	ld	hl, #_delta_x
 	ld	(hl), #0xff
 	inc	hl
 	ld	(hl), #0xff
-;src/rooms/room_34_1.h:115: dizzy_stun = 1;
+;src/rooms/room_34_1.c:115: dizzy_stun = 1;
 	ld	hl, #_dizzy_stun
 	ld	(hl), #0x01
-;src/rooms/room_34_1.h:116: ani_type = ANI_JUMP_L; ani_phase = 0;
+;src/rooms/room_34_1.c:116: ani_type = ANI_JUMP_L; ani_phase = 0;
 	ld	hl, #_ani_type
 	ld	(hl), #0x09
 	ld	hl, #_ani_phase
 	ld	(hl), #0x00
-;src/rooms/room_34_1.h:117: current_dyn = &move_y_dynamics; current_dyn_phase = 0;            
+;src/rooms/room_34_1.c:117: current_dyn = &move_y_dynamics; current_dyn_phase = 0;            
 	ld	hl, #_current_dyn
 	ld	(hl), #<(_move_y_dynamics)
 	inc	hl
@@ -978,7 +962,7 @@ _vcoll_troll::
 	ld	hl, #_current_dyn_phase
 	ld	(hl), #0x00
 00113$:
-;src/rooms/room_34_1.h:120: get_v_coll(x, y);
+;src/rooms/room_34_1.c:120: get_v_coll(x, y);
 	ldhl	sp,	#5
 	ld	a, (hl+)
 	ld	e, a
@@ -990,29 +974,29 @@ _vcoll_troll::
 	ld	d, (hl)
 	push	de
 	call	_get_v_coll
-;src/rooms/room_34_1.h:121: }
+;src/rooms/room_34_1.c:121: }
 	add	sp, #5
 	ret
-;src/rooms/room_5_1.h:2: void reset_room5_1() {
+;src/rooms/room_5_1.c:2: void reset_room5_1() {
 ;	---------------------------------
 ; Function reset_room5_1
 ; ---------------------------------
 _reset_room5_1::
-;src/rooms/room_5_1.h:3: dasy_negotiated = 0;
+;src/rooms/room_5_1.c:3: dasy_negotiated = 0;
 	ld	hl, #_dasy_negotiated
 	ld	(hl), #0x00
-;src/rooms/room_5_1.h:4: }
+;src/rooms/room_5_1.c:4: }
 	ret
-;src/rooms/room_5_1.h:9: void hcoll_mushroom(WORD x, WORD y) {
+;src/rooms/room_5_1.c:9: void hcoll_mushroom(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_mushroom
 ; ---------------------------------
 _hcoll_mushroom::
-;src/rooms/room_5_1.h:10: if (delta_y >= 0) {
+;src/rooms/room_5_1.c:10: if (delta_y >= 0) {
 	ld	a, (#_delta_y + 1)
 	bit	7, a
 	jp	NZ, 00108$
-;src/rooms/room_5_1.h:11: if ((x >= (mushroom_pos_x - 8)) && (x <= (mushroom_pos_x + (2 * 8)))) {
+;src/rooms/room_5_1.c:11: if ((x >= (mushroom_pos_x - 8)) && (x <= (mushroom_pos_x + (2 * 8)))) {
 	ldhl	sp,	#2
 	ld	a, (hl+)
 	sub	a, #0x18
@@ -1052,7 +1036,7 @@ _hcoll_mushroom::
 	scf
 00139$:
 	jp	C, 00108$
-;src/rooms/room_5_1.h:12: if ((y >= (mushroom_pos_y - 1)) && (y <= (mushroom_pos_y + 4))) {
+;src/rooms/room_5_1.c:12: if ((y >= (mushroom_pos_y - 1)) && (y <= (mushroom_pos_y + 4))) {
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	sub	a, #0x5f
@@ -1092,7 +1076,7 @@ _hcoll_mushroom::
 	scf
 00143$:
 	jr	C, 00108$
-;src/rooms/room_5_1.h:13: tile_pos_x = x >> 3; tile_pos_ox = (x - float4_pos_x) & 7;
+;src/rooms/room_5_1.c:13: tile_pos_x = x >> 3; tile_pos_ox = (x - float4_pos_x) & 7;
 	ldhl	sp,#2
 	ld	a, (hl+)
 	ld	c, a
@@ -1112,7 +1096,7 @@ _hcoll_mushroom::
 	sub	a, c
 	and	a, #0x07
 	ld	(#_tile_pos_ox),a
-;src/rooms/room_5_1.h:14: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
+;src/rooms/room_5_1.c:14: tile_pos_y = y >> 3; tile_pos_oy = y & 7;
 	ldhl	sp,#4
 	ld	a, (hl+)
 	ld	c, a
@@ -1129,34 +1113,28 @@ _hcoll_mushroom::
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(#_tile_pos_oy),a
-;src/rooms/room_5_1.h:15: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
+;src/rooms/room_5_1.c:15: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
 	ld	hl, #_collision_buf
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
+	ld	(hl), #0x01
+	ld	hl, #(_collision_buf + 1)
+	ld	(hl), #0x01
 	ld	hl, #(_collision_buf + 2)
-	ld	a, #0x01
-	ld	(hl+), a
 	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 4)
-	xor	a, a
-	ld	(hl+), a
-	ld	(hl), a
-;src/rooms/room_5_1.h:16: delta_y = 0;
+;src/rooms/room_5_1.c:16: delta_y = 0;
 	xor	a, a
 	ld	hl, #_delta_y
 	ld	(hl+), a
 	ld	(hl), a
-;src/rooms/room_5_1.h:17: is_position_safe = 0;
+;src/rooms/room_5_1.c:17: is_position_safe = 0;
 	ld	hl, #_is_position_safe
 	ld	(hl), #0x00
-;src/rooms/room_5_1.h:18: double_dyn = 1;
+;src/rooms/room_5_1.c:18: double_dyn = 1;
 	ld	hl, #_double_dyn
 	ld	(hl), #0x01
-;src/rooms/room_5_1.h:19: return;
+;src/rooms/room_5_1.c:19: return;
 	ret
 00108$:
-;src/rooms/room_5_1.h:23: get_h_coll(x, y);
+;src/rooms/room_5_1.c:23: get_h_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -1169,18 +1147,18 @@ _hcoll_mushroom::
 	push	de
 	call	_get_h_coll
 	add	sp, #4
-;src/rooms/room_5_1.h:24: }
+;src/rooms/room_5_1.c:24: }
 	ret
-;src/rooms/room_5_1.h:26: void vcoll_daisy(WORD x, WORD y) {
+;src/rooms/room_5_1.c:26: void vcoll_daisy(WORD x, WORD y) {
 ;	---------------------------------
 ; Function vcoll_daisy
 ; ---------------------------------
 _vcoll_daisy::
-;src/rooms/room_5_1.h:27: if (!dasy_negotiated) {
+;src/rooms/room_5_1.c:27: if (!dasy_negotiated) {
 	ld	a, (#_dasy_negotiated)
 	or	a, a
 	jr	NZ, 00106$
-;src/rooms/room_5_1.h:28: if ((y > (14 * 8)) && (x > (17 * 8)) && (x < (19 * 8))) {
+;src/rooms/room_5_1.c:28: if ((y > (14 * 8)) && (x > (17 * 8)) && (x < (19 * 8))) {
 	ldhl	sp,	#4
 	ld	a, #0x70
 	sub	a, (hl)
@@ -1240,7 +1218,7 @@ _vcoll_daisy::
 	scf
 00134$:
 	jr	NC, 00106$
-;src/rooms/room_5_1.h:29: show_dialog_window(5, &daisy_dialog);
+;src/rooms/room_5_1.c:29: show_dialog_window(5, &daisy_dialog);
 	ld	de, #_daisy_dialog
 	push	de
 	ld	a, #0x05
@@ -1248,11 +1226,11 @@ _vcoll_daisy::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_5_1.h:30: dasy_negotiated = 1;
+;src/rooms/room_5_1.c:30: dasy_negotiated = 1;
 	ld	hl, #_dasy_negotiated
 	ld	(hl), #0x01
 00106$:
-;src/rooms/room_5_1.h:33: get_v_coll(x, y);
+;src/rooms/room_5_1.c:33: get_v_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -1265,19 +1243,19 @@ _vcoll_daisy::
 	push	de
 	call	_get_v_coll
 	add	sp, #4
-;src/rooms/room_5_1.h:34: }
+;src/rooms/room_5_1.c:34: }
 	ret
-;src/rooms/room_5_1.h:36: UBYTE daisy_gets_mushrooms(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+;src/rooms/room_5_1.c:36: UBYTE daisy_gets_mushrooms(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
 ;	---------------------------------
 ; Function daisy_gets_mushrooms
 ; ---------------------------------
 _daisy_gets_mushrooms::
-;src/rooms/room_5_1.h:37: if (id == ID_MUSHROOMS) {
+;src/rooms/room_5_1.c:37: if (id == ID_MUSHROOMS) {
 	ldhl	sp,	#4
 	ld	a, (hl)
 	sub	a, #0x04
 	jr	NZ, 00106$
-;src/rooms/room_5_1.h:38: if ((tile_y == 14) && (tile_x > 14) && (tile_x < 19)) {
+;src/rooms/room_5_1.c:38: if ((tile_y == 14) && (tile_x > 14) && (tile_x < 19)) {
 	ldhl	sp,	#3
 	ld	a, (hl)
 	sub	a, #0x0e
@@ -1289,7 +1267,7 @@ _daisy_gets_mushrooms::
 	ld	a, (hl)
 	sub	a, #0x13
 	jr	NC, 00106$
-;src/rooms/room_5_1.h:39: show_dialog_window(7, &daisy_gives_pie);
+;src/rooms/room_5_1.c:39: show_dialog_window(7, &daisy_gives_pie);
 	ld	de, #_daisy_gives_pie
 	push	de
 	ld	a, #0x07
@@ -1297,18 +1275,18 @@ _daisy_gets_mushrooms::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_5_1.h:40: return ID_PIE;
+;src/rooms/room_5_1.c:40: return ID_PIE;
 	ld	e, #0x05
 	ret
 00106$:
-;src/rooms/room_5_1.h:43: return default_drop(id);
+;src/rooms/room_5_1.c:43: return default_drop(id);
 	ldhl	sp,	#4
 	ld	a, (hl)
 	push	af
 	inc	sp
 	call	_default_drop
 	inc	sp
-;src/rooms/room_5_1.h:44: }
+;src/rooms/room_5_1.c:44: }
 	ret
 	.area _CODE_5
 _room_3_1_map:

@@ -29,7 +29,7 @@ extern UBYTE dizzy_falling, dizzy_stun;
 extern UBYTE bkg_scroll_x_target, bkg_scroll_y_target;
 
 extern UBYTE tile_pos_x, tile_pos_y, tile_pos_ox, tile_pos_oy;
-extern unsigned collision_buf[];
+extern UBYTE collision_buf[];
 
 extern spr_ofs_t evil_hide[];
 

@@ -1,4 +1,8 @@
-/build
+build/*.ihx
+build/*.map
+build/*.noi
+build/*.sym
+build/*.sav
 /unused
 *.bak
 *.dof
@@ -16,3 +20,4 @@ mushroompie.zip
 /*.ihx
 /*.noi
 .vscode
+obj

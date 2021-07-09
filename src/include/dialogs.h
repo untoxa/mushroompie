@@ -1,3 +1,6 @@
+#ifndef __DIALOGS_H_INCLUDE
+#define __DIALOGS_H_INCLUDE
+
 void show_dialog_window(const UBYTE lines, const dialog_item* item);
 
 extern dialog_item start_dialog;    
@@ -18,3 +21,5 @@ extern dialog_item firefly_out;
 extern dialog_item firefly_caught;
 extern dialog_item darkness_warn;
 extern dialog_item grandpa_thanks;
+
+#endif

@@ -12,21 +12,21 @@
 
 #include "hUGEDriver.h"
 
-#include "include/dizzy_types.h"
+#include "dizzy_types.h"
 
 #define rle_decompress_to_bkg 0
 #define rle_decompress_to_win 1
 
-#include "include/rle_utils.h"
-#include "include/sprite_utils.h"
+#include "rle_utils.h"
+#include "sprite_utils.h"
 
-#include "include/dialogs.h"
+#include "dialogs.h"
 
-#include "gfx/title_gfx_data.h"
-#include "gfx/anim_gfx_data.h"
-#include "gfx/rooms_gfx.h"
+#include "gfx/title_gfx_data.c"
+#include "gfx/anim_gfx_data.c"
+#include "gfx/rooms_gfx.c"
 
-#include "snd/dizzy_sounds.h"
+#include "dizzy_sounds.h"
 
 const UBYTE * const ptr_div_reg = (UBYTE *)0xFF04; 
 
@@ -72,7 +72,7 @@ UBYTE joy = 0;
 // some general purpose variables
 UBYTE __temp_i, __temp_j, __temp_k, __temp_l, __temp_m; 
 
-#include "include/energy.h"
+#include "misc/energy.c"
 
 #define MAX_STUN_HEIGHT 32
 UBYTE dizzy_falling = 0, dizzy_stun = 0;
@@ -395,8 +395,8 @@ __endasm;
 }
 #endif
 
-#include "include/inventory.h"
-#include "include/room_defaults.h"
+#include "misc/inventory.c"
+#include "misc/room_defaults.c"
 
 void reset_world() {
     for (UBYTE row = 0; row < WORLD_HEIGHT; row++) {

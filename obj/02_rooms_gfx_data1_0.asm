@@ -152,17 +152,17 @@ _flame2_phase::
 ; code
 ;--------------------------------------------------------
 	.area _CODE_4
-;src/rooms/room_0_1.h:16: void reset_room0_1() {
+;src/rooms/room_0_1.c:16: void reset_room0_1() {
 ;	---------------------------------
 ; Function reset_room0_1
 ; ---------------------------------
 _reset_room0_1::
-;src/rooms/room_0_1.h:17: room_dark = 1; warning_shown = 0;
+;src/rooms/room_0_1.c:17: room_dark = 1; warning_shown = 0;
 	ld	hl, #_room_dark
 	ld	(hl), #0x01
 	ld	hl, #_warning_shown
 	ld	(hl), #0x00
-;src/rooms/room_0_1.h:18: }
+;src/rooms/room_0_1.c:18: }
 	ret
 _bat_offsets:
 	.db #0x28	; 40
@@ -183,12 +183,12 @@ _bftn:
 _evils:
 	.dw (_bftn + 0)
 	.dw (_bftn + 5)
-;src/rooms/room_0_1.h:19: void init_room0_1() {
+;src/rooms/room_0_1.c:19: void init_room0_1() {
 ;	---------------------------------
 ; Function init_room0_1
 ; ---------------------------------
 _init_room0_1::
-;src/rooms/room_0_1.h:20: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+;src/rooms/room_0_1.c:20: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -208,19 +208,19 @@ _init_room0_1::
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/rooms/room_0_1.h:21: }
+;src/rooms/room_0_1.c:21: }
 	ret
-;src/rooms/room_0_1.h:22: void draw_room0_1() {
+;src/rooms/room_0_1.c:22: void draw_room0_1() {
 ;	---------------------------------
 ; Function draw_room0_1
 ; ---------------------------------
 _draw_room0_1::
-;src/rooms/room_0_1.h:23: if (room_dark) {
+;src/rooms/room_0_1.c:23: if (room_dark) {
 	ld	hl, #_room_dark
 	ld	a, (hl)
 	or	a, a
 	jp	Z,_default_draw
-;src/rooms/room_0_1.h:24: rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, empty_compressed_map);
+;src/rooms/room_0_1.c:24: rle_decompress_tilemap(rle_decompress_to_bkg, 0, 3, room_width, room_height, empty_compressed_map);
 	ld	de, #_empty_compressed_map
 	push	de
 	ld	hl, #0x111e
@@ -233,25 +233,25 @@ _draw_room0_1::
 	push	af
 	call	_rle_decompress_tilemap
 	add	sp, #7
-;src/rooms/room_0_1.h:25: } else default_draw();
+;src/rooms/room_0_1.c:25: } else default_draw();
 	ret
-;src/rooms/room_0_1.h:26: }
+;src/rooms/room_0_1.c:26: }
 	ret
-;src/rooms/room_0_1.h:41: void move_bats0() {
+;src/rooms/room_0_1.c:41: void move_bats0() {
 ;	---------------------------------
 ; Function move_bats0
 ; ---------------------------------
 _move_bats0::
-;src/rooms/room_0_1.h:42: if (room_dark) return;
+;src/rooms/room_0_1.c:42: if (room_dark) return;
 	ld	a, (#_room_dark)
 	or	a, a
 	ret	NZ
-;src/rooms/room_0_1.h:43: if (bat1_dir) {
+;src/rooms/room_0_1.c:43: if (bat1_dir) {
 	ld	hl, #_bat1_dir + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00108$
-;src/rooms/room_0_1.h:44: bat1_pos_x++; if (bat1_pos_x >= bat1_max_x) bat1_dir = 0;
+;src/rooms/room_0_1.c:44: bat1_pos_x++; if (bat1_pos_x >= bat1_max_x) bat1_dir = 0;
 	ld	hl, #_bat1_pos_x
 	inc	(hl)
 	jr	NZ, 00192$
@@ -283,7 +283,7 @@ _move_bats0::
 	ld	(hl), a
 	jr	00109$
 00108$:
-;src/rooms/room_0_1.h:46: bat1_pos_x--; if (bat1_pos_x <= bat1_min_x) bat1_dir = 1;
+;src/rooms/room_0_1.c:46: bat1_pos_x--; if (bat1_pos_x <= bat1_min_x) bat1_dir = 1;
 	ld	hl, #_bat1_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -319,12 +319,12 @@ _move_bats0::
 	xor	a, a
 	ld	(hl), a
 00109$:
-;src/rooms/room_0_1.h:48: if (bat2_dir) {
+;src/rooms/room_0_1.c:48: if (bat2_dir) {
 	ld	hl, #_bat2_dir + 1
 	ld	a, (hl-)
 	or	a, (hl)
 	jr	Z, 00115$
-;src/rooms/room_0_1.h:49: bat2_pos_x++; if (bat2_pos_x >= bat2_max_x) bat2_dir = 0;
+;src/rooms/room_0_1.c:49: bat2_pos_x++; if (bat2_pos_x >= bat2_max_x) bat2_dir = 0;
 	ld	hl, #_bat2_pos_x
 	inc	(hl)
 	jr	NZ, 00197$
@@ -356,7 +356,7 @@ _move_bats0::
 	ld	(hl), a
 	jr	00116$
 00115$:
-;src/rooms/room_0_1.h:51: bat2_pos_x--; if (bat2_pos_x <= bat2_min_x) bat2_dir = 1;
+;src/rooms/room_0_1.c:51: bat2_pos_x--; if (bat2_pos_x <= bat2_min_x) bat2_dir = 1;
 	ld	hl, #_bat2_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -392,10 +392,10 @@ _move_bats0::
 	xor	a, a
 	ld	(hl), a
 00116$:
-;src/rooms/room_0_1.h:53: if (bat_phase & 1) {
+;src/rooms/room_0_1.c:53: if (bat_phase & 1) {
 	ld	hl, #_bat_phase
 	ld	e, (hl)
-;src/rooms/room_0_1.h:54: firefly_pos_x += fly_delta[(*(ptr_div_reg)) & 7];
+;src/rooms/room_0_1.c:54: firefly_pos_x += fly_delta[(*(ptr_div_reg)) & 7];
 	ld	hl, #_ptr_div_reg
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -415,10 +415,10 @@ _move_bats0::
 	add	hl, hl
 	ld	c, l
 	ld	b, h
-;src/rooms/room_0_1.h:53: if (bat_phase & 1) {
+;src/rooms/room_0_1.c:53: if (bat_phase & 1) {
 	bit	0, e
 	jr	Z, 00128$
-;src/rooms/room_0_1.h:54: firefly_pos_x += fly_delta[(*(ptr_div_reg)) & 7];
+;src/rooms/room_0_1.c:54: firefly_pos_x += fly_delta[(*(ptr_div_reg)) & 7];
 	ld	hl, #_fly_delta
 	add	hl, bc
 	ld	a, (hl+)
@@ -431,7 +431,7 @@ _move_bats0::
 	ld	a, (hl)
 	adc	a, b
 	ld	(hl), a
-;src/rooms/room_0_1.h:55: if (firefly_pos_x < 0) firefly_pos_x = 0; 
+;src/rooms/room_0_1.c:55: if (firefly_pos_x < 0) firefly_pos_x = 0; 
 	bit	7, (hl)
 	jr	Z, 00120$
 	dec	hl
@@ -440,7 +440,7 @@ _move_bats0::
 	ld	(hl), a
 	ret
 00120$:
-;src/rooms/room_0_1.h:56: else if (firefly_pos_x > (room_width * 8)) firefly_pos_x = ((room_width * 8) - 1);
+;src/rooms/room_0_1.c:56: else if (firefly_pos_x > (room_width * 8)) firefly_pos_x = ((room_width * 8) - 1);
 	ld	hl, #_firefly_pos_x
 	ld	a, #0xf0
 	sub	a, (hl)
@@ -468,7 +468,7 @@ _move_bats0::
 	ld	(hl), a
 	ret
 00128$:
-;src/rooms/room_0_1.h:58: firefly_pos_y += fly_delta[(*(ptr_div_reg)) & 7];
+;src/rooms/room_0_1.c:58: firefly_pos_y += fly_delta[(*(ptr_div_reg)) & 7];
 	ld	hl, #_fly_delta
 	add	hl, bc
 	ld	a, (hl+)
@@ -481,7 +481,7 @@ _move_bats0::
 	ld	a, (hl)
 	adc	a, b
 	ld	(hl), a
-;src/rooms/room_0_1.h:59: if (firefly_pos_y < 0) firefly_pos_y = 0; 
+;src/rooms/room_0_1.c:59: if (firefly_pos_y < 0) firefly_pos_y = 0; 
 	bit	7, (hl)
 	jr	Z, 00125$
 	dec	hl
@@ -490,7 +490,7 @@ _move_bats0::
 	ld	(hl), a
 	ret
 00125$:
-;src/rooms/room_0_1.h:60: else if (firefly_pos_y > (room_height * 8)) firefly_pos_y = ((room_height * 8) - 1);
+;src/rooms/room_0_1.c:60: else if (firefly_pos_y > (room_height * 8)) firefly_pos_y = ((room_height * 8) - 1);
 	ld	hl, #_firefly_pos_y
 	ld	a, #0x88
 	sub	a, (hl)
@@ -516,22 +516,22 @@ _move_bats0::
 	ld	(hl+), a
 	xor	a, a
 	ld	(hl), a
-;src/rooms/room_0_1.h:62: }
+;src/rooms/room_0_1.c:62: }
 	ret
-;src/rooms/room_0_1.h:64: void draw_bats0() {
+;src/rooms/room_0_1.c:64: void draw_bats0() {
 ;	---------------------------------
 ; Function draw_bats0
 ; ---------------------------------
 _draw_bats0::
-;src/rooms/room_0_1.h:65: if (room_dark) return;
+;src/rooms/room_0_1.c:65: if (room_dark) return;
 	ld	a, (#_room_dark)
 	or	a, a
 	ret	NZ
-;src/rooms/room_0_1.h:66: if (bat_phase == 0) {
+;src/rooms/room_0_1.c:66: if (bat_phase == 0) {
 	ld	a, (#_bat_phase)
 	or	a, a
 	jr	NZ, 00106$
-;src/rooms/room_0_1.h:67: multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[0]);        
+;src/rooms/room_0_1.c:67: multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[0]);        
 	ld	hl, #_evils
 	ld	a, (hl+)
 	ld	c, a
@@ -543,11 +543,11 @@ _draw_bats0::
 	add	sp, #4
 	jr	00107$
 00106$:
-;src/rooms/room_0_1.h:68: } else if (bat_phase == 4) {
+;src/rooms/room_0_1.c:68: } else if (bat_phase == 4) {
 	ld	a, (#_bat_phase)
 	sub	a, #0x04
 	jr	NZ, 00107$
-;src/rooms/room_0_1.h:69: multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[1]);        
+;src/rooms/room_0_1.c:69: multiple_set_sprite_tiles(evil_sprite_offset, total_room0_1_evil, evils[1]);        
 	ld	hl, #(_evils + 2)
 	ld	a, (hl+)
 	ld	c, a
@@ -558,15 +558,15 @@ _draw_bats0::
 	call	_multiple_set_sprite_tiles
 	add	sp, #4
 00107$:
-;src/rooms/room_0_1.h:71: bat_phase++; bat_phase &= 7;
+;src/rooms/room_0_1.c:71: bat_phase++; bat_phase &= 7;
 	ld	hl, #_bat_phase
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(hl), a
-;src/rooms/room_0_1.h:74: (unsigned char *)bat_offsets);    
+;src/rooms/room_0_1.c:74: (unsigned char *)bat_offsets);    
 	ld	bc, #_bat_offsets
-;src/rooms/room_0_1.h:73: bat1_pos_x - bkg_scroll_x_target, bat1_pos_y - bkg_scroll_y_target, 
+;src/rooms/room_0_1.c:73: bat1_pos_x - bkg_scroll_x_target, bat1_pos_y - bkg_scroll_y_target, 
 	ld	a, #0x38
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -575,7 +575,7 @@ _draw_bats0::
 	ld	hl, #_bkg_scroll_x_target
 	ld	e, (hl)
 	sub	a, e
-;src/rooms/room_0_1.h:72: multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
+;src/rooms/room_0_1.c:72: multiple_move_sprites(bat1_sprite_offset, bat_sprite_count, 
 	push	bc
 	push	de
 	inc	sp
@@ -587,8 +587,8 @@ _draw_bats0::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_0_1.h:77: (unsigned char *)bat_offsets);    
-;src/rooms/room_0_1.h:76: bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
+;src/rooms/room_0_1.c:77: (unsigned char *)bat_offsets);    
+;src/rooms/room_0_1.c:76: bat2_pos_x - bkg_scroll_x_target, bat2_pos_y - bkg_scroll_y_target, 
 	ld	a, #0x58
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -597,7 +597,7 @@ _draw_bats0::
 	ld	hl, #_bkg_scroll_x_target
 	ld	c, (hl)
 	sub	a, c
-;src/rooms/room_0_1.h:75: multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
+;src/rooms/room_0_1.c:75: multiple_move_sprites(bat2_sprite_offset, bat_sprite_count, 
 	ld	de, #_bat_offsets
 	push	de
 	push	bc
@@ -610,8 +610,8 @@ _draw_bats0::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_0_1.h:80: (unsigned char *)fly_offsets);
-;src/rooms/room_0_1.h:79: firefly_pos_x - bkg_scroll_x_target, firefly_pos_y - bkg_scroll_y_target,
+;src/rooms/room_0_1.c:80: (unsigned char *)fly_offsets);
+;src/rooms/room_0_1.c:79: firefly_pos_x - bkg_scroll_x_target, firefly_pos_y - bkg_scroll_y_target,
 	ld	a, (#_firefly_pos_y)
 	ld	hl, #_bkg_scroll_y_target
 	ld	c, (hl)
@@ -621,7 +621,7 @@ _draw_bats0::
 	ld	hl, #_bkg_scroll_x_target
 	ld	c, (hl)
 	sub	a, c
-;src/rooms/room_0_1.h:78: multiple_move_sprites(fly_sprite_offset1, fly_sprite_count, 
+;src/rooms/room_0_1.c:78: multiple_move_sprites(fly_sprite_offset1, fly_sprite_count, 
 	ld	de, #_fly_offsets
 	push	de
 	push	bc
@@ -634,19 +634,19 @@ _draw_bats0::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_0_1.h:81: }
+;src/rooms/room_0_1.c:81: }
 	ret
-;src/rooms/room_0_1.h:83: void coll_bats(WORD x, WORD y) {
+;src/rooms/room_0_1.c:83: void coll_bats(WORD x, WORD y) {
 ;	---------------------------------
 ; Function coll_bats
 ; ---------------------------------
 _coll_bats::
 	add	sp, #-5
-;src/rooms/room_0_1.h:84: if (room_dark) return;
+;src/rooms/room_0_1.c:84: if (room_dark) return;
 	ld	a, (#_room_dark)
 	or	a, a
 	jp	NZ,00114$
-;src/rooms/room_0_1.h:85: if (!((bat1_pos_x > x + 16) || 
+;src/rooms/room_0_1.c:85: if (!((bat1_pos_x > x + 16) || 
 	ldhl	sp,#7
 	ld	a, (hl+)
 	ld	e, a
@@ -656,7 +656,7 @@ _coll_bats::
 	inc	sp
 	inc	sp
 	push	hl
-;src/rooms/room_0_1.h:87: (bat1_pos_y > y + 20) ||
+;src/rooms/room_0_1.c:87: (bat1_pos_y > y + 20) ||
 	ldhl	sp,#9
 	ld	a, (hl+)
 	ld	e, a
@@ -665,12 +665,12 @@ _coll_bats::
 	add	hl, de
 	ld	c, l
 	ld	b, h
-;src/rooms/room_0_1.h:89: dec_energy += 3;
+;src/rooms/room_0_1.c:89: dec_energy += 3;
 	ld	a, (#_dec_energy)
 	add	a, #0x03
 	ldhl	sp,	#2
 	ld	(hl), a
-;src/rooms/room_0_1.h:85: if (!((bat1_pos_x > x + 16) || 
+;src/rooms/room_0_1.c:85: if (!((bat1_pos_x > x + 16) || 
 	ldhl	sp,	#0
 	ld	e, l
 	ld	d, h
@@ -695,7 +695,7 @@ _coll_bats::
 	scf
 00162$:
 	jr	C, 00109$
-;src/rooms/room_0_1.h:86: (bat1_pos_x + 16 < x) ||
+;src/rooms/room_0_1.c:86: (bat1_pos_x + 16 < x) ||
 	ld	hl, #_bat1_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -734,7 +734,7 @@ _coll_bats::
 	scf
 00164$:
 	jr	C, 00109$
-;src/rooms/room_0_1.h:87: (bat1_pos_y > y + 20) ||
+;src/rooms/room_0_1.c:87: (bat1_pos_y > y + 20) ||
 	ld	a, c
 	sub	a, #0x38
 	ld	a, b
@@ -743,7 +743,7 @@ _coll_bats::
 	rra
 	sbc	a, #0x80
 	jr	C, 00109$
-;src/rooms/room_0_1.h:88: (bat1_pos_y + 8 < y))) {
+;src/rooms/room_0_1.c:88: (bat1_pos_y + 8 < y))) {
 	ldhl	sp,	#9
 	ld	a, #0x40
 	sub	a, (hl)
@@ -764,13 +764,13 @@ _coll_bats::
 	scf
 00166$:
 	jr	C, 00109$
-;src/rooms/room_0_1.h:89: dec_energy += 3;
+;src/rooms/room_0_1.c:89: dec_energy += 3;
 	ldhl	sp,	#2
 	ld	a, (hl)
 	ld	(#_dec_energy),a
 	jp	00114$
 00109$:
-;src/rooms/room_0_1.h:90: } else if (!((bat2_pos_x > x + 16) || 
+;src/rooms/room_0_1.c:90: } else if (!((bat2_pos_x > x + 16) || 
 	ldhl	sp,	#0
 	ld	e, l
 	ld	d, h
@@ -795,7 +795,7 @@ _coll_bats::
 	scf
 00168$:
 	jr	C, 00114$
-;src/rooms/room_0_1.h:91: (bat2_pos_x + 16 < x) ||
+;src/rooms/room_0_1.c:91: (bat2_pos_x + 16 < x) ||
 	ld	hl, #_bat2_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -834,7 +834,7 @@ _coll_bats::
 	scf
 00170$:
 	jr	C, 00114$
-;src/rooms/room_0_1.h:92: (bat2_pos_y > y + 20) ||
+;src/rooms/room_0_1.c:92: (bat2_pos_y > y + 20) ||
 	ld	a, c
 	sub	a, #0x58
 	ld	a, b
@@ -843,7 +843,7 @@ _coll_bats::
 	rra
 	sbc	a, #0x80
 	jr	C, 00114$
-;src/rooms/room_0_1.h:93: (bat2_pos_y + 8 < y))) {
+;src/rooms/room_0_1.c:93: (bat2_pos_y + 8 < y))) {
 	ldhl	sp,	#9
 	ld	a, #0x60
 	sub	a, (hl)
@@ -864,28 +864,28 @@ _coll_bats::
 	scf
 00172$:
 	jr	C, 00114$
-;src/rooms/room_0_1.h:94: dec_energy += 3;
+;src/rooms/room_0_1.c:94: dec_energy += 3;
 	ldhl	sp,	#2
 	ld	a, (hl)
 	ld	(#_dec_energy),a
 00114$:
-;src/rooms/room_0_1.h:96: }
+;src/rooms/room_0_1.c:96: }
 	add	sp, #5
 	ret
-;src/rooms/room_0_1.h:98: void hcoll_darkness(WORD x, WORD y) {
+;src/rooms/room_0_1.c:98: void hcoll_darkness(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_darkness
 ; ---------------------------------
 _hcoll_darkness::
-;src/rooms/room_0_1.h:99: if (room_dark) {
+;src/rooms/room_0_1.c:99: if (room_dark) {
 	ld	a, (#_room_dark)
 	or	a, a
 	jr	Z, 00109$
-;src/rooms/room_0_1.h:100: if (!warning_shown) {
+;src/rooms/room_0_1.c:100: if (!warning_shown) {
 	ld	a, (#_warning_shown)
 	or	a, a
 	jr	NZ, 00102$
-;src/rooms/room_0_1.h:101: show_dialog_window(4, &darkness_warn);
+;src/rooms/room_0_1.c:101: show_dialog_window(4, &darkness_warn);
 	ld	de, #_darkness_warn
 	push	de
 	ld	a, #0x04
@@ -893,11 +893,11 @@ _hcoll_darkness::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_0_1.h:102: warning_shown = 1;
+;src/rooms/room_0_1.c:102: warning_shown = 1;
 	ld	hl, #_warning_shown
 	ld	(hl), #0x01
 00102$:
-;src/rooms/room_0_1.h:104: if (x < (MAX_DIZZY_X - 8)) {
+;src/rooms/room_0_1.c:104: if (x < (MAX_DIZZY_X - 8)) {
 	ldhl	sp,	#2
 	ld	a, (hl+)
 	sub	a, #0xd8
@@ -917,15 +917,15 @@ _hcoll_darkness::
 	scf
 00138$:
 	jr	NC, 00109$
-;src/rooms/room_0_1.h:105: is_position_safe = 0;
+;src/rooms/room_0_1.c:105: is_position_safe = 0;
 	ld	hl, #_is_position_safe
 	ld	(hl), #0x00
-;src/rooms/room_0_1.h:106: bite_timer++; bite_timer &= 3;
+;src/rooms/room_0_1.c:106: bite_timer++; bite_timer &= 3;
 	ld	hl, #_bite_timer
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x03
-;src/rooms/room_0_1.h:107: if ((!bite_timer) && (!dec_energy)) dec_energy++;
+;src/rooms/room_0_1.c:107: if ((!bite_timer) && (!dec_energy)) dec_energy++;
 	ld	(hl), a
 	or	a, a
 	jr	NZ, 00109$
@@ -935,7 +935,7 @@ _hcoll_darkness::
 	jr	NZ, 00109$
 	inc	(hl)
 00109$:
-;src/rooms/room_0_1.h:110: get_h_coll(x, y);
+;src/rooms/room_0_1.c:110: get_h_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -948,21 +948,21 @@ _hcoll_darkness::
 	push	de
 	call	_get_h_coll
 	add	sp, #4
-;src/rooms/room_0_1.h:111: }
+;src/rooms/room_0_1.c:111: }
 	ret
-;src/rooms/room_0_1.h:113: UBYTE dizzy_drops_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+;src/rooms/room_0_1.c:113: UBYTE dizzy_drops_firefly(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
 ;	---------------------------------
 ; Function dizzy_drops_firefly
 ; ---------------------------------
 _dizzy_drops_firefly::
 	dec	sp
 	dec	sp
-;src/rooms/room_0_1.h:115: if (id == ID_FIREFLY) {
+;src/rooms/room_0_1.c:115: if (id == ID_FIREFLY) {
 	ldhl	sp,	#6
 	ld	a, (hl)
 	sub	a, #0x08
 	jr	NZ, 00117$
-;src/rooms/room_0_1.h:116: room_dark = 0; firefly_pos_x = (25 * 8); firefly_pos_y = (9 * 8);
+;src/rooms/room_0_1.c:116: room_dark = 0; firefly_pos_x = (25 * 8); firefly_pos_y = (9 * 8);
 	ld	hl, #_room_dark
 	ld	(hl), #0x00
 	ld	hl, #_firefly_pos_x
@@ -977,12 +977,12 @@ _dizzy_drops_firefly::
 	ld	(hl), a
 	jp	00118$
 00117$:
-;src/rooms/room_0_1.h:117: } else if (id == ID_LID) {
+;src/rooms/room_0_1.c:117: } else if (id == ID_LID) {
 	ldhl	sp,	#6
 	ld	a, (hl)
 	sub	a, #0x07
 	jp	NZ,00118$
-;src/rooms/room_0_1.h:118: temp_item = find_by_id(&inventory_item_list, ID_JAR);
+;src/rooms/room_0_1.c:118: temp_item = find_by_id(&inventory_item_list, ID_JAR);
 	ld	a, #0x06
 	push	af
 	inc	sp
@@ -991,10 +991,10 @@ _dizzy_drops_firefly::
 	call	_find_by_id
 	add	sp, #3
 	ld	a, e
-;src/rooms/room_0_1.h:119: if (temp_item) {
+;src/rooms/room_0_1.c:119: if (temp_item) {
 	or	a, d
 	jp	Z, 00118$
-;src/rooms/room_0_1.h:120: UBYTE ff_tile_x = firefly_pos_x >> 3, ff_tile_y = firefly_pos_y >> 3;
+;src/rooms/room_0_1.c:120: UBYTE ff_tile_x = firefly_pos_x >> 3, ff_tile_y = firefly_pos_y >> 3;
 	ld	hl, #_firefly_pos_x
 	ld	a, (hl+)
 	ld	e, a
@@ -1017,7 +1017,7 @@ _dizzy_drops_firefly::
 	rr	c
 	ldhl	sp,	#1
 	ld	(hl), c
-;src/rooms/room_0_1.h:121: if ((ff_tile_x >= tile_x) && (ff_tile_x <= tile_x + 2) &&
+;src/rooms/room_0_1.c:121: if ((ff_tile_x >= tile_x) && (ff_tile_x <= tile_x + 2) &&
 	ld	a, e
 	ldhl	sp,	#4
 	sub	a, (hl)
@@ -1050,7 +1050,7 @@ _dizzy_drops_firefly::
 	scf
 00176$:
 	jp	C, 00118$
-;src/rooms/room_0_1.h:122: (ff_tile_y >= tile_y) && (ff_tile_y <= tile_y + 1)) {
+;src/rooms/room_0_1.c:122: (ff_tile_y >= tile_y) && (ff_tile_y <= tile_y + 1)) {
 	ldhl	sp,	#1
 	ld	a, (hl)
 	ldhl	sp,	#5
@@ -1083,7 +1083,7 @@ _dizzy_drops_firefly::
 	scf
 00178$:
 	jr	C, 00118$
-;src/rooms/room_0_1.h:124: temp_item = pop_by_id(&inventory_item_list, ID_JAR);
+;src/rooms/room_0_1.c:124: temp_item = pop_by_id(&inventory_item_list, ID_JAR);
 	ld	a, #0x06
 	push	af
 	inc	sp
@@ -1091,7 +1091,7 @@ _dizzy_drops_firefly::
 	push	de
 	call	_pop_by_id
 	add	sp, #3
-;src/rooms/room_0_1.h:125: if (temp_item) push_last(&item_stack, temp_item);
+;src/rooms/room_0_1.c:125: if (temp_item) push_last(&item_stack, temp_item);
 	ld	a, d
 	or	a, e
 	jr	Z, 00102$
@@ -1101,7 +1101,7 @@ _dizzy_drops_firefly::
 	call	_push_last
 	add	sp, #4
 00102$:
-;src/rooms/room_0_1.h:127: temp_item = pop_by_id(&game_item_list, ID_FIREFLY);
+;src/rooms/room_0_1.c:127: temp_item = pop_by_id(&game_item_list, ID_FIREFLY);
 	ld	a, #0x08
 	push	af
 	inc	sp
@@ -1111,7 +1111,7 @@ _dizzy_drops_firefly::
 	add	sp, #3
 	ld	c, e
 	ld	b, d
-;src/rooms/room_0_1.h:128: if (!temp_item) temp_item = pop_by_id(&item_stack, ID_FIREFLY);
+;src/rooms/room_0_1.c:128: if (!temp_item) temp_item = pop_by_id(&item_stack, ID_FIREFLY);
 	ld	a, b
 	or	a, c
 	jr	NZ, 00104$
@@ -1125,7 +1125,7 @@ _dizzy_drops_firefly::
 	ld	c, e
 	ld	b, d
 00104$:
-;src/rooms/room_0_1.h:129: if (temp_item) push_last(&inventory_item_list, temp_item);                
+;src/rooms/room_0_1.c:129: if (temp_item) push_last(&inventory_item_list, temp_item);                
 	ld	a, b
 	or	a, c
 	jr	Z, 00106$
@@ -1135,7 +1135,7 @@ _dizzy_drops_firefly::
 	call	_push_last
 	add	sp, #4
 00106$:
-;src/rooms/room_0_1.h:131: show_dialog_window(2, &firefly_caught);
+;src/rooms/room_0_1.c:131: show_dialog_window(2, &firefly_caught);
 	ld	de, #_firefly_caught
 	push	de
 	ld	a, #0x02
@@ -1143,7 +1143,7 @@ _dizzy_drops_firefly::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_0_1.h:133: multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);           
+;src/rooms/room_0_1.c:133: multiple_move_sprites(evil_sprite_offset, evil_sprite_total_count, 0, 0, (unsigned char *)evil_hide);           
 	ld	de, #_evil_hide
 	push	de
 	xor	a, a
@@ -1153,14 +1153,14 @@ _dizzy_drops_firefly::
 	push	hl
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_0_1.h:134: room_dark = 1;
+;src/rooms/room_0_1.c:134: room_dark = 1;
 	ld	hl, #_room_dark
 	ld	(hl), #0x01
-;src/rooms/room_0_1.h:135: return ID_ITEM_USED;
+;src/rooms/room_0_1.c:135: return ID_ITEM_USED;
 	ld	e, #0x0f
 	jr	00119$
 00118$:
-;src/rooms/room_0_1.h:139: return default_drop(id);
+;src/rooms/room_0_1.c:139: return default_drop(id);
 	ldhl	sp,	#6
 	ld	a, (hl)
 	push	af
@@ -1168,21 +1168,21 @@ _dizzy_drops_firefly::
 	call	_default_drop
 	inc	sp
 00119$:
-;src/rooms/room_0_1.h:140: }
+;src/rooms/room_0_1.c:140: }
 	inc	sp
 	inc	sp
 	ret
-;src/rooms/room_1_1.h:18: void reset_room1() {
+;src/rooms/room_1_1.c:18: void reset_room1() {
 ;	---------------------------------
 ; Function reset_room1
 ; ---------------------------------
 _reset_room1::
-;src/rooms/room_1_1.h:19: intro_shown = 0, path_cleaned = 0;
+;src/rooms/room_1_1.c:19: intro_shown = 0, path_cleaned = 0;
 	ld	hl, #_intro_shown
 	ld	(hl), #0x00
 	ld	hl, #_path_cleaned
 	ld	(hl), #0x00
-;src/rooms/room_1_1.h:20: }
+;src/rooms/room_1_1.c:20: }
 	ret
 _flames_offsets:
 	.db #0x28	; 40
@@ -1235,12 +1235,12 @@ _flames:
 	.dw (_ftn + 20)
 	.dw (_ftn + 24)
 	.dw (_ftn + 28)
-;src/rooms/room_1_1.h:21: void init_room1_1() {
+;src/rooms/room_1_1.c:21: void init_room1_1() {
 ;	---------------------------------
 ; Function init_room1_1
 ; ---------------------------------
 _init_room1_1::
-;src/rooms/room_1_1.h:22: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+;src/rooms/room_1_1.c:22: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -1260,30 +1260,30 @@ _init_room1_1::
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/rooms/room_1_1.h:23: }
+;src/rooms/room_1_1.c:23: }
 	ret
-;src/rooms/room_1_1.h:24: void draw_flames1_1() {
+;src/rooms/room_1_1.c:24: void draw_flames1_1() {
 ;	---------------------------------
 ; Function draw_flames1_1
 ; ---------------------------------
 _draw_flames1_1::
-;src/rooms/room_1_1.h:25: if (!flame_timer) {
+;src/rooms/room_1_1.c:25: if (!flame_timer) {
 	ld	a, (#_flame_timer)
 	or	a, a
 	jr	NZ, 00102$
-;src/rooms/room_1_1.h:26: flame1_phase++; flame1_phase &= 7;
+;src/rooms/room_1_1.c:26: flame1_phase++; flame1_phase &= 7;
 	ld	hl, #_flame1_phase
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(hl), a
-;src/rooms/room_1_1.h:27: flame2_phase++; flame2_phase &= 7;
+;src/rooms/room_1_1.c:27: flame2_phase++; flame2_phase &= 7;
 	ld	hl, #_flame2_phase
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(hl), a
-;src/rooms/room_1_1.h:28: multiple_set_sprite_tiles(flame1_sprite_offset, flame_sprite_count, flames[flame1_phase]);
+;src/rooms/room_1_1.c:28: multiple_set_sprite_tiles(flame1_sprite_offset, flame_sprite_count, flames[flame1_phase]);
 	ld	bc, #_flames+0
 	ld	hl, #_flame1_phase
 	ld	l, (hl)
@@ -1307,7 +1307,7 @@ _draw_flames1_1::
 	call	_multiple_set_sprite_tiles
 	add	sp, #4
 	pop	bc
-;src/rooms/room_1_1.h:29: multiple_set_sprite_tiles(flame2_sprite_offset, flame_sprite_count, flames[flame2_phase]);
+;src/rooms/room_1_1.c:29: multiple_set_sprite_tiles(flame2_sprite_offset, flame_sprite_count, flames[flame2_phase]);
 	ld	hl, #_flame2_phase
 	ld	l, (hl)
 ;	spillPairReg hl
@@ -1326,15 +1326,15 @@ _draw_flames1_1::
 	call	_multiple_set_sprite_tiles
 	add	sp, #4
 00102$:
-;src/rooms/room_1_1.h:31: flame_timer++; flame_timer &= 7;
+;src/rooms/room_1_1.c:31: flame_timer++; flame_timer &= 7;
 	ld	hl, #_flame_timer
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(hl), a
-;src/rooms/room_1_1.h:34: (unsigned char *)flames_offsets);    
+;src/rooms/room_1_1.c:34: (unsigned char *)flames_offsets);    
 	ld	de, #_flames_offsets
-;src/rooms/room_1_1.h:33: flame1_pos_x - bkg_scroll_x_target, flame1_pos_y - bkg_scroll_y_target, 
+;src/rooms/room_1_1.c:33: flame1_pos_x - bkg_scroll_x_target, flame1_pos_y - bkg_scroll_y_target, 
 	ld	a, #0x28
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -1342,7 +1342,7 @@ _draw_flames1_1::
 	ld	a, #0x18
 	ld	hl, #_bkg_scroll_x_target
 	sub	a, (hl)
-;src/rooms/room_1_1.h:32: multiple_move_sprites(flame1_sprite_offset, flame_sprite_count, 
+;src/rooms/room_1_1.c:32: multiple_move_sprites(flame1_sprite_offset, flame_sprite_count, 
 	push	de
 	push	bc
 	inc	sp
@@ -1354,9 +1354,9 @@ _draw_flames1_1::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_1_1.h:37: (unsigned char *)flames_offsets);
+;src/rooms/room_1_1.c:37: (unsigned char *)flames_offsets);
 	ld	de, #_flames_offsets
-;src/rooms/room_1_1.h:36: flame2_pos_x - bkg_scroll_x_target, flame2_pos_y - bkg_scroll_y_target, 
+;src/rooms/room_1_1.c:36: flame2_pos_x - bkg_scroll_x_target, flame2_pos_y - bkg_scroll_y_target, 
 	ld	a, #0x38
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -1364,7 +1364,7 @@ _draw_flames1_1::
 	ld	a, #0x60
 	ld	hl, #_bkg_scroll_x_target
 	sub	a, (hl)
-;src/rooms/room_1_1.h:35: multiple_move_sprites(flame2_sprite_offset, flame_sprite_count, 
+;src/rooms/room_1_1.c:35: multiple_move_sprites(flame2_sprite_offset, flame_sprite_count, 
 	push	de
 	push	bc
 	inc	sp
@@ -1376,18 +1376,18 @@ _draw_flames1_1::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_1_1.h:38: }
+;src/rooms/room_1_1.c:38: }
 	ret
-;src/rooms/room_1_1.h:40: void hcoll_blockage(WORD x, WORD y) {
+;src/rooms/room_1_1.c:40: void hcoll_blockage(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_blockage
 ; ---------------------------------
 _hcoll_blockage::
-;src/rooms/room_1_1.h:42: if (!intro_shown) {
+;src/rooms/room_1_1.c:42: if (!intro_shown) {
 	ld	a, (#_intro_shown)
 	or	a, a
 	jr	NZ, 00102$
-;src/rooms/room_1_1.h:43: show_dialog_window(5, &intro);
+;src/rooms/room_1_1.c:43: show_dialog_window(5, &intro);
 	ld	de, #_intro
 	push	de
 	ld	a, #0x05
@@ -1395,11 +1395,11 @@ _hcoll_blockage::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_1_1.h:44: intro_shown = 1;
+;src/rooms/room_1_1.c:44: intro_shown = 1;
 	ld	hl, #_intro_shown
 	ld	(hl), #0x01
 00102$:
-;src/rooms/room_1_1.h:46: get_h_coll(x, y);
+;src/rooms/room_1_1.c:46: get_h_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -1412,21 +1412,21 @@ _hcoll_blockage::
 	push	de
 	call	_get_h_coll
 	add	sp, #4
-;src/rooms/room_1_1.h:47: }
+;src/rooms/room_1_1.c:47: }
 	ret
-;src/rooms/room_1_1.h:49: void vcoll_blockage(WORD x, WORD y) {
+;src/rooms/room_1_1.c:49: void vcoll_blockage(WORD x, WORD y) {
 ;	---------------------------------
 ; Function vcoll_blockage
 ; ---------------------------------
 _vcoll_blockage::
-;src/rooms/room_1_1.h:50: if ((!path_cleaned) && (delta_x >= 0)) {
+;src/rooms/room_1_1.c:50: if ((!path_cleaned) && (delta_x >= 0)) {
 	ld	a, (#_path_cleaned)
 	or	a, a
 	jr	NZ, 00104$
 	ld	a, (#_delta_x + 1)
 	bit	7, a
 	jr	NZ, 00104$
-;src/rooms/room_1_1.h:51: if (x >= (17 * 8)) {
+;src/rooms/room_1_1.c:51: if (x >= (17 * 8)) {
 	ldhl	sp,	#2
 	ld	a, (hl+)
 	sub	a, #0x88
@@ -1446,7 +1446,7 @@ _vcoll_blockage::
 	scf
 00124$:
 	jr	C, 00104$
-;src/rooms/room_1_1.h:52: tile_pos_x = x >> 3; 
+;src/rooms/room_1_1.c:52: tile_pos_x = x >> 3; 
 	ldhl	sp,#2
 	ld	a, (hl+)
 	ld	c, a
@@ -1459,19 +1459,15 @@ _vcoll_blockage::
 	rr	c
 	ld	hl, #_tile_pos_x
 	ld	(hl), c
-;src/rooms/room_1_1.h:53: collision_buf[0] = 1; collision_buf[1] = 1;
+;src/rooms/room_1_1.c:53: collision_buf[0] = 1; collision_buf[1] = 1;
 	ld	hl, #_collision_buf
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 2)
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
-;src/rooms/room_1_1.h:54: return;
+	ld	(hl), #0x01
+	ld	hl, #(_collision_buf + 1)
+	ld	(hl), #0x01
+;src/rooms/room_1_1.c:54: return;
 	ret
 00104$:
-;src/rooms/room_1_1.h:57: get_v_coll(x, y);
+;src/rooms/room_1_1.c:57: get_v_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -1484,14 +1480,14 @@ _vcoll_blockage::
 	push	de
 	call	_get_v_coll
 	add	sp, #4
-;src/rooms/room_1_1.h:58: }
+;src/rooms/room_1_1.c:58: }
 	ret
-;src/rooms/room_1_1.h:60: UBYTE cleaning_path(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+;src/rooms/room_1_1.c:60: UBYTE cleaning_path(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
 ;	---------------------------------
 ; Function cleaning_path
 ; ---------------------------------
 _cleaning_path::
-;src/rooms/room_1_1.h:62: if ((!path_cleaned) && (id == ID_PICKAXE)) {
+;src/rooms/room_1_1.c:62: if ((!path_cleaned) && (id == ID_PICKAXE)) {
 	ld	a, (#_path_cleaned)
 	or	a, a
 	jr	NZ, 00104$
@@ -1499,12 +1495,12 @@ _cleaning_path::
 	ld	a, (hl)
 	dec	a
 	jr	NZ, 00104$
-;src/rooms/room_1_1.h:63: if (tile_x >= 14) {
+;src/rooms/room_1_1.c:63: if (tile_x >= 14) {
 	ldhl	sp,	#2
 	ld	a, (hl)
 	sub	a, #0x0e
 	jr	C, 00104$
-;src/rooms/room_1_1.h:64: show_dialog_window(2, &cleared_path);
+;src/rooms/room_1_1.c:64: show_dialog_window(2, &cleared_path);
 	ld	de, #_cleared_path
 	push	de
 	ld	a, #0x02
@@ -1512,7 +1508,7 @@ _cleaning_path::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_1_1.h:66: pop_by_id(&game_item_list, ID_BOULDER0);
+;src/rooms/room_1_1.c:66: pop_by_id(&game_item_list, ID_BOULDER0);
 	ld	a, #0x0c
 	push	af
 	inc	sp
@@ -1520,7 +1516,7 @@ _cleaning_path::
 	push	de
 	call	_pop_by_id
 	add	sp, #3
-;src/rooms/room_1_1.h:67: pop_by_id(&game_item_list, ID_BOULDER1);
+;src/rooms/room_1_1.c:67: pop_by_id(&game_item_list, ID_BOULDER1);
 	ld	a, #0x0d
 	push	af
 	inc	sp
@@ -1528,7 +1524,7 @@ _cleaning_path::
 	push	de
 	call	_pop_by_id
 	add	sp, #3
-;src/rooms/room_1_1.h:68: pop_by_id(&game_item_list, ID_BOULDER2);
+;src/rooms/room_1_1.c:68: pop_by_id(&game_item_list, ID_BOULDER2);
 	ld	a, #0x0e
 	push	af
 	inc	sp
@@ -1536,28 +1532,28 @@ _cleaning_path::
 	push	de
 	call	_pop_by_id
 	add	sp, #3
-;src/rooms/room_1_1.h:69: path_cleaned = 1;
+;src/rooms/room_1_1.c:69: path_cleaned = 1;
 	ld	hl, #_path_cleaned
 	ld	(hl), #0x01
-;src/rooms/room_1_1.h:70: return ID_ITEM_NONE;
+;src/rooms/room_1_1.c:70: return ID_ITEM_NONE;
 	ld	e, #0x00
 	ret
 00104$:
-;src/rooms/room_1_1.h:73: return default_drop(id);
+;src/rooms/room_1_1.c:73: return default_drop(id);
 	ldhl	sp,	#4
 	ld	a, (hl)
 	push	af
 	inc	sp
 	call	_default_drop
 	inc	sp
-;src/rooms/room_1_1.h:74: }
+;src/rooms/room_1_1.c:74: }
 	ret
-;src/rooms/room_2_1.h:12: void reset_room2() {
+;src/rooms/room_2_1.c:12: void reset_room2() {
 ;	---------------------------------
 ; Function reset_room2
 ; ---------------------------------
 _reset_room2::
-;src/rooms/room_2_1.h:13: elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0; dylan_negotiated = 0;
+;src/rooms/room_2_1.c:13: elevator_pos_y = elevator_min_y, elevator_dir = 1, elevator_move = 0, elevator_enabled = 0; dylan_negotiated = 0;
 	ld	hl, #_elevator_pos_y
 	ld	(hl), #0x18
 	ld	hl, #_elevator_dir
@@ -1568,7 +1564,7 @@ _reset_room2::
 	ld	(hl), #0x00
 	ld	hl, #_dylan_negotiated
 	ld	(hl), #0x00
-;src/rooms/room_2_1.h:14: }
+;src/rooms/room_2_1.c:14: }
 	ret
 _elevator_map:
 	.db #0x00	; 0
@@ -1611,12 +1607,12 @@ _elevator_offsets:
 	.db #0x18	; 24
 	.db #0x48	; 72	'H'
 	.db #0x20	; 32
-;src/rooms/room_2_1.h:15: void init_room2() {
+;src/rooms/room_2_1.c:15: void init_room2() {
 ;	---------------------------------
 ; Function init_room2
 ; ---------------------------------
 _init_room2::
-;src/rooms/room_2_1.h:16: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
+;src/rooms/room_2_1.c:16: set_sprite_data(evil_sprites_tileoffset, current_room->raw_enemies_tiles->count, current_room->raw_enemies_tiles->data);
 	ld	hl, #_current_room
 	ld	a, (hl+)
 	ld	c, a
@@ -1636,11 +1632,11 @@ _init_room2::
 	push	hl
 	call	_set_sprite_data
 	add	sp, #4
-;src/rooms/room_2_1.h:17: for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
+;src/rooms/room_2_1.c:17: for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
 	ld	hl, #___temp_i
 	ld	(hl), #0x00
 00103$:
-;src/rooms/room_2_1.h:18: set_sprite_tile(elevator_sprite_offset + __temp_i, evil_sprites_tileoffset + elevator_map[__temp_i]);
+;src/rooms/room_2_1.c:18: set_sprite_tile(elevator_sprite_offset + __temp_i, evil_sprites_tileoffset + elevator_map[__temp_i]);
 	ld	a, #<(_elevator_map)
 	ld	hl, #___temp_i
 	add	a, (hl)
@@ -1667,37 +1663,37 @@ _init_room2::
 	inc	hl
 	inc	hl
 	ld	(hl), c
-;src/rooms/room_2_1.h:17: for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
+;src/rooms/room_2_1.c:17: for (__temp_i = 0; __temp_i < elevator_sprite_count; __temp_i++) 
 	ld	hl, #___temp_i
 	inc	(hl)
 	ld	a, (hl)
 	sub	a, #0x0d
 	jr	C, 00103$
-;src/rooms/room_2_1.h:19: }
+;src/rooms/room_2_1.c:19: }
 	ret
-;src/rooms/room_2_1.h:20: void move_elevator() {
+;src/rooms/room_2_1.c:20: void move_elevator() {
 ;	---------------------------------
 ; Function move_elevator
 ; ---------------------------------
 _move_elevator::
-;src/rooms/room_2_1.h:21: if (elevator_enabled) {
+;src/rooms/room_2_1.c:21: if (elevator_enabled) {
 	ld	a, (#_elevator_enabled)
 	or	a, a
 	ret	Z
-;src/rooms/room_2_1.h:22: elevator_move++; elevator_move &= 1;
+;src/rooms/room_2_1.c:22: elevator_move++; elevator_move &= 1;
 	ld	hl, #_elevator_move
 	inc	(hl)
 	ld	a, (hl)
 	and	a, #0x01
-;src/rooms/room_2_1.h:23: if (!elevator_move) {
+;src/rooms/room_2_1.c:23: if (!elevator_move) {
 	ld	(hl), a
 	or	a, a
 	ret	NZ
-;src/rooms/room_2_1.h:24: if (elevator_dir) {
+;src/rooms/room_2_1.c:24: if (elevator_dir) {
 	ld	a, (#_elevator_dir)
 	or	a, a
 	jr	Z, 00106$
-;src/rooms/room_2_1.h:25: elevator_pos_y++; if (elevator_pos_y >= elevator_max_y) elevator_dir = 0;
+;src/rooms/room_2_1.c:25: elevator_pos_y++; if (elevator_pos_y >= elevator_max_y) elevator_dir = 0;
 	ld	hl, #_elevator_pos_y
 	inc	(hl)
 	ld	a, (hl)
@@ -1707,7 +1703,7 @@ _move_elevator::
 	ld	(hl), #0x00
 	ret
 00106$:
-;src/rooms/room_2_1.h:27: elevator_pos_y--; if (elevator_pos_y <= elevator_min_y) elevator_dir = 1;
+;src/rooms/room_2_1.c:27: elevator_pos_y--; if (elevator_pos_y <= elevator_min_y) elevator_dir = 1;
 	ld	hl, #_elevator_pos_y
 	dec	(hl)
 	ld	a, #0x18
@@ -1715,19 +1711,19 @@ _move_elevator::
 	ret	C
 	ld	hl, #_elevator_dir
 	ld	(hl), #0x01
-;src/rooms/room_2_1.h:31: }
+;src/rooms/room_2_1.c:31: }
 	ret
-;src/rooms/room_2_1.h:32: void draw_elevator() {
+;src/rooms/room_2_1.c:32: void draw_elevator() {
 ;	---------------------------------
 ; Function draw_elevator
 ; ---------------------------------
 _draw_elevator::
-;src/rooms/room_2_1.h:33: if (!elevator_move) {
+;src/rooms/room_2_1.c:33: if (!elevator_move) {
 	ld	a, (#_elevator_move)
 	or	a, a
 	ret	NZ
-;src/rooms/room_2_1.h:36: (unsigned char *)elevator_offsets);
-;src/rooms/room_2_1.h:35: elevator_pos_x - bkg_scroll_x_target, elevator_pos_y - bkg_scroll_y_target, 
+;src/rooms/room_2_1.c:36: (unsigned char *)elevator_offsets);
+;src/rooms/room_2_1.c:35: elevator_pos_x - bkg_scroll_x_target, elevator_pos_y - bkg_scroll_y_target, 
 	ld	a, (#_elevator_pos_y)
 	ld	hl, #_bkg_scroll_y_target
 	sub	a, (hl)
@@ -1735,7 +1731,7 @@ _draw_elevator::
 	ld	a, #0x78
 	ld	hl, #_bkg_scroll_x_target
 	sub	a, (hl)
-;src/rooms/room_2_1.h:34: multiple_move_sprites(elevator_sprite_offset, elevator_sprite_count, 
+;src/rooms/room_2_1.c:34: multiple_move_sprites(elevator_sprite_offset, elevator_sprite_count, 
 	ld	de, #_elevator_offsets
 	push	de
 	push	bc
@@ -1748,23 +1744,23 @@ _draw_elevator::
 	inc	sp
 	call	_multiple_move_sprites
 	add	sp, #6
-;src/rooms/room_2_1.h:38: }
+;src/rooms/room_2_1.c:38: }
 	ret
-;src/rooms/room_2_1.h:39: void hcoll_elevator(WORD x, WORD y) {
+;src/rooms/room_2_1.c:39: void hcoll_elevator(WORD x, WORD y) {
 ;	---------------------------------
 ; Function hcoll_elevator
 ; ---------------------------------
 _hcoll_elevator::
 	dec	sp
 	dec	sp
-;src/rooms/room_2_1.h:40: if ((elevator_enabled) && (delta_y >= 0)) {
+;src/rooms/room_2_1.c:40: if ((elevator_enabled) && (delta_y >= 0)) {
 	ld	a, (#_elevator_enabled)
 	or	a, a
 	jp	Z, 00113$
 	ld	a, (#_delta_y + 1)
 	bit	7, a
 	jp	NZ, 00113$
-;src/rooms/room_2_1.h:41: if ((x >= elevator_pos_x - 8) && (x <= elevator_pos_x + (3 * 8))) {
+;src/rooms/room_2_1.c:41: if ((x >= elevator_pos_x - 8) && (x <= elevator_pos_x + (3 * 8))) {
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	sub	a, #0x70
@@ -1804,7 +1800,7 @@ _hcoll_elevator::
 	scf
 00160$:
 	jp	C, 00113$
-;src/rooms/room_2_1.h:42: if ((y >= elevator_pos_y + ((4 * 8) - 1)) && (y <= elevator_pos_y + ((4 * 8) + 7))) {
+;src/rooms/room_2_1.c:42: if ((y >= elevator_pos_y + ((4 * 8) - 1)) && (y <= elevator_pos_y + ((4 * 8) + 7))) {
 	ld	hl, #_elevator_pos_y
 	ld	c, (hl)
 	ld	b, #0x00
@@ -1861,7 +1857,7 @@ _hcoll_elevator::
 	scf
 00164$:
 	jr	C, 00113$
-;src/rooms/room_2_1.h:43: tile_pos_x = x >> 3; tile_pos_ox = x & 7;
+;src/rooms/room_2_1.c:43: tile_pos_x = x >> 3; tile_pos_ox = x & 7;
 	ldhl	sp,#4
 	ld	a, (hl+)
 	ld	c, a
@@ -1878,7 +1874,7 @@ _hcoll_elevator::
 	ld	a, (hl)
 	and	a, #0x07
 	ld	(#_tile_pos_ox),a
-;src/rooms/room_2_1.h:44: tile_pos_y = y >> 3; tile_pos_oy = (y - elevator_pos_y) & 7;
+;src/rooms/room_2_1.c:44: tile_pos_y = y >> 3; tile_pos_oy = (y - elevator_pos_y) & 7;
 	ldhl	sp,#6
 	ld	a, (hl+)
 	ld	c, a
@@ -1898,24 +1894,18 @@ _hcoll_elevator::
 	sub	a, c
 	and	a, #0x07
 	ld	(#_tile_pos_oy),a
-;src/rooms/room_2_1.h:45: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
+;src/rooms/room_2_1.c:45: collision_buf[0] = 1; collision_buf[1] = 1; collision_buf[2] = 0;
 	ld	hl, #_collision_buf
-	ld	a, #0x01
-	ld	(hl+), a
-	ld	(hl), #0x00
+	ld	(hl), #0x01
+	ld	hl, #(_collision_buf + 1)
+	ld	(hl), #0x01
 	ld	hl, #(_collision_buf + 2)
-	ld	a, #0x01
-	ld	(hl+), a
 	ld	(hl), #0x00
-	ld	hl, #(_collision_buf + 4)
-	xor	a, a
-	ld	(hl+), a
-	ld	(hl), a
-;src/rooms/room_2_1.h:46: if (!elevator_move) {
+;src/rooms/room_2_1.c:46: if (!elevator_move) {
 	ld	a, (#_elevator_move)
 	or	a, a
 	jr	NZ, 00105$
-;src/rooms/room_2_1.h:47: if (!elevator_dir) delta_y = -1; else delta_y = 0;
+;src/rooms/room_2_1.c:47: if (!elevator_dir) delta_y = -1; else delta_y = 0;
 	ld	a, (#_elevator_dir)
 	or	a, a
 	jr	NZ, 00102$
@@ -1930,13 +1920,13 @@ _hcoll_elevator::
 	ld	(hl+), a
 	ld	(hl), a
 00105$:
-;src/rooms/room_2_1.h:49: is_position_safe = 0;
+;src/rooms/room_2_1.c:49: is_position_safe = 0;
 	ld	hl, #_is_position_safe
 	ld	(hl), #0x00
-;src/rooms/room_2_1.h:50: return;
+;src/rooms/room_2_1.c:50: return;
 	jr	00115$
 00113$:
-;src/rooms/room_2_1.h:54: get_h_coll(x, y);
+;src/rooms/room_2_1.c:54: get_h_coll(x, y);
 	ldhl	sp,	#6
 	ld	a, (hl+)
 	ld	e, a
@@ -1950,20 +1940,20 @@ _hcoll_elevator::
 	call	_get_h_coll
 	add	sp, #4
 00115$:
-;src/rooms/room_2_1.h:55: }
+;src/rooms/room_2_1.c:55: }
 	inc	sp
 	inc	sp
 	ret
-;src/rooms/room_2_1.h:57: void vcoll_dylan(WORD x, WORD y) {
+;src/rooms/room_2_1.c:57: void vcoll_dylan(WORD x, WORD y) {
 ;	---------------------------------
 ; Function vcoll_dylan
 ; ---------------------------------
 _vcoll_dylan::
-;src/rooms/room_2_1.h:58: if (!dylan_negotiated) {
+;src/rooms/room_2_1.c:58: if (!dylan_negotiated) {
 	ld	a, (#_dylan_negotiated)
 	or	a, a
 	jr	NZ, 00106$
-;src/rooms/room_2_1.h:59: if ((x > (21 * 8)) && (x < (24 * 8)) && (y > (10 * 8))) {
+;src/rooms/room_2_1.c:59: if ((x > (21 * 8)) && (x < (24 * 8)) && (y > (10 * 8))) {
 	ldhl	sp,	#2
 	ld	a, #0xa8
 	sub	a, (hl)
@@ -2023,7 +2013,7 @@ _vcoll_dylan::
 	scf
 00134$:
 	jr	NC, 00106$
-;src/rooms/room_2_1.h:60: show_dialog_window(6, &dylan_dialog);
+;src/rooms/room_2_1.c:60: show_dialog_window(6, &dylan_dialog);
 	ld	de, #_dylan_dialog
 	push	de
 	ld	a, #0x06
@@ -2031,11 +2021,11 @@ _vcoll_dylan::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_2_1.h:61: dylan_negotiated = 1;
+;src/rooms/room_2_1.c:61: dylan_negotiated = 1;
 	ld	hl, #_dylan_negotiated
 	ld	(hl), #0x01
 00106$:
-;src/rooms/room_2_1.h:64: get_v_coll(x, y);
+;src/rooms/room_2_1.c:64: get_v_coll(x, y);
 	ldhl	sp,	#4
 	ld	a, (hl+)
 	ld	e, a
@@ -2048,14 +2038,14 @@ _vcoll_dylan::
 	push	de
 	call	_get_v_coll
 	add	sp, #4
-;src/rooms/room_2_1.h:65: }
+;src/rooms/room_2_1.c:65: }
 	ret
-;src/rooms/room_2_1.h:67: UBYTE dylan_gets_key(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
+;src/rooms/room_2_1.c:67: UBYTE dylan_gets_key(UBYTE tile_x, UBYTE tile_y, UBYTE id) {
 ;	---------------------------------
 ; Function dylan_gets_key
 ; ---------------------------------
 _dylan_gets_key::
-;src/rooms/room_2_1.h:68: if ((!elevator_enabled) && (id == ID_KEY)) {
+;src/rooms/room_2_1.c:68: if ((!elevator_enabled) && (id == ID_KEY)) {
 	ld	a, (#_elevator_enabled)
 	or	a, a
 	jr	NZ, 00106$
@@ -2063,7 +2053,7 @@ _dylan_gets_key::
 	ld	a, (hl)
 	sub	a, #0x02
 	jr	NZ, 00106$
-;src/rooms/room_2_1.h:69: if ((tile_y == 12) && (tile_x > 19) && (tile_x < 24)) {
+;src/rooms/room_2_1.c:69: if ((tile_y == 12) && (tile_x > 19) && (tile_x < 24)) {
 	ldhl	sp,	#3
 	ld	a, (hl)
 	sub	a, #0x0c
@@ -2075,7 +2065,7 @@ _dylan_gets_key::
 	ld	a, (hl)
 	sub	a, #0x18
 	jr	NC, 00106$
-;src/rooms/room_2_1.h:70: show_dialog_window(4, &dylan_thanks);
+;src/rooms/room_2_1.c:70: show_dialog_window(4, &dylan_thanks);
 	ld	de, #_dylan_thanks
 	push	de
 	ld	a, #0x04
@@ -2083,24 +2073,24 @@ _dylan_gets_key::
 	inc	sp
 	call	_show_dialog_window
 	add	sp, #3
-;src/rooms/room_2_1.h:71: elevator_enabled = 1;
+;src/rooms/room_2_1.c:71: elevator_enabled = 1;
 	ld	hl, #_elevator_enabled
 	ld	(hl), #0x01
-;src/rooms/room_2_1.h:72: dylan_negotiated = 1;
+;src/rooms/room_2_1.c:72: dylan_negotiated = 1;
 	ld	hl, #_dylan_negotiated
 	ld	(hl), #0x01
-;src/rooms/room_2_1.h:73: return ID_ITEM_USED;
+;src/rooms/room_2_1.c:73: return ID_ITEM_USED;
 	ld	e, #0x0f
 	ret
 00106$:
-;src/rooms/room_2_1.h:76: return default_drop(id);
+;src/rooms/room_2_1.c:76: return default_drop(id);
 	ldhl	sp,	#4
 	ld	a, (hl)
 	push	af
 	inc	sp
 	call	_default_drop
 	inc	sp
-;src/rooms/room_2_1.h:77: }
+;src/rooms/room_2_1.c:77: }
 	ret
 	.area _CODE_4
 _room_0_1_map:

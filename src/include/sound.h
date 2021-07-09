@@ -1,5 +1,5 @@
-#ifndef SOUND_H
-#define SOUND_H
+#ifndef __SOUND_H_INCLUDE_
+#define __SOUND_H_INCLUDE_
 
 #include <gb/gb.h>
 
