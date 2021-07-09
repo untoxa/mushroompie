@@ -1,8 +1,4 @@
-build/*.ihx
-build/*.map
-build/*.noi
-build/*.sym
-build/*.sav
+build
 /unused
 *.bak
 *.dof
