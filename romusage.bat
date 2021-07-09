@@ -1,1 +1,1 @@
-@python tools\romusage.py mushroompie.gb
+@python tools\romusage.py build\mushroompie.gb

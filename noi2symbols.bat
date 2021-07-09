@@ -1,1 +1,0 @@
-@python .\tools\noi2sym.py mushroompie.noi >mushroompie.sym

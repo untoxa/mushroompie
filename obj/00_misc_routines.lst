@@ -1,0 +1,1118 @@
+                                      1 ;--------------------------------------------------------
+                                      2 ; File Created by SDCC : free open source ANSI-C Compiler
+                                      3 ; Version 4.1.6 #12533 (MINGW32)
+                                      4 ;--------------------------------------------------------
+                                      5 	.module 00_misc_routines
+                                      6 	.optsdcc -mgbz80
+                                      7 	
+                                      8 ;--------------------------------------------------------
+                                      9 ; Public variables in this module
+                                     10 ;--------------------------------------------------------
+                                     11 	.globl _FadeDMG
+                                     12 	.globl _FadeStep
+                                     13 	.globl _execute_inventory
+                                     14 	.globl _execute_dialog
+                                     15 	.globl _draw_fancy_frame
+                                     16 	.globl _prepare_text
+                                     17 	.globl _set_win_tiles
+                                     18 	.globl _wait_vbl_done
+                                     19 	.globl _waitpadup
+                                     20 	.globl _joypad
+                                     21 	.globl _delay
+                                     22 	.globl _inventory_joy
+                                     23 	.globl _old_inventory_selection
+                                     24 	.globl _inventory_selection
+                                     25 	.globl _inventory_items
+                                     26 	.globl _selector_empty
+                                     27 	.globl _selector_offset
+                                     28 	.globl _dlg_idx
+                                     29 	.globl _dlg_unpacked
+                                     30 ;--------------------------------------------------------
+                                     31 ; special function registers
+                                     32 ;--------------------------------------------------------
+                                     33 ;--------------------------------------------------------
+                                     34 ; ram data
+                                     35 ;--------------------------------------------------------
+                                     36 	.area _DATA
+      000000                         37 _inventory_items::
+      000000                         38 	.ds 6
+      000006                         39 _inventory_selection::
+      000006                         40 	.ds 1
+      000007                         41 _old_inventory_selection::
+      000007                         42 	.ds 1
+      000008                         43 _inventory_joy::
+      000008                         44 	.ds 1
+                                     45 ;--------------------------------------------------------
+                                     46 ; ram data
+                                     47 ;--------------------------------------------------------
+                                     48 	.area _INITIALIZED
+                                     49 ;--------------------------------------------------------
+                                     50 ; absolute external ram data
+                                     51 ;--------------------------------------------------------
+                                     52 	.area _DABS (ABS)
+                                     53 ;--------------------------------------------------------
+                                     54 ; global & static initialisations
+                                     55 ;--------------------------------------------------------
+                                     56 	.area _HOME
+                                     57 	.area _GSINIT
+                                     58 	.area _GSFINAL
+                                     59 	.area _GSINIT
+                                     60 ;--------------------------------------------------------
+                                     61 ; Home
+                                     62 ;--------------------------------------------------------
+                                     63 	.area _HOME
+                                     64 	.area _HOME
+                                     65 ;--------------------------------------------------------
+                                     66 ; code
+                                     67 ;--------------------------------------------------------
+                                     68 	.area _CODE_1
+                                     69 ;src/00_misc_routines.c:41: UBYTE prepare_text(const unsigned char * src, unsigned char * dest) __naked
+                                     70 ;	---------------------------------
+                                     71 ; Function prepare_text
+                                     72 ; ---------------------------------
+      000000                         73 _prepare_text::
+                                     74 ;src/00_misc_routines.c:84: __endasm;           
+      000000 C5                      75 	push	BC
+      000001 F8 04                   76 	lda	HL, 4(SP)
+      000003 4E                      77 	ld	C, (HL)
+      000004 23                      78 	inc	HL
+      000005 46                      79 	ld	B, (HL) ; BC = source
+      000006 23                      80 	inc	HL
+      000007 2A                      81 	ld	A, (HL+)
+      000008 66                      82 	ld	H, (HL)
+      000009 6F                      83 	ld	L, A ; HL = dest
+      00000A 11 00 00                84 	ld	DE, #0
+      00000D                         85 	$preptxt02:
+      00000D 0A                      86 	ld A, (BC)
+      00000E 03                      87 	inc	BC
+      00000F B7                      88 	or	A
+      000010 28 18                   89 	jr	Z, $preptxt01
+      000012 FE 20                   90 	cp	#32 ; ' '
+      000014 38 0F                   91 	jr	C, $preptxt03
+      000016 D6 21                   92 	sub	#33
+      000018 FE 3A                   93 	cp	#58 ; font length in chars
+      00001A 30 09                   94 	jr	NC, $preptxt03
+      00001C 57                      95 	ld	D, A
+      00001D FAr00r00                96 	ld	A, (#_font_tiles_start)
+      000020 82                      97 	add	D
+      000021 22                      98 	ld	(HL+), A
+      000022 1C                      99 	inc	E
+      000023 18 E8                  100 	jr	$preptxt02
+      000025                        101 	$preptxt03:
+      000025 AF                     102 	xor A
+      000026 22                     103 	ld	(HL+), A
+      000027 1C                     104 	inc	E
+      000028 18 E3                  105 	jr	$preptxt02
+      00002A                        106 	$preptxt01:
+      00002A 16 00                  107 	ld D, #0
+      00002C C1                     108 	pop	BC
+      00002D C9                     109 	ret
+                                    110 ;src/00_misc_routines.c:85: }
+                                    111 ;src/00_misc_routines.c:87: void draw_fancy_frame(UBYTE lines) {
+                                    112 ;	---------------------------------
+                                    113 ; Function draw_fancy_frame
+                                    114 ; ---------------------------------
+      00002E                        115 _draw_fancy_frame::
+                                    116 ;src/00_misc_routines.c:88: if (lines < 11) {
+      00002E F8 02                  117 	ldhl	sp,	#2
+      000030 7E                     118 	ld	a, (hl)
+      000031 D6 0B                  119 	sub	a, #0x0b
+      000033 30 60                  120 	jr	NC, 00102$
+                                    121 ;src/00_misc_routines.c:89: __temp_j = ((lines + 4) << 3); __temp_k = ((144 - __temp_j) >> 1);
+      000035 46                     122 	ld	b, (hl)
+      000036 78                     123 	ld	a, b
+      000037 3C                     124 	inc	a
+      000038 3C                     125 	inc	a
+      000039 3C                     126 	inc	a
+      00003A 3C                     127 	inc	a
+      00003B 87                     128 	add	a, a
+      00003C 87                     129 	add	a, a
+      00003D 87                     130 	add	a, a
+      00003E 21r00r00               131 	ld	hl, #___temp_j
+      000041 77                     132 	ld	(hl), a
+      000042 5E                     133 	ld	e, (hl)
+      000043 16 00                  134 	ld	d, #0x00
+      000045 3E 90                  135 	ld	a, #0x90
+      000047 93                     136 	sub	a, e
+      000048 5F                     137 	ld	e, a
+      000049 9F                     138 	sbc	a, a
+      00004A 92                     139 	sub	a, d
+      00004B 57                     140 	ld	d, a
+      00004C CB 2A                  141 	sra	d
+      00004E CB 1B                  142 	rr	e
+      000050 21r00r00               143 	ld	hl, #___temp_k
+      000053 73                     144 	ld	(hl), e
+                                    145 ;src/00_misc_routines.c:90: lyc_table[6] = __temp_k; lyc_table[7] = __temp_k + __temp_j;
+      000054 11r06r00               146 	ld	de, #(_lyc_table + 6)
+      000057 7E                     147 	ld	a, (hl)
+      000058 12                     148 	ld	(de), a
+      000059 11r07r00               149 	ld	de, #_lyc_table + 7
+      00005C 7E                     150 	ld	a, (hl)
+      00005D 21r00r00               151 	ld	hl, #___temp_j
+      000060 86                     152 	add	a, (hl)
+      000061 12                     153 	ld	(de), a
+                                    154 ;src/00_misc_routines.c:91: set_win_tiles(0, title_height, 20, 2, dlg_unpacked);
+      000062 11rA0r00               155 	ld	de, #_dlg_unpacked
+      000065 D5                     156 	push	de
+      000066 21 14 02               157 	ld	hl, #0x214
+      000069 E5                     158 	push	hl
+      00006A 21 00 03               159 	ld	hl, #0x300
+      00006D E5                     160 	push	hl
+      00006E CDr00r00               161 	call	_set_win_tiles
+      000071 E8 06                  162 	add	sp, #6
+                                    163 ;src/00_misc_routines.c:92: set_win_tiles(0, title_height + 2, 20, lines + 2, (unsigned char *)dlg_idx[lines]);
+      000073 F8 02                  164 	ldhl	sp,	#2
+      000075 5E                     165 	ld	e, (hl)
+      000076 16 00                  166 	ld	d, #0x00
+      000078 6B                     167 	ld	l, e
+      000079 62                     168 	ld	h, d
+      00007A 29                     169 	add	hl, hl
+      00007B 11rA4r01               170 	ld	de, #_dlg_idx
+      00007E 19                     171 	add	hl, de
+      00007F 2A                     172 	ld	a, (hl+)
+      000080 4F                     173 	ld	c, a
+      000081 66                     174 	ld	h, (hl)
+                                    175 ;	spillPairReg hl
+      000082 04                     176 	inc	b
+      000083 04                     177 	inc	b
+      000084 69                     178 	ld	l, c
+                                    179 ;	spillPairReg hl
+                                    180 ;	spillPairReg hl
+      000085 E5                     181 	push	hl
+      000086 C5                     182 	push	bc
+      000087 33                     183 	inc	sp
+      000088 21 05 14               184 	ld	hl, #0x1405
+      00008B E5                     185 	push	hl
+      00008C AF                     186 	xor	a, a
+      00008D F5                     187 	push	af
+      00008E 33                     188 	inc	sp
+      00008F CDr00r00               189 	call	_set_win_tiles
+      000092 E8 06                  190 	add	sp, #6
+      000094 C9                     191 	ret
+      000095                        192 00102$:
+                                    193 ;src/00_misc_routines.c:94: lyc_table[6] = 0; lyc_table[7] = 23; // don't draw if window too large
+      000095 21r06r00               194 	ld	hl, #(_lyc_table + 6)
+      000098 36 00                  195 	ld	(hl), #0x00
+      00009A 21r07r00               196 	ld	hl, #(_lyc_table + 7)
+      00009D 36 17                  197 	ld	(hl), #0x17
+                                    198 ;src/00_misc_routines.c:96: }
+      00009F C9                     199 	ret
+      0000A0                        200 _dlg_unpacked:
+      0000A0 00                     201 	.db #0x00	; 0
+      0000A1 E7                     202 	.db #0xe7	; 231
+      0000A2 00                     203 	.db #0x00	; 0
+      0000A3 00                     204 	.db #0x00	; 0
+      0000A4 00                     205 	.db #0x00	; 0
+      0000A5 00                     206 	.db #0x00	; 0
+      0000A6 00                     207 	.db #0x00	; 0
+      0000A7 00                     208 	.db #0x00	; 0
+      0000A8 00                     209 	.db #0x00	; 0
+      0000A9 00                     210 	.db #0x00	; 0
+      0000AA 00                     211 	.db #0x00	; 0
+      0000AB 00                     212 	.db #0x00	; 0
+      0000AC 00                     213 	.db #0x00	; 0
+      0000AD 00                     214 	.db #0x00	; 0
+      0000AE 00                     215 	.db #0x00	; 0
+      0000AF 00                     216 	.db #0x00	; 0
+      0000B0 00                     217 	.db #0x00	; 0
+      0000B1 00                     218 	.db #0x00	; 0
+      0000B2 E7                     219 	.db #0xe7	; 231
+      0000B3 00                     220 	.db #0x00	; 0
+      0000B4 E8                     221 	.db #0xe8	; 232
+      0000B5 E9                     222 	.db #0xe9	; 233
+      0000B6 EA                     223 	.db #0xea	; 234
+      0000B7 EA                     224 	.db #0xea	; 234
+      0000B8 EA                     225 	.db #0xea	; 234
+      0000B9 EA                     226 	.db #0xea	; 234
+      0000BA EA                     227 	.db #0xea	; 234
+      0000BB EA                     228 	.db #0xea	; 234
+      0000BC EA                     229 	.db #0xea	; 234
+      0000BD EA                     230 	.db #0xea	; 234
+      0000BE EA                     231 	.db #0xea	; 234
+      0000BF EA                     232 	.db #0xea	; 234
+      0000C0 EA                     233 	.db #0xea	; 234
+      0000C1 EA                     234 	.db #0xea	; 234
+      0000C2 EA                     235 	.db #0xea	; 234
+      0000C3 EA                     236 	.db #0xea	; 234
+      0000C4 EA                     237 	.db #0xea	; 234
+      0000C5 EA                     238 	.db #0xea	; 234
+      0000C6 E9                     239 	.db #0xe9	; 233
+      0000C7 EB                     240 	.db #0xeb	; 235
+      0000C8 00                     241 	.db #0x00	; 0
+      0000C9 EC                     242 	.db #0xec	; 236
+      0000CA 00                     243 	.db #0x00	; 0
+      0000CB 00                     244 	.db #0x00	; 0
+      0000CC 00                     245 	.db #0x00	; 0
+      0000CD 00                     246 	.db #0x00	; 0
+      0000CE 00                     247 	.db #0x00	; 0
+      0000CF 00                     248 	.db #0x00	; 0
+      0000D0 00                     249 	.db #0x00	; 0
+      0000D1 00                     250 	.db #0x00	; 0
+      0000D2 00                     251 	.db #0x00	; 0
+      0000D3 00                     252 	.db #0x00	; 0
+      0000D4 00                     253 	.db #0x00	; 0
+      0000D5 00                     254 	.db #0x00	; 0
+      0000D6 00                     255 	.db #0x00	; 0
+      0000D7 00                     256 	.db #0x00	; 0
+      0000D8 00                     257 	.db #0x00	; 0
+      0000D9 00                     258 	.db #0x00	; 0
+      0000DA EC                     259 	.db #0xec	; 236
+      0000DB 00                     260 	.db #0x00	; 0
+      0000DC 00                     261 	.db #0x00	; 0
+      0000DD EC                     262 	.db #0xec	; 236
+      0000DE 00                     263 	.db #0x00	; 0
+      0000DF 00                     264 	.db #0x00	; 0
+      0000E0 00                     265 	.db #0x00	; 0
+      0000E1 00                     266 	.db #0x00	; 0
+      0000E2 00                     267 	.db #0x00	; 0
+      0000E3 00                     268 	.db #0x00	; 0
+      0000E4 00                     269 	.db #0x00	; 0
+      0000E5 00                     270 	.db #0x00	; 0
+      0000E6 00                     271 	.db #0x00	; 0
+      0000E7 00                     272 	.db #0x00	; 0
+      0000E8 00                     273 	.db #0x00	; 0
+      0000E9 00                     274 	.db #0x00	; 0
+      0000EA 00                     275 	.db #0x00	; 0
+      0000EB 00                     276 	.db #0x00	; 0
+      0000EC 00                     277 	.db #0x00	; 0
+      0000ED 00                     278 	.db #0x00	; 0
+      0000EE EC                     279 	.db #0xec	; 236
+      0000EF 00                     280 	.db #0x00	; 0
+      0000F0 00                     281 	.db #0x00	; 0
+      0000F1 EC                     282 	.db #0xec	; 236
+      0000F2 00                     283 	.db #0x00	; 0
+      0000F3 00                     284 	.db #0x00	; 0
+      0000F4 00                     285 	.db #0x00	; 0
+      0000F5 00                     286 	.db #0x00	; 0
+      0000F6 00                     287 	.db #0x00	; 0
+      0000F7 00                     288 	.db #0x00	; 0
+      0000F8 00                     289 	.db #0x00	; 0
+      0000F9 00                     290 	.db #0x00	; 0
+      0000FA 00                     291 	.db #0x00	; 0
+      0000FB 00                     292 	.db #0x00	; 0
+      0000FC 00                     293 	.db #0x00	; 0
+      0000FD 00                     294 	.db #0x00	; 0
+      0000FE 00                     295 	.db #0x00	; 0
+      0000FF 00                     296 	.db #0x00	; 0
+      000100 00                     297 	.db #0x00	; 0
+      000101 00                     298 	.db #0x00	; 0
+      000102 EC                     299 	.db #0xec	; 236
+      000103 00                     300 	.db #0x00	; 0
+      000104 00                     301 	.db #0x00	; 0
+      000105 EC                     302 	.db #0xec	; 236
+      000106 00                     303 	.db #0x00	; 0
+      000107 00                     304 	.db #0x00	; 0
+      000108 00                     305 	.db #0x00	; 0
+      000109 00                     306 	.db #0x00	; 0
+      00010A 00                     307 	.db #0x00	; 0
+      00010B 00                     308 	.db #0x00	; 0
+      00010C 00                     309 	.db #0x00	; 0
+      00010D 00                     310 	.db #0x00	; 0
+      00010E 00                     311 	.db #0x00	; 0
+      00010F 00                     312 	.db #0x00	; 0
+      000110 00                     313 	.db #0x00	; 0
+      000111 00                     314 	.db #0x00	; 0
+      000112 00                     315 	.db #0x00	; 0
+      000113 00                     316 	.db #0x00	; 0
+      000114 00                     317 	.db #0x00	; 0
+      000115 00                     318 	.db #0x00	; 0
+      000116 EC                     319 	.db #0xec	; 236
+      000117 00                     320 	.db #0x00	; 0
+      000118 00                     321 	.db #0x00	; 0
+      000119 EC                     322 	.db #0xec	; 236
+      00011A 00                     323 	.db #0x00	; 0
+      00011B 00                     324 	.db #0x00	; 0
+      00011C 00                     325 	.db #0x00	; 0
+      00011D 00                     326 	.db #0x00	; 0
+      00011E 00                     327 	.db #0x00	; 0
+      00011F 00                     328 	.db #0x00	; 0
+      000120 00                     329 	.db #0x00	; 0
+      000121 00                     330 	.db #0x00	; 0
+      000122 00                     331 	.db #0x00	; 0
+      000123 00                     332 	.db #0x00	; 0
+      000124 00                     333 	.db #0x00	; 0
+      000125 00                     334 	.db #0x00	; 0
+      000126 00                     335 	.db #0x00	; 0
+      000127 00                     336 	.db #0x00	; 0
+      000128 00                     337 	.db #0x00	; 0
+      000129 00                     338 	.db #0x00	; 0
+      00012A EC                     339 	.db #0xec	; 236
+      00012B 00                     340 	.db #0x00	; 0
+      00012C 00                     341 	.db #0x00	; 0
+      00012D EC                     342 	.db #0xec	; 236
+      00012E 00                     343 	.db #0x00	; 0
+      00012F 00                     344 	.db #0x00	; 0
+      000130 00                     345 	.db #0x00	; 0
+      000131 00                     346 	.db #0x00	; 0
+      000132 00                     347 	.db #0x00	; 0
+      000133 00                     348 	.db #0x00	; 0
+      000134 00                     349 	.db #0x00	; 0
+      000135 00                     350 	.db #0x00	; 0
+      000136 00                     351 	.db #0x00	; 0
+      000137 00                     352 	.db #0x00	; 0
+      000138 00                     353 	.db #0x00	; 0
+      000139 00                     354 	.db #0x00	; 0
+      00013A 00                     355 	.db #0x00	; 0
+      00013B 00                     356 	.db #0x00	; 0
+      00013C 00                     357 	.db #0x00	; 0
+      00013D 00                     358 	.db #0x00	; 0
+      00013E EC                     359 	.db #0xec	; 236
+      00013F 00                     360 	.db #0x00	; 0
+      000140 00                     361 	.db #0x00	; 0
+      000141 EC                     362 	.db #0xec	; 236
+      000142 00                     363 	.db #0x00	; 0
+      000143 00                     364 	.db #0x00	; 0
+      000144 00                     365 	.db #0x00	; 0
+      000145 00                     366 	.db #0x00	; 0
+      000146 00                     367 	.db #0x00	; 0
+      000147 00                     368 	.db #0x00	; 0
+      000148 00                     369 	.db #0x00	; 0
+      000149 00                     370 	.db #0x00	; 0
+      00014A 00                     371 	.db #0x00	; 0
+      00014B 00                     372 	.db #0x00	; 0
+      00014C 00                     373 	.db #0x00	; 0
+      00014D 00                     374 	.db #0x00	; 0
+      00014E 00                     375 	.db #0x00	; 0
+      00014F 00                     376 	.db #0x00	; 0
+      000150 00                     377 	.db #0x00	; 0
+      000151 00                     378 	.db #0x00	; 0
+      000152 EC                     379 	.db #0xec	; 236
+      000153 00                     380 	.db #0x00	; 0
+      000154 00                     381 	.db #0x00	; 0
+      000155 EC                     382 	.db #0xec	; 236
+      000156 00                     383 	.db #0x00	; 0
+      000157 00                     384 	.db #0x00	; 0
+      000158 00                     385 	.db #0x00	; 0
+      000159 00                     386 	.db #0x00	; 0
+      00015A 00                     387 	.db #0x00	; 0
+      00015B 00                     388 	.db #0x00	; 0
+      00015C 00                     389 	.db #0x00	; 0
+      00015D 00                     390 	.db #0x00	; 0
+      00015E 00                     391 	.db #0x00	; 0
+      00015F 00                     392 	.db #0x00	; 0
+      000160 00                     393 	.db #0x00	; 0
+      000161 00                     394 	.db #0x00	; 0
+      000162 00                     395 	.db #0x00	; 0
+      000163 00                     396 	.db #0x00	; 0
+      000164 00                     397 	.db #0x00	; 0
+      000165 00                     398 	.db #0x00	; 0
+      000166 EC                     399 	.db #0xec	; 236
+      000167 00                     400 	.db #0x00	; 0
+      000168 00                     401 	.db #0x00	; 0
+      000169 EC                     402 	.db #0xec	; 236
+      00016A 00                     403 	.db #0x00	; 0
+      00016B 00                     404 	.db #0x00	; 0
+      00016C 00                     405 	.db #0x00	; 0
+      00016D 00                     406 	.db #0x00	; 0
+      00016E 00                     407 	.db #0x00	; 0
+      00016F 00                     408 	.db #0x00	; 0
+      000170 00                     409 	.db #0x00	; 0
+      000171 00                     410 	.db #0x00	; 0
+      000172 00                     411 	.db #0x00	; 0
+      000173 00                     412 	.db #0x00	; 0
+      000174 00                     413 	.db #0x00	; 0
+      000175 00                     414 	.db #0x00	; 0
+      000176 00                     415 	.db #0x00	; 0
+      000177 00                     416 	.db #0x00	; 0
+      000178 00                     417 	.db #0x00	; 0
+      000179 00                     418 	.db #0x00	; 0
+      00017A EC                     419 	.db #0xec	; 236
+      00017B 00                     420 	.db #0x00	; 0
+      00017C E8                     421 	.db #0xe8	; 232
+      00017D E9                     422 	.db #0xe9	; 233
+      00017E EA                     423 	.db #0xea	; 234
+      00017F EA                     424 	.db #0xea	; 234
+      000180 EA                     425 	.db #0xea	; 234
+      000181 EA                     426 	.db #0xea	; 234
+      000182 EA                     427 	.db #0xea	; 234
+      000183 EA                     428 	.db #0xea	; 234
+      000184 EA                     429 	.db #0xea	; 234
+      000185 EA                     430 	.db #0xea	; 234
+      000186 EA                     431 	.db #0xea	; 234
+      000187 EA                     432 	.db #0xea	; 234
+      000188 EA                     433 	.db #0xea	; 234
+      000189 EA                     434 	.db #0xea	; 234
+      00018A EA                     435 	.db #0xea	; 234
+      00018B EA                     436 	.db #0xea	; 234
+      00018C EA                     437 	.db #0xea	; 234
+      00018D EA                     438 	.db #0xea	; 234
+      00018E E9                     439 	.db #0xe9	; 233
+      00018F EB                     440 	.db #0xeb	; 235
+      000190 00                     441 	.db #0x00	; 0
+      000191 ED                     442 	.db #0xed	; 237
+      000192 00                     443 	.db #0x00	; 0
+      000193 00                     444 	.db #0x00	; 0
+      000194 00                     445 	.db #0x00	; 0
+      000195 00                     446 	.db #0x00	; 0
+      000196 00                     447 	.db #0x00	; 0
+      000197 00                     448 	.db #0x00	; 0
+      000198 00                     449 	.db #0x00	; 0
+      000199 00                     450 	.db #0x00	; 0
+      00019A 00                     451 	.db #0x00	; 0
+      00019B 00                     452 	.db #0x00	; 0
+      00019C 00                     453 	.db #0x00	; 0
+      00019D 00                     454 	.db #0x00	; 0
+      00019E 00                     455 	.db #0x00	; 0
+      00019F 00                     456 	.db #0x00	; 0
+      0001A0 00                     457 	.db #0x00	; 0
+      0001A1 00                     458 	.db #0x00	; 0
+      0001A2 ED                     459 	.db #0xed	; 237
+      0001A3 00                     460 	.db #0x00	; 0
+      0001A4                        461 _dlg_idx:
+      0001A4r7Cr01                  462 	.dw (_dlg_unpacked + 220)
+      0001A6r68r01                  463 	.dw (_dlg_unpacked + 200)
+      0001A8r54r01                  464 	.dw (_dlg_unpacked + 180)
+      0001AAr40r01                  465 	.dw (_dlg_unpacked + 160)
+      0001ACr2Cr01                  466 	.dw (_dlg_unpacked + 140)
+      0001AEr18r01                  467 	.dw (_dlg_unpacked + 120)
+      0001B0r04r01                  468 	.dw (_dlg_unpacked + 100)
+      0001B2rF0r00                  469 	.dw (_dlg_unpacked + 80)
+      0001B4rDCr00                  470 	.dw (_dlg_unpacked + 60)
+      0001B6rC8r00                  471 	.dw (_dlg_unpacked + 40)
+                                    472 ;src/00_misc_routines.c:100: void execute_dialog(const UBYTE lines, const dialog_item* item) {
+                                    473 ;	---------------------------------
+                                    474 ; Function execute_dialog
+                                    475 ; ---------------------------------
+      0001B8                        476 _execute_dialog::
+      0001B8 3B                     477 	dec	sp
+      0001B9 3B                     478 	dec	sp
+                                    479 ;src/00_misc_routines.c:101: const dialog_item* item_old = 0;
+      0001BA AF                     480 	xor	a, a
+      0001BB F8 00                  481 	ldhl	sp,	#0
+      0001BD 22                     482 	ld	(hl+), a
+      0001BE 77                     483 	ld	(hl), a
+                                    484 ;src/00_misc_routines.c:102: if (item) {
+      0001BF F8 06                  485 	ldhl	sp,	#6
+      0001C1 3A                     486 	ld	a, (hl-)
+      0001C2 B6                     487 	or	a, (hl)
+      0001C3 CAr65r02               488 	jp	Z, 00115$
+                                    489 ;src/00_misc_routines.c:103: draw_fancy_frame(lines);
+      0001C6 2B                     490 	dec	hl
+      0001C7 7E                     491 	ld	a, (hl)
+      0001C8 F5                     492 	push	af
+      0001C9 33                     493 	inc	sp
+      0001CA CDr2Er00               494 	call	_draw_fancy_frame
+      0001CD 33                     495 	inc	sp
+                                    496 ;src/00_misc_routines.c:104: wait_vbl_done();          // prevent inventory flicking
+      0001CE CDr00r00               497 	call	_wait_vbl_done
+                                    498 ;src/00_misc_routines.c:105: inventory = 1;
+      0001D1 21r00r00               499 	ld	hl, #_inventory
+      0001D4 36 01                  500 	ld	(hl), #0x01
+                                    501 ;src/00_misc_routines.c:106: while (item) {
+      0001D6                        502 00111$:
+      0001D6 F8 06                  503 	ldhl	sp,	#6
+      0001D8 3A                     504 	ld	a, (hl-)
+      0001D9 B6                     505 	or	a, (hl)
+      0001DA CAr62r02               506 	jp	Z, 00113$
+                                    507 ;src/00_misc_routines.c:109: if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, __temp_text_buf), 1, __temp_text_buf);
+      0001DD 2A                     508 	ld	a, (hl+)
+      0001DE 4F                     509 	ld	c, a
+                                    510 ;src/00_misc_routines.c:107: if ((item_old != item) && (item)) {
+      0001DF 3A                     511 	ld	a, (hl-)
+      0001E0 47                     512 	ld	b, a
+      0001E1 7E                     513 	ld	a, (hl)
+      0001E2 F8 00                  514 	ldhl	sp,	#0
+      0001E4 96                     515 	sub	a, (hl)
+      0001E5 20 08                  516 	jr	NZ, 00158$
+      0001E7 F8 06                  517 	ldhl	sp,	#6
+      0001E9 7E                     518 	ld	a, (hl)
+      0001EA F8 01                  519 	ldhl	sp,	#1
+      0001EC 96                     520 	sub	a, (hl)
+      0001ED 28 3E                  521 	jr	Z, 00104$
+      0001EF                        522 00158$:
+      0001EF F8 06                  523 	ldhl	sp,	#6
+      0001F1 3A                     524 	ld	a, (hl-)
+      0001F2 B6                     525 	or	a, (hl)
+      0001F3 28 38                  526 	jr	Z, 00104$
+                                    527 ;src/00_misc_routines.c:108: wait_vbl_done();
+      0001F5 CDr00r00               528 	call	_wait_vbl_done
+                                    529 ;src/00_misc_routines.c:109: if (item->text) set_win_tiles(2 + item->x, 5 + item->y, prepare_text(item->text, __temp_text_buf), 1, __temp_text_buf);
+      0001F8 69                     530 	ld	l, c
+                                    531 ;	spillPairReg hl
+                                    532 ;	spillPairReg hl
+      0001F9 60                     533 	ld	h, b
+                                    534 ;	spillPairReg hl
+                                    535 ;	spillPairReg hl
+      0001FA 23                     536 	inc	hl
+      0001FB 23                     537 	inc	hl
+      0001FC 2A                     538 	ld	a,	(hl+)
+      0001FD 66                     539 	ld	h, (hl)
+                                    540 ;	spillPairReg hl
+                                    541 ;	spillPairReg hl
+                                    542 ;	spillPairReg hl
+      0001FE 6F                     543 	ld	l,a
+      0001FF B4                     544 	or	a,h
+      000200 28 28                  545 	jr	Z, 00102$
+      000202 C5                     546 	push	bc
+      000203 11r00r00               547 	ld	de, #___temp_text_buf
+      000206 D5                     548 	push	de
+      000207 E5                     549 	push	hl
+      000208 CDr00r00               550 	call	_prepare_text
+      00020B E8 04                  551 	add	sp, #4
+      00020D C1                     552 	pop	bc
+      00020E 69                     553 	ld	l, c
+                                    554 ;	spillPairReg hl
+                                    555 ;	spillPairReg hl
+      00020F 60                     556 	ld	h, b
+                                    557 ;	spillPairReg hl
+                                    558 ;	spillPairReg hl
+      000210 23                     559 	inc	hl
+      000211 7E                     560 	ld	a, (hl)
+      000212 C6 05                  561 	add	a, #0x05
+      000214 57                     562 	ld	d, a
+      000215 0A                     563 	ld	a, (bc)
+      000216 C6 02                  564 	add	a, #0x02
+      000218 21r00r00               565 	ld	hl, #___temp_text_buf
+      00021B E5                     566 	push	hl
+      00021C 26 01                  567 	ld	h, #0x01
+                                    568 ;	spillPairReg hl
+                                    569 ;	spillPairReg hl
+      00021E E5                     570 	push	hl
+      00021F 33                     571 	inc	sp
+      000220 63                     572 	ld	h, e
+                                    573 ;	spillPairReg hl
+                                    574 ;	spillPairReg hl
+      000221 6A                     575 	ld	l, d
+      000222 E5                     576 	push	hl
+      000223 F5                     577 	push	af
+      000224 33                     578 	inc	sp
+      000225 CDr00r00               579 	call	_set_win_tiles
+      000228 E8 06                  580 	add	sp, #6
+      00022A                        581 00102$:
+                                    582 ;src/00_misc_routines.c:110: item_old = item;
+      00022A 33                     583 	inc	sp
+      00022B 33                     584 	inc	sp
+      00022C C5                     585 	push	bc
+      00022D                        586 00104$:
+                                    587 ;src/00_misc_routines.c:112: if (item->key) {
+      00022D 21 04 00               588 	ld	hl, #0x0004
+      000230 09                     589 	add	hl, bc
+      000231 5E                     590 	ld	e, (hl)
+                                    591 ;src/00_misc_routines.c:116: item = item->next;
+      000232 03                     592 	inc	bc
+      000233 03                     593 	inc	bc
+      000234 03                     594 	inc	bc
+      000235 03                     595 	inc	bc
+      000236 03                     596 	inc	bc
+                                    597 ;src/00_misc_routines.c:112: if (item->key) {
+      000237 7B                     598 	ld	a, e
+      000238 B7                     599 	or	a, a
+      000239 28 1B                  600 	jr	Z, 00109$
+                                    601 ;src/00_misc_routines.c:113: wait_vbl_done();
+      00023B E5                     602 	push	hl
+      00023C CDr00r00               603 	call	_wait_vbl_done
+      00023F CDr00r00               604 	call	_joypad
+      000242 E1                     605 	pop	hl
+      000243 7E                     606 	ld	a, (hl)
+      000244 A3                     607 	and	a,e
+      000245 28 8F                  608 	jr	Z, 00111$
+                                    609 ;src/00_misc_routines.c:115: waitpadup();
+      000247 CDr00r00               610 	call	_waitpadup
+                                    611 ;src/00_misc_routines.c:116: item = item->next;
+      00024A 59                     612 	ld	e, c
+      00024B 50                     613 	ld	d, b
+      00024C 1A                     614 	ld	a, (de)
+      00024D F8 05                  615 	ldhl	sp,	#5
+      00024F 22                     616 	ld	(hl+), a
+      000250 13                     617 	inc	de
+      000251 1A                     618 	ld	a, (de)
+      000252 77                     619 	ld	(hl), a
+      000253 C3rD6r01               620 	jp	00111$
+      000256                        621 00109$:
+                                    622 ;src/00_misc_routines.c:118: } else item = item->next;
+      000256 59                     623 	ld	e, c
+      000257 50                     624 	ld	d, b
+      000258 1A                     625 	ld	a, (de)
+      000259 F8 05                  626 	ldhl	sp,	#5
+      00025B 22                     627 	ld	(hl+), a
+      00025C 13                     628 	inc	de
+      00025D 1A                     629 	ld	a, (de)
+      00025E 77                     630 	ld	(hl), a
+      00025F C3rD6r01               631 	jp	00111$
+      000262                        632 00113$:
+                                    633 ;src/00_misc_routines.c:120: waitpadup();
+      000262 CDr00r00               634 	call	_waitpadup
+      000265                        635 00115$:
+                                    636 ;src/00_misc_routines.c:122: wait_vbl_done();
+      000265 CDr00r00               637 	call	_wait_vbl_done
+                                    638 ;src/00_misc_routines.c:123: inventory = 0;
+      000268 21r00r00               639 	ld	hl, #_inventory
+      00026B 36 00                  640 	ld	(hl), #0x00
+                                    641 ;src/00_misc_routines.c:124: }
+      00026D 33                     642 	inc	sp
+      00026E 33                     643 	inc	sp
+      00026F C9                     644 	ret
+                                    645 ;src/00_misc_routines.c:137: game_item * execute_inventory() {
+                                    646 ;	---------------------------------
+                                    647 ; Function execute_inventory
+                                    648 ; ---------------------------------
+      000270                        649 _execute_inventory::
+                                    650 ;src/00_misc_routines.c:138: draw_fancy_frame(5);
+      000270 3E 05                  651 	ld	a, #0x05
+      000272 F5                     652 	push	af
+      000273 33                     653 	inc	sp
+      000274 CDr2Er00               654 	call	_draw_fancy_frame
+      000277 33                     655 	inc	sp
+                                    656 ;src/00_misc_routines.c:140: __temp_i = 0;
+      000278 21r00r00               657 	ld	hl, #___temp_i
+      00027B 36 00                  658 	ld	(hl), #0x00
+                                    659 ;src/00_misc_routines.c:141: if (inventory_item_list.size > 0) {
+      00027D FAr00r00               660 	ld	a, (#_inventory_item_list + 0)
+      000280 B7                     661 	or	a, a
+      000281 CAr09r03               662 	jp	Z, 00105$
+                                    663 ;src/00_misc_routines.c:142: __temp_j = (2 + title_height);
+      000284 21r00r00               664 	ld	hl, #___temp_j
+      000287 36 05                  665 	ld	(hl), #0x05
+                                    666 ;src/00_misc_routines.c:143: __temp_game_item = inventory_item_list.first;        
+      000289 11r01r00               667 	ld	de, #(_inventory_item_list + 1)
+      00028C 1A                     668 	ld	a, (de)
+      00028D 21r00r00               669 	ld	hl, #___temp_game_item
+      000290 22                     670 	ld	(hl+), a
+      000291 13                     671 	inc	de
+      000292 1A                     672 	ld	a, (de)
+      000293 77                     673 	ld	(hl), a
+                                    674 ;src/00_misc_routines.c:144: while (__temp_game_item) {            
+      000294                        675 00101$:
+      000294 21r01r00               676 	ld	hl, #___temp_game_item + 1
+      000297 3A                     677 	ld	a, (hl-)
+      000298 B6                     678 	or	a, (hl)
+      000299 CAr2Fr03               679 	jp	Z, 00106$
+                                    680 ;src/00_misc_routines.c:145: inventory_items[__temp_i] = __temp_game_item;
+      00029C 21r00r00               681 	ld	hl, #___temp_i
+      00029F 6E                     682 	ld	l, (hl)
+                                    683 ;	spillPairReg hl
+                                    684 ;	spillPairReg hl
+      0002A0 26 00                  685 	ld	h, #0x00
+                                    686 ;	spillPairReg hl
+                                    687 ;	spillPairReg hl
+      0002A2 29                     688 	add	hl, hl
+      0002A3 7D                     689 	ld	a, l
+      0002A4 C6r00                  690 	add	a, #<(_inventory_items)
+      0002A6 4F                     691 	ld	c, a
+      0002A7 7C                     692 	ld	a, h
+      0002A8 CEs00                  693 	adc	a, #>(_inventory_items)
+      0002AA 47                     694 	ld	b, a
+      0002AB 21r00r00               695 	ld	hl, #___temp_game_item
+      0002AE 2A                     696 	ld	a, (hl+)
+      0002AF 02                     697 	ld	(bc), a
+      0002B0 03                     698 	inc	bc
+      0002B1 7E                     699 	ld	a, (hl)
+      0002B2 02                     700 	ld	(bc), a
+                                    701 ;src/00_misc_routines.c:146: wait_vbl_done();
+      0002B3 CDr00r00               702 	call	_wait_vbl_done
+                                    703 ;src/00_misc_routines.c:147: set_win_tiles(3, __temp_j, prepare_text(__temp_game_item->desc->name, __temp_text_buf), 1, __temp_text_buf);
+      0002B6 21r00r00               704 	ld	hl, #___temp_game_item
+      0002B9 2A                     705 	ld	a, (hl+)
+      0002BA 4F                     706 	ld	c, a
+      0002BB 46                     707 	ld	b, (hl)
+      0002BC 21 05 00               708 	ld	hl, #0x0005
+      0002BF 09                     709 	add	hl, bc
+      0002C0 2A                     710 	ld	a, (hl+)
+      0002C1 4F                     711 	ld	c, a
+      0002C2 46                     712 	ld	b, (hl)
+      0002C3 21 05 00               713 	ld	hl, #0x0005
+      0002C6 09                     714 	add	hl, bc
+      0002C7 2A                     715 	ld	a, (hl+)
+      0002C8 4F                     716 	ld	c, a
+      0002C9 46                     717 	ld	b, (hl)
+      0002CA 11r00r00               718 	ld	de, #___temp_text_buf
+      0002CD D5                     719 	push	de
+      0002CE C5                     720 	push	bc
+      0002CF CDr00r00               721 	call	_prepare_text
+      0002D2 E8 04                  722 	add	sp, #4
+      0002D4 7B                     723 	ld	a, e
+      0002D5 11r00r00               724 	ld	de, #___temp_text_buf
+      0002D8 D5                     725 	push	de
+      0002D9 26 01                  726 	ld	h, #0x01
+                                    727 ;	spillPairReg hl
+                                    728 ;	spillPairReg hl
+      0002DB E5                     729 	push	hl
+      0002DC 33                     730 	inc	sp
+      0002DD F5                     731 	push	af
+      0002DE 33                     732 	inc	sp
+      0002DF FAr00r00               733 	ld	a, (#___temp_j)
+      0002E2 67                     734 	ld	h, a
+      0002E3 2E 03                  735 	ld	l, #0x03
+      0002E5 E5                     736 	push	hl
+      0002E6 CDr00r00               737 	call	_set_win_tiles
+      0002E9 E8 06                  738 	add	sp, #6
+                                    739 ;src/00_misc_routines.c:148: __temp_i++; __temp_j ++;
+      0002EB 21r00r00               740 	ld	hl, #___temp_i
+      0002EE 34                     741 	inc	(hl)
+      0002EF 21r00r00               742 	ld	hl, #___temp_j
+      0002F2 34                     743 	inc	(hl)
+                                    744 ;src/00_misc_routines.c:149: __temp_game_item = __temp_game_item->next;
+      0002F3 21r00r00               745 	ld	hl, #___temp_game_item
+      0002F6 2A                     746 	ld	a, (hl+)
+      0002F7 4F                     747 	ld	c, a
+      0002F8 46                     748 	ld	b, (hl)
+      0002F9 21 07 00               749 	ld	hl, #0x0007
+      0002FC 09                     750 	add	hl, bc
+      0002FD 5D                     751 	ld	e, l
+      0002FE 54                     752 	ld	d, h
+      0002FF 1A                     753 	ld	a, (de)
+      000300 21r00r00               754 	ld	hl, #___temp_game_item
+      000303 22                     755 	ld	(hl+), a
+      000304 13                     756 	inc	de
+      000305 1A                     757 	ld	a, (de)
+      000306 77                     758 	ld	(hl), a
+      000307 18 8B                  759 	jr	00101$
+      000309                        760 00105$:
+                                    761 ;src/00_misc_routines.c:152: wait_vbl_done();
+      000309 CDr00r00               762 	call	_wait_vbl_done
+                                    763 ;src/00_misc_routines.c:153: set_win_tiles(3, 6, prepare_text("N O T H I N G", __temp_text_buf), 1, __temp_text_buf);
+      00030C 11r00r00               764 	ld	de, #___temp_text_buf
+      00030F D5                     765 	push	de
+      000310 11r62r04               766 	ld	de, #___str_0
+      000313 D5                     767 	push	de
+      000314 CDr00r00               768 	call	_prepare_text
+      000317 E8 04                  769 	add	sp, #4
+      000319 7B                     770 	ld	a, e
+      00031A 11r00r00               771 	ld	de, #___temp_text_buf
+      00031D D5                     772 	push	de
+      00031E 26 01                  773 	ld	h, #0x01
+                                    774 ;	spillPairReg hl
+                                    775 ;	spillPairReg hl
+      000320 E5                     776 	push	hl
+      000321 33                     777 	inc	sp
+      000322 67                     778 	ld	h, a
+      000323 2E 06                  779 	ld	l, #0x06
+      000325 E5                     780 	push	hl
+      000326 3E 03                  781 	ld	a, #0x03
+      000328 F5                     782 	push	af
+      000329 33                     783 	inc	sp
+      00032A CDr00r00               784 	call	_set_win_tiles
+      00032D E8 06                  785 	add	sp, #6
+      00032F                        786 00106$:
+                                    787 ;src/00_misc_routines.c:155: set_win_tiles(5, 9, prepare_text("DON'T DROP", __temp_text_buf), 1, __temp_text_buf);
+      00032F 11r00r00               788 	ld	de, #___temp_text_buf
+      000332 D5                     789 	push	de
+      000333 11r70r04               790 	ld	de, #___str_1
+      000336 D5                     791 	push	de
+      000337 CDr00r00               792 	call	_prepare_text
+      00033A E8 04                  793 	add	sp, #4
+      00033C 7B                     794 	ld	a, e
+      00033D 11r00r00               795 	ld	de, #___temp_text_buf
+      000340 D5                     796 	push	de
+      000341 26 01                  797 	ld	h, #0x01
+                                    798 ;	spillPairReg hl
+                                    799 ;	spillPairReg hl
+      000343 E5                     800 	push	hl
+      000344 33                     801 	inc	sp
+      000345 67                     802 	ld	h, a
+      000346 2E 09                  803 	ld	l, #0x09
+      000348 E5                     804 	push	hl
+      000349 3E 05                  805 	ld	a, #0x05
+      00034B F5                     806 	push	af
+      00034C 33                     807 	inc	sp
+      00034D CDr00r00               808 	call	_set_win_tiles
+      000350 E8 06                  809 	add	sp, #6
+                                    810 ;src/00_misc_routines.c:156: prepare_text("><", __temp_text_buf);
+      000352 11r00r00               811 	ld	de, #___temp_text_buf
+      000355 D5                     812 	push	de
+      000356 11r7Br04               813 	ld	de, #___str_2
+      000359 D5                     814 	push	de
+      00035A CDr00r00               815 	call	_prepare_text
+      00035D E8 04                  816 	add	sp, #4
+                                    817 ;src/00_misc_routines.c:158: inventory_selection = 0, old_inventory_selection = 1;
+      00035F 21r06r00               818 	ld	hl, #_inventory_selection
+      000362 36 00                  819 	ld	(hl), #0x00
+      000364 21r07r00               820 	ld	hl, #_old_inventory_selection
+      000367 36 01                  821 	ld	(hl), #0x01
+                                    822 ;src/00_misc_routines.c:160: wait_vbl_done();
+      000369 CDr00r00               823 	call	_wait_vbl_done
+                                    824 ;src/00_misc_routines.c:161: inventory = 1;    
+      00036C 21r00r00               825 	ld	hl, #_inventory
+      00036F 36 01                  826 	ld	(hl), #0x01
+                                    827 ;src/00_misc_routines.c:162: do {
+      000371                        828 00124$:
+                                    829 ;src/00_misc_routines.c:163: if (inventory_selection != old_inventory_selection) {
+      000371 FAr06r00               830 	ld	a, (#_inventory_selection)
+      000374 21r07r00               831 	ld	hl, #_old_inventory_selection
+      000377 96                     832 	sub	a, (hl)
+      000378 28 7C                  833 	jr	Z, 00108$
+                                    834 ;src/00_misc_routines.c:164: __temp_l = selector_offset[old_inventory_selection], __temp_k = selector_offset[inventory_selection];
+      00037A 3Er5D                  835 	ld	a, #<(_selector_offset)
+      00037C 21r07r00               836 	ld	hl, #_old_inventory_selection
+      00037F 86                     837 	add	a, (hl)
+      000380 4F                     838 	ld	c, a
+      000381 3Es04                  839 	ld	a, #>(_selector_offset)
+      000383 CE 00                  840 	adc	a, #0x00
+      000385 47                     841 	ld	b, a
+      000386 0A                     842 	ld	a, (bc)
+      000387 EAr00r00               843 	ld	(#___temp_l),a
+      00038A 3Er5D                  844 	ld	a, #<(_selector_offset)
+      00038C 21r06r00               845 	ld	hl, #_inventory_selection
+      00038F 86                     846 	add	a, (hl)
+      000390 4F                     847 	ld	c, a
+      000391 3Es04                  848 	ld	a, #>(_selector_offset)
+      000393 CE 00                  849 	adc	a, #0x00
+      000395 47                     850 	ld	b, a
+      000396 0A                     851 	ld	a, (bc)
+      000397 EAr00r00               852 	ld	(#___temp_k),a
+                                    853 ;src/00_misc_routines.c:165: wait_vbl_done();
+      00039A CDr00r00               854 	call	_wait_vbl_done
+                                    855 ;src/00_misc_routines.c:166: set_win_tiles(2, __temp_l, 1, 1, selector_empty);
+      00039D 11r61r04               856 	ld	de, #_selector_empty
+      0003A0 D5                     857 	push	de
+      0003A1 21 01 01               858 	ld	hl, #0x101
+      0003A4 E5                     859 	push	hl
+      0003A5 FAr00r00               860 	ld	a, (#___temp_l)
+      0003A8 67                     861 	ld	h, a
+      0003A9 2E 02                  862 	ld	l, #0x02
+      0003AB E5                     863 	push	hl
+      0003AC CDr00r00               864 	call	_set_win_tiles
+      0003AF E8 06                  865 	add	sp, #6
+                                    866 ;src/00_misc_routines.c:167: set_win_tiles(17, __temp_l, 1, 1, selector_empty);
+      0003B1 11r61r04               867 	ld	de, #_selector_empty
+      0003B4 D5                     868 	push	de
+      0003B5 21 01 01               869 	ld	hl, #0x101
+      0003B8 E5                     870 	push	hl
+      0003B9 FAr00r00               871 	ld	a, (#___temp_l)
+      0003BC 67                     872 	ld	h, a
+      0003BD 2E 11                  873 	ld	l, #0x11
+      0003BF E5                     874 	push	hl
+      0003C0 CDr00r00               875 	call	_set_win_tiles
+      0003C3 E8 06                  876 	add	sp, #6
+                                    877 ;src/00_misc_routines.c:168: set_win_tiles(2, __temp_k, 1, 1, __temp_text_buf);
+      0003C5 11r00r00               878 	ld	de, #___temp_text_buf
+      0003C8 D5                     879 	push	de
+      0003C9 21 01 01               880 	ld	hl, #0x101
+      0003CC E5                     881 	push	hl
+      0003CD FAr00r00               882 	ld	a, (#___temp_k)
+      0003D0 67                     883 	ld	h, a
+      0003D1 2E 02                  884 	ld	l, #0x02
+      0003D3 E5                     885 	push	hl
+      0003D4 CDr00r00               886 	call	_set_win_tiles
+      0003D7 E8 06                  887 	add	sp, #6
+                                    888 ;src/00_misc_routines.c:169: set_win_tiles(17, __temp_k, 1, 1, __temp_text_buf + 1);
+      0003D9 11r01r00               889 	ld	de, #(___temp_text_buf + 1)
+      0003DC D5                     890 	push	de
+      0003DD 21 01 01               891 	ld	hl, #0x101
+      0003E0 E5                     892 	push	hl
+      0003E1 FAr00r00               893 	ld	a, (#___temp_k)
+      0003E4 67                     894 	ld	h, a
+      0003E5 2E 11                  895 	ld	l, #0x11
+      0003E7 E5                     896 	push	hl
+      0003E8 CDr00r00               897 	call	_set_win_tiles
+      0003EB E8 06                  898 	add	sp, #6
+                                    899 ;src/00_misc_routines.c:171: old_inventory_selection = inventory_selection;
+      0003ED FAr06r00               900 	ld	a, (#_inventory_selection)
+      0003F0 EAr07r00               901 	ld	(#_old_inventory_selection),a
+                                    902 ;src/00_misc_routines.c:172: waitpadup();
+      0003F3 CDr00r00               903 	call	_waitpadup
+      0003F6                        904 00108$:
+                                    905 ;src/00_misc_routines.c:174: inventory_joy = joypad();
+      0003F6 CDr00r00               906 	call	_joypad
+      0003F9 21r08r00               907 	ld	hl, #_inventory_joy
+      0003FC 73                     908 	ld	(hl), e
+                                    909 ;src/00_misc_routines.c:175: if (inventory_joy & (J_UP | J_LEFT)) {
+      0003FD 4E                     910 	ld	c, (hl)
+      0003FE 79                     911 	ld	a, c
+      0003FF E6 06                  912 	and	a, #0x06
+      000401 28 12                  913 	jr	Z, 00122$
+                                    914 ;src/00_misc_routines.c:176: if (inventory_selection) inventory_selection--; else inventory_selection = __temp_i;
+      000403 21r06r00               915 	ld	hl, #_inventory_selection
+      000406 7E                     916 	ld	a, (hl)
+      000407 B7                     917 	or	a, a
+      000408 28 03                  918 	jr	Z, 00110$
+      00040A 35                     919 	dec	(hl)
+      00040B 18 45                  920 	jr	00125$
+      00040D                        921 00110$:
+      00040D FAr00r00               922 	ld	a, (#___temp_i)
+      000410 EAr06r00               923 	ld	(#_inventory_selection),a
+      000413 18 3D                  924 	jr	00125$
+      000415                        925 00122$:
+                                    926 ;src/00_misc_routines.c:177: } else if (inventory_joy & (J_DOWN | J_RIGHT)) {
+      000415 79                     927 	ld	a, c
+      000416 E6 09                  928 	and	a, #0x09
+      000418 28 11                  929 	jr	Z, 00119$
+                                    930 ;src/00_misc_routines.c:178: inventory_selection++; if (inventory_selection > __temp_i) inventory_selection = 0;
+      00041A 21r06r00               931 	ld	hl, #_inventory_selection
+      00041D 34                     932 	inc	(hl)
+      00041E FAr00r00               933 	ld	a, (#___temp_i)
+      000421 21r06r00               934 	ld	hl, #_inventory_selection
+      000424 96                     935 	sub	a, (hl)
+      000425 30 2B                  936 	jr	NC, 00125$
+      000427 36 00                  937 	ld	(hl), #0x00
+      000429 18 27                  938 	jr	00125$
+      00042B                        939 00119$:
+                                    940 ;src/00_misc_routines.c:179: } else if (inventory_joy & J_B) {
+      00042B CB 69                  941 	bit	5, c
+      00042D 28 23                  942 	jr	Z, 00125$
+                                    943 ;src/00_misc_routines.c:180: waitpadup();
+      00042F CDr00r00               944 	call	_waitpadup
+                                    945 ;src/00_misc_routines.c:181: wait_vbl_done();
+      000432 CDr00r00               946 	call	_wait_vbl_done
+                                    947 ;src/00_misc_routines.c:182: inventory = 0;
+      000435 21r00r00               948 	ld	hl, #_inventory
+      000438 36 00                  949 	ld	(hl), #0x00
+                                    950 ;src/00_misc_routines.c:183: if (inventory_selection) return inventory_items[inventory_selection - 1];
+      00043A 21r06r00               951 	ld	hl, #_inventory_selection
+      00043D 7E                     952 	ld	a, (hl)
+      00043E B7                     953 	or	a, a
+      00043F 28 11                  954 	jr	Z, 00125$
+      000441 01r00r00               955 	ld	bc, #_inventory_items+0
+      000444 7E                     956 	ld	a, (hl)
+      000445 3D                     957 	dec	a
+      000446 6F                     958 	ld	l, a
+                                    959 ;	spillPairReg hl
+                                    960 ;	spillPairReg hl
+      000447 07                     961 	rlca
+      000448 9F                     962 	sbc	a, a
+      000449 67                     963 	ld	h, a
+                                    964 ;	spillPairReg hl
+                                    965 ;	spillPairReg hl
+      00044A 29                     966 	add	hl, hl
+      00044B 09                     967 	add	hl, bc
+      00044C 2A                     968 	ld	a, (hl+)
+      00044D 4F                     969 	ld	c, a
+      00044E 46                     970 	ld	b, (hl)
+      00044F 59                     971 	ld	e, c
+      000450 50                     972 	ld	d, b
+      000451 C9                     973 	ret
+      000452                        974 00125$:
+                                    975 ;src/00_misc_routines.c:185: } while(inventory);
+      000452 FAr00r00               976 	ld	a, (#_inventory)
+      000455 B7                     977 	or	a, a
+      000456 C2r71r03               978 	jp	NZ, 00124$
+                                    979 ;src/00_misc_routines.c:186: return 0;
+      000459 11 00 00               980 	ld	de, #0x0000
+                                    981 ;src/00_misc_routines.c:187: }
+      00045C C9                     982 	ret
+      00045D                        983 _selector_offset:
+      00045D 09                     984 	.db #0x09	; 9
+      00045E 05                     985 	.db #0x05	; 5
+      00045F 06                     986 	.db #0x06	; 6
+      000460 07                     987 	.db #0x07	; 7
+      000461                        988 _selector_empty:
+      000461 00                     989 	.db #0x00	; 0
+      000462                        990 ___str_0:
+      000462 4E 20 4F 20 54 20 48   991 	.ascii "N O T H I N G"
+             20 49 20 4E 20 47
+      00046F 00                     992 	.db 0x00
+      000470                        993 ___str_1:
+      000470 44 4F 4E 27 54 20 44   994 	.ascii "DON'T DROP"
+             52 4F 50
+      00047A 00                     995 	.db 0x00
+      00047B                        996 ___str_2:
+      00047B 3E 3C                  997 	.ascii "><"
+      00047D 00                     998 	.db 0x00
+                                    999 ;src/00_misc_routines.c:191: UBYTE FadeStep(UBYTE pal, UBYTE step) __naked {
+                                   1000 ;	---------------------------------
+                                   1001 ; Function FadeStep
+                                   1002 ; ---------------------------------
+      00047E                       1003 _FadeStep::
+                                   1004 ;src/00_misc_routines.c:230: __endasm;
+      00047E F8 03                 1005 	lda	HL, 3(SP)
+      000480 3A                    1006 	ld	A, (HL-)
+      000481 5E                    1007 	ld	E, (HL)
+      000482 B7                    1008 	or	A
+      000483 28 21                 1009 	jr	Z, $fadeout03
+      000485 57                    1010 	ld	D, A
+      000486 C5                    1011 	push	BC
+      000487                       1012 	$fadeout00:
+      000487 06 04                 1013 	ld	B, #4
+      000489                       1014 	$fadeout01:
+      000489 7B                    1015 	ld	A, E
+      00048A E6 03                 1016 	and	#3
+      00048C FE 03                 1017 	cp	#3
+      00048E 28 01                 1018 	jr	Z, $fadeout02
+      000490 3C                    1019 	inc	A
+      000491                       1020 	$fadeout02:
+      000491 CB 3F                 1021 	srl A
+      000493 CB 19                 1022 	rr	C
+      000495 CB 3F                 1023 	srl	A
+      000497 CB 19                 1024 	rr	C
+      000499 CB 3B                 1025 	srl	E
+      00049B CB 3B                 1026 	srl	E
+      00049D 05                    1027 	dec	B
+      00049E 20 E9                 1028 	jr	NZ, $fadeout01
+      0004A0 59                    1029 	ld	E, C
+      0004A1 15                    1030 	dec	D
+      0004A2 20 E3                 1031 	jr	NZ, $fadeout00
+      0004A4 C1                    1032 	pop	BC
+      0004A5 C9                    1033 	ret
+      0004A6                       1034 	$fadeout03:
+      0004A6 16 00                 1035 	ld D, #0
+      0004A8 C9                    1036 	ret
+                                   1037 ;src/00_misc_routines.c:231: }
+                                   1038 ;src/00_misc_routines.c:233: void FadeDMG(UBYTE dir, UBYTE bgp, UBYTE obp0, UBYTE obp1) {
+                                   1039 ;	---------------------------------
+                                   1040 ; Function FadeDMG
+                                   1041 ; ---------------------------------
+      0004A9                       1042 _FadeDMG::
+                                   1043 ;src/00_misc_routines.c:235: for (UBYTE i = 0; i < 4; i++) {
+      0004A9 0E 00                 1044 	ld	c, #0x00
+      0004AB                       1045 00106$:
+      0004AB 79                    1046 	ld	a, c
+      0004AC D6 04                 1047 	sub	a, #0x04
+      0004AE D0                    1048 	ret	NC
+                                   1049 ;src/00_misc_routines.c:236: if (dir) j = 3 - i; else j = i;
+      0004AF F8 02                 1050 	ldhl	sp,	#2
+      0004B1 7E                    1051 	ld	a, (hl)
+      0004B2 B7                    1052 	or	a, a
+      0004B3 28 07                 1053 	jr	Z, 00102$
+      0004B5 41                    1054 	ld	b, c
+      0004B6 3E 03                 1055 	ld	a, #0x03
+      0004B8 90                    1056 	sub	a, b
+      0004B9 47                    1057 	ld	b, a
+      0004BA 18 01                 1058 	jr	00103$
+      0004BC                       1059 00102$:
+      0004BC 41                    1060 	ld	b, c
+      0004BD                       1061 00103$:
+                                   1062 ;src/00_misc_routines.c:237: wait_vbl_done();
+      0004BD CDr00r00              1063 	call	_wait_vbl_done
+                                   1064 ;src/00_misc_routines.c:238: BGP_REG  = FadeStep(bgp,  j); 
+      0004C0 C5                    1065 	push	bc
+      0004C1 C5                    1066 	push	bc
+      0004C2 33                    1067 	inc	sp
+      0004C3 F8 06                 1068 	ldhl	sp,	#6
+      0004C5 7E                    1069 	ld	a, (hl)
+      0004C6 F5                    1070 	push	af
+      0004C7 33                    1071 	inc	sp
+      0004C8 CDr7Er04              1072 	call	_FadeStep
+      0004CB E1                    1073 	pop	hl
+      0004CC 7B                    1074 	ld	a, e
+      0004CD C1                    1075 	pop	bc
+      0004CE E0r00                 1076 	ldh	(_BGP_REG + 0), a
+                                   1077 ;src/00_misc_routines.c:239: OBP0_REG = FadeStep(obp0, j); 
+      0004D0 C5                    1078 	push	bc
+      0004D1 C5                    1079 	push	bc
+      0004D2 33                    1080 	inc	sp
+      0004D3 F8 07                 1081 	ldhl	sp,	#7
+      0004D5 7E                    1082 	ld	a, (hl)
+      0004D6 F5                    1083 	push	af
+      0004D7 33                    1084 	inc	sp
+      0004D8 CDr7Er04              1085 	call	_FadeStep
+      0004DB E1                    1086 	pop	hl
+      0004DC 7B                    1087 	ld	a, e
+      0004DD C1                    1088 	pop	bc
+      0004DE E0r00                 1089 	ldh	(_OBP0_REG + 0), a
+                                   1090 ;src/00_misc_routines.c:240: OBP1_REG = FadeStep(obp1, j);
+      0004E0 C5                    1091 	push	bc
+      0004E1 C5                    1092 	push	bc
+      0004E2 33                    1093 	inc	sp
+      0004E3 F8 08                 1094 	ldhl	sp,	#8
+      0004E5 7E                    1095 	ld	a, (hl)
+      0004E6 F5                    1096 	push	af
+      0004E7 33                    1097 	inc	sp
+      0004E8 CDr7Er04              1098 	call	_FadeStep
+      0004EB E1                    1099 	pop	hl
+      0004EC 7B                    1100 	ld	a, e
+      0004ED C1                    1101 	pop	bc
+      0004EE E0r00                 1102 	ldh	(_OBP1_REG + 0), a
+                                   1103 ;src/00_misc_routines.c:241: delay(50);
+      0004F0 C5                    1104 	push	bc
+      0004F1 11 32 00              1105 	ld	de, #0x0032
+      0004F4 D5                    1106 	push	de
+      0004F5 CDr00r00              1107 	call	_delay
+      0004F8 E1                    1108 	pop	hl
+      0004F9 C1                    1109 	pop	bc
+                                   1110 ;src/00_misc_routines.c:235: for (UBYTE i = 0; i < 4; i++) {
+      0004FA 0C                    1111 	inc	c
+                                   1112 ;src/00_misc_routines.c:243: }
+      0004FB 18 AE                 1113 	jr	00106$
+                                   1114 	.area _CODE_1
+                                   1115 	.area _INITIALIZER
+                                   1116 	.area _CABS (ABS)

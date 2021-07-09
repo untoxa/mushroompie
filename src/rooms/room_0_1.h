@@ -12,7 +12,7 @@ const spr_ofs_t const bat_offsets[] = {{0x28, 0x08}, {0x28, 0x10}};
 const unsigned char const bftn[] = {9, 10, 11, 12, 13, 11, 12, 9, 10, 14};
 const unsigned char * const evils[] = {&bftn[0], &bftn[5]};
 
-UBYTE room_dark, bite_timer, warning_shown;
+UBYTE room_dark, bite_timer = 0, warning_shown;
 void reset_room0_1() {
     room_dark = 1; warning_shown = 0;
 }

@@ -1,3 +1,5 @@
+#pragma bank 3
+
 #include <gb/gb.h>
 #include "include/dizzy_types.h"
 #include "include/dialogs.h"

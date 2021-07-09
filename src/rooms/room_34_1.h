@@ -12,7 +12,7 @@ void init_room34() {
     for (__temp_i = evil_sprite_offset; __temp_i < (evil_sprite_offset + 4); __temp_i++) 
         set_sprite_tile(__temp_i, evil_sprites_tileoffset);
 }
-UBYTE float_move_timer;
+UBYTE float_move_timer = 0;
 #define float_track_len ((17 * 8) + (8 * 8) - (4 * 8))
 #define float34_pos_y (15 * 8)
 UBYTE float3_move = 1, float4_move = 0;
